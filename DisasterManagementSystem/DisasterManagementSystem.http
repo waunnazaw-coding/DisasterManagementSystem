@@ -1,0 +1,6 @@
+@DisasterManagementSystem_HostAddress = http://localhost:5188
+
+GET {{DisasterManagementSystem_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
