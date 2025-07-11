@@ -8,6 +8,6 @@ public interface IlocationService
     Task<Result<AppLocation>> GetByIdAsync(int id);
     Task<Result<IEnumerable<AppLocation>>> GetAllAsync();
     Task<Result<AppLocation>> AddAsync(LocationCreateDto dto);
-    Task<Result<AppLocation>> UpdateAsync(AppLocation location);
+    Task<Result<AppLocation>> UpdateAsync(LocationUpdateDto location);
     Task<Result<bool>> DeleteAsync(int id);
 }

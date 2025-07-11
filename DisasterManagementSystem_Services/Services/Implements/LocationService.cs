@@ -58,23 +58,45 @@ public class LocationService : IlocationService
 
         await _repository.AddAsync(location);
         await _repository.SaveChangesAsync();
-        
+
         return Result<AppLocation>.Success(location, "Location added successfully.");
     }
 
-    public async Task<Result<AppLocation>> UpdateAsync(AppLocation location)
+    public async Task<Result<AppLocation>> UpdateAsync(LocationUpdateDto dto)
     {
-        var existingLocation = await _repository.GetByIdAsync(location.Id);
-        if (existingLocation == null)
-        {
+        var existing = await _repository.GetByIdAsync(dto.Id);
+        if (existing == null)
             return Result<AppLocation>.NotFoundError("Location not found.");
+
+        // Fix GeoJson if it's provided
+        if (!string.IsNullOrWhiteSpace(dto.GeoJson))
+        {
+            var reader = new GeoJsonReader();
+            try
+            {
+                var geom = FixPolygonOrientation(reader.Read<Geometry>(dto.GeoJson));
+                existing.Geography = geom;
+
+                // Optional: reverse geocode if location changed
+                var center = geom.Centroid;
+                var geoInfo = await _geocodingService.ReverseGeocodeAsync(center.Y, center.X);
+                existing.Address = geoInfo?.Address;
+                existing.Region = geoInfo?.Region;
+                existing.Country = geoInfo?.Country;
+            }
+            catch
+            {
+                return Result<AppLocation>.ValidationError("Invalid GeoJSON.");
+            }
         }
 
-        await _repository.UpdateAsync(location);
+        existing.Name = dto.Name;
+        await _repository.UpdateAsync(existing);
         await _repository.SaveChangesAsync();
 
-        return Result<AppLocation>.Success(location, "Location updated successfully.");
+        return Result<AppLocation>.Success(existing, "Location updated.");
     }
+
 
     public async Task<Result<bool>> DeleteAsync(int id)
     {
@@ -85,7 +107,7 @@ public class LocationService : IlocationService
         }
         await _repository.DeleteAsync(id);
         await _repository.SaveChangesAsync();
-        
+
         return Result<bool>.Success(true, "Location deleted successfully.");
     }
 
