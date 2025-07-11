@@ -54,7 +54,7 @@ public partial class AppDbContext : DbContext
                 .Build();
 
             var connectionString = configuration.GetConnectionString("DefaultConnection");
-            optionsBuilder.UseSqlServer(connectionString);
+            optionsBuilder.UseSqlServer(connectionString ,  x => x.UseNetTopologySuite());
         }
     }
 
@@ -434,10 +434,15 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.ExternalId).HasMaxLength(255);
             entity.Property(e => e.Name).HasMaxLength(100);
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
-            entity.Property(e => e.Role).HasMaxLength(20);
+            entity.Property(e => e.Role).HasMaxLength(20).HasDefaultValue("User"); ;
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasDefaultValue("Active");
+            entity.Property(e => e.RefreshToken)
+                .HasMaxLength(255);
+
+            entity.Property(e => e.RefreshTokenExpiryTime);
+            
         });
 
         OnModelCreatingPartial(modelBuilder);
