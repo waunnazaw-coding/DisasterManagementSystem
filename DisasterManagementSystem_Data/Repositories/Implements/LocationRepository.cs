@@ -1,11 +1,11 @@
 using DisasterManagementSystem_Data.Models;
 using Microsoft.EntityFrameworkCore;
 
-public class LocatioinRepository : IlocationRepository
+public class LocationRepository : IlocationRepository
 {
     private readonly AppDbContext _context;
 
-    public LocatioinRepository(AppDbContext context)
+    public LocationRepository(AppDbContext context)
     {
         _context = context;
     }

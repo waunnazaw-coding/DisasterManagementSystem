@@ -10,6 +10,8 @@ namespace DisasterManagementSystem_Services
         public static void AddDomain(this WebApplicationBuilder builder)
         {
             builder.Services.AddScoped<ITestService, TestService>();
+            builder.Services.AddScoped<IlocationService, LocationService>();
+            builder.Services.AddHttpClient<INominatimGeocodingService, NominatimGeocodingService>();
         }
     }
 }
