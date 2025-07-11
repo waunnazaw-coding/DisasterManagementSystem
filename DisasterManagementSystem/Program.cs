@@ -14,6 +14,8 @@ builder.AddDomain();
 
 // Repositories
 builder.Services.AddScoped<IlocationRepository, LocationRepository>();
+builder.Services.AddScoped<IDisasterReportRepository, DisasterReportRepository>();
+builder.Services.AddScoped<IDisasterTypeRepository, DisasterTypeRepository>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

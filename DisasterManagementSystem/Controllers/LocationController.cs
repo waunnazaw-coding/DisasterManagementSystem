@@ -38,7 +38,7 @@ namespace DisasterManagementSystem_API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IResult> Update(int id, [FromBody] Location model)
+        public async Task<IResult> Update(int id, [FromBody] LocationUpdateDto model)
         {
             if (id != model.Id)
                 return Result<Location>.ValidationError("ID in route and body do not match").Execute();

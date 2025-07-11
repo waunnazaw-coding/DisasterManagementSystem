@@ -11,6 +11,9 @@ namespace DisasterManagementSystem_Services
         {
             builder.Services.AddScoped<ITestService, TestService>();
             builder.Services.AddScoped<IlocationService, LocationService>();
+            builder.Services.AddScoped<IDisasterReportService, DisasterReportService>();
+            builder.Services.AddScoped<IDisasterTypeService, DisasterTypeService>();
+
             builder.Services.AddHttpClient<INominatimGeocodingService, NominatimGeocodingService>();
         }
     }

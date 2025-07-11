@@ -28,19 +28,8 @@ public class DisasterTypeRepository : IDisasterTypeRepository
 
     public async Task UpdateAsync(DisasterType disasterType)
     {
-        var existing = await _context.DisasterTypes.FindAsync(disasterType.Id);
-        if (existing != null)
-        {
-            existing.Name = disasterType.Name;
-            existing.Description = disasterType.Description;
-            existing.Category = disasterType.Category;
-
-            await _context.SaveChangesAsync();
-        }
-        else
-        {
-            throw new KeyNotFoundException($"DisasterType with ID {disasterType.Id} not found.");
-        }
+        _context.DisasterTypes.Update(disasterType);
+        await _context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(int id)

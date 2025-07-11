@@ -15,20 +15,42 @@ public class LocationService : IlocationService
         _geocodingService = geocodingService;
     }
 
-    public async Task<Result<AppLocation>> GetByIdAsync(int id)
+    public async Task<Result<LocationDto>> GetByIdAsync(int id)
     {
         var loc = await _repository.GetByIdAsync(id);
-        return loc == null
-            ? Result<AppLocation>.NotFoundError("Location not found.")
-            : Result<AppLocation>.Success(loc);
+        if (loc == null)
+            return Result<LocationDto>.NotFoundError("Location not found.");
+
+        var dto = new LocationDto
+        {
+            Id = loc.Id,
+            Name = loc.Name,
+            GeoJson = loc.Geography != null ? new GeoJsonWriter().Write(loc.Geography) : null,
+            Address = loc.Address,
+            Country = loc.Country,
+            Region = loc.Region
+        };
+
+        return Result<LocationDto>.Success(dto);
     }
 
-    public async Task<Result<IEnumerable<AppLocation>>> GetAllAsync()
+    public async Task<Result<IEnumerable<LocationDto>>> GetAllAsync()
     {
         var all = await _repository.GetAllAsync();
-        return Result<IEnumerable<AppLocation>>.Success(all);
-    }
+        var writer = new GeoJsonWriter();
 
+        var result = all.Select(loc => new LocationDto
+        {
+            Id = loc.Id,
+            Name = loc.Name,
+            GeoJson = loc.Geography != null ? writer.Write(loc.Geography) : null,
+            Address = loc.Address,
+            Country = loc.Country,
+            Region = loc.Region
+        });
+
+        return Result<IEnumerable<LocationDto>>.Success(result);
+    }
 
     public async Task<Result<AppLocation>> AddAsync(LocationCreateDto dto)
     {
