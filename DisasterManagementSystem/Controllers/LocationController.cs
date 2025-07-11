@@ -23,21 +23,21 @@ namespace DisasterManagementSystem_API.Controllers
             return result.Execute();
         }
 
-        [HttpGet]
+        [HttpGet("all")]
         public async Task<IResult> GetAll()
         {
             var result = await _locationService.GetAllAsync();
             return result.Execute();
         }
 
-        [HttpPost]
+        [HttpPost("crate")]
         public async Task<IResult> Create([FromBody] LocationCreateDto dto)
         {
             var result = await _locationService.AddAsync(dto);
             return result.Execute();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("update/{id}")]
         public async Task<IResult> Update(int id, [FromBody] LocationUpdateDto model)
         {
             if (id != model.Id)
@@ -47,7 +47,7 @@ namespace DisasterManagementSystem_API.Controllers
             return result.Execute();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("delete/{id}")]
         public async Task<IResult> Delete(int id)
         {
             var result = await _locationService.DeleteAsync(id);
