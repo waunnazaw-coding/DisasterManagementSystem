@@ -10,30 +10,59 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="373ff947-e936-4a3b-91b4-d8bb06058b3d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.DisasterManagementSystem/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DisasterManagementSystem/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Models/AuthDtos/AuthResponseDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Models/AuthDtos/GoogleLoginDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Models/AuthDtos/LoginDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Models/AuthDtos/RegisterDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Models/AuthDtos/UserResponseDto.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Services/Implements/AuthService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Services/Interfaces/IAuthService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Services/Interfaces/IJwtService.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.DisasterManagementSystem/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DisasterManagementSystem/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem/DisasterManagementSystem_Api.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem/DisasterManagementSystem_Api.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem/Controllers/AuthoController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem/Controllers/AuthoController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem/appsettings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/AppDbContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/AppDbContext.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/User.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/User.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Data/Repositories/Implements/TestRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Repositories/Implements/UserRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Data/Repositories/Interfaces/ITestRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Repositories/Interfaces/IUserRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Services/DisasterManagementSystem_Services.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/DisasterManagementSystem_Services.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Services/ServiceManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/ServiceManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Services/Services/Implements/TestService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Services/Implements/JwtService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Services/Services/Interfaces/ITestService.cs" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="DpaMonitoringSettings">
+    <option name="autoShow" value="false" />
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "waunnazaw-coding"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;waunnazaw-coding&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/waunnazaw-coding/DisasterManagementSystem.git",
-    "accountId": "c8a7e5f5-8eab-44ea-984b-31f9ea6fe3d8"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/waunnazaw-coding/DisasterManagementSystem.git&quot;,
+    &quot;accountId&quot;: &quot;c8a7e5f5-8eab-44ea-984b-31f9ea6fe3d8&quot;
   }
-}]]></component>
+}</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/1e8feaadf5c3fa14d36ea2a638c432a2e1a47b7837d8b83d88303c5d9c15cf/AsyncValueTaskMethodBuilderT.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/8d5d6cbff46ddc7b152381f92ae1ae51d3e7b57b14dd23840a11f5aaaaed396/InternalEntityEntry.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/9c8450c236242f14f5c7e81c1b74e4159fb85c2e34eb4b41ebd732c77f94d/RuntimeEntityType.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/9f23c87e889cf8c85521a222263288275aeda8581951b7f5db9c432f675398/NonCapturingLazyInitializer.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/a0b45f29f34f594814a7b1fbc25fe5ef3c18257956ed4f4fbfa68717db58/DbContext.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/a8f525b34e074d7c1c1ee2f97d75fed82d55ae9102858934b3ef12954923d91/InternalDbSet.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/edb0de51b1d42de1f0965b28bdb0a37a43b1d4b158a79125753e6c5e964b24f7/StateManager.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -46,8 +75,9 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    ".NET Launch Settings Profile.DisasterManagementSystem_Api: IIS Express.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "develop",
     "ignore.virus.scanning.warn.message": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -115,6 +145,9 @@
       <workItem from="1751017201145" duration="589000" />
       <workItem from="1751449175602" duration="194000" />
       <workItem from="1752120435682" duration="562000" />
+      <workItem from="1752205786018" duration="596000" />
+      <workItem from="1752218631730" duration="461000" />
+      <workItem from="1752221578716" duration="4328000" />
     </task>
     <servers />
   </component>
@@ -125,5 +158,24 @@
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/DisasterManagementSystem/Controllers/AuthoController.cs</url>
+          <line>24</line>
+          <properties documentPath="D:\DisasterManagementSystem\Backend\DisasterManagementSystem\DisasterManagementSystem\Controllers\AuthoController.cs" containingFunctionPresentation="Method 'Register'">
+            <startOffsets>
+              <option value="776" />
+            </startOffsets>
+            <endOffsets>
+              <option value="800" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
