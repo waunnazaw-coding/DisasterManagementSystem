@@ -3,6 +3,7 @@ using NetTopologySuite.Geometries;
 using DisasterManagementSystem_Services.Models;
 using AppLocation = DisasterManagementSystem_Data.Models.Location;
 using DisasterManagementSystem_Services.Models.LocationDtos;
+using NetTopologySuite.IO;
 
 public class LocationService : IlocationService
 {
@@ -39,37 +40,53 @@ public class LocationService : IlocationService
         }
         catch (Exception ex)
         {
-            throw new ArgumentException("Invalid GeoJSON format", ex);
+            throw new ArgumentException("Invalid GeoJSON: ", ex.Message);
         }
 
-        if (geom != null)
-        {
-            geom = FixPolygonOrientation(geom);
-        }
+        geom = FixPolygonOrientation(geom);
+        var centroid = geom.Centroid;
+        var geoInfo = await _geocodingService.ReverseGeocodeAsync(centroid.Y, centroid.X);
 
-        var disasterArea = new DisasterArea
+        var location = new AppLocation
         {
             Name = dto.Name,
-            Description = dto.Description,
-            Area = geom,
-            CreatedAt = DateTime.UtcNow
+            Geography = geom,
+            Address = geoInfo?.Address,
+            Country = geoInfo?.Country,
+            Region = geoInfo?.Region
         };
 
-        await _repository.AddAsync(disasterArea);
+        await _repository.AddAsync(location);
         await _repository.SaveChangesAsync();
+        
+        return Result<AppLocation>.Success(location, "Location added successfully.");
     }
 
-    public async Task UpdateAsync(DisasterArea disasterArea)
+    public async Task<Result<AppLocation>> UpdateAsync(AppLocation location)
     {
-        disasterArea.Area = FixPolygonOrientation(disasterArea.Area);
-        await _repository.UpdateAsync(disasterArea);
+        var existingLocation = await _repository.GetByIdAsync(location.Id);
+        if (existingLocation == null)
+        {
+            return Result<AppLocation>.NotFoundError("Location not found.");
+        }
+
+        await _repository.UpdateAsync(location);
         await _repository.SaveChangesAsync();
+
+        return Result<AppLocation>.Success(location, "Location updated successfully.");
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<Result<bool>> DeleteAsync(int id)
     {
+        var existingLocation = await _repository.GetByIdAsync(id);
+        if (existingLocation == null)
+        {
+            return Result<bool>.NotFoundError("Location not found.");
+        }
         await _repository.DeleteAsync(id);
         await _repository.SaveChangesAsync();
+        
+        return Result<bool>.Success(true, "Location deleted successfully.");
     }
 
 
@@ -79,7 +96,7 @@ public class LocationService : IlocationService
         if (geometry is Polygon poly)
         {
             var shell = poly.Shell;
-            if (!Orientation.IsCCW(shell.Co`ordinateSequence))
+            if (!Orientation.IsCCW(shell.CoordinateSequence))
             {
                 shell = (LinearRing)shell.Reverse();
             }
