@@ -1,19 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using DisasterManagementSystem_Services.Models;
 using DisasterManagementSystem_Services.Models.AuthDtos;
 
 namespace DisasterManagementSystem_Services.Services.Interfaces
 {
     public interface IAuthService
     {
-        Task<AuthResponseDto> RegisterAsync(RegisterDto model);
-        Task<AuthResponseDto> LoginAsync(LoginDto model);
-        Task<UserResponseDto> GetMeAsync(int userId);
-        Task<AuthResponseDto> RefreshTokenAsync(string accessToken, string refreshToken);
-        // NEW: Method for Google Login
-        Task<AuthResponseDto> GoogleLoginAsync(GoogleLoginDto model);
+        Task<Result<AuthResponseDto>> RegisterAsync(RegisterDto model);
+        Task<Result<AuthResponseDto>> LoginAsync(LoginDto model);
+        Task<Result<UserResponseDto>> GetMeAsync(int userId);
+        Task<Result<AuthResponseDto>> RefreshTokenAsync(string accessToken, string refreshToken);
+        Task<Result<AuthResponseDto>> GoogleLoginAsync(GoogleLoginDto model);
     }
 }
