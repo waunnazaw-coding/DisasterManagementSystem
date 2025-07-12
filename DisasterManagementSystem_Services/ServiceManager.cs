@@ -14,6 +14,7 @@ namespace DisasterManagementSystem_Services
         {
             builder.Services.AddScoped<IJwtService, JwtService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IReportPhotoService, ReportPhotoService>();
         }
     }
 }
