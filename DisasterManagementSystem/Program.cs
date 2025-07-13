@@ -9,6 +9,7 @@ using DisasterManagementSystem_Data.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
+using DisasterManagementSystem_Services.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,8 +60,8 @@ builder.Services.AddAuthentication(options =>
 
 //Add Authorization (optional, but recommended)
 builder.Services.AddAuthorization();
-// builder.Services.Configure<CloudinarySettings>(
-//     builder.Configuration.GetSection("CloudinarySettings"));
+builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("CloudinarySettings"));
 
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
