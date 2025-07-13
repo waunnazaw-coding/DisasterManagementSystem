@@ -9,7 +9,7 @@ namespace DisasterManagementSystem_Services.Services.Interfaces
     {
         Task<Result<AuthResponseDto>> RegisterAsync(RegisterDto model);
         Task<Result<AuthResponseDto>> LoginAsync(LoginDto model);
-        Task<Result<UserResponseDto>> GetMeAsync(int userId);
+        Task<Result<UserResponseDto>> GetMeAsync(Guid userId);
         Task<Result<AuthResponseDto>> RefreshTokenAsync(string accessToken, string refreshToken);
         Task<Result<AuthResponseDto>> GoogleLoginAsync(GoogleLoginDto model);
     }

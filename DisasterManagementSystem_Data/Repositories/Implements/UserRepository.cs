@@ -54,6 +54,19 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
             return user;
         }
 
+        public async Task<string?> GetUserRoleAsync(Guid userId)
+        {
+            // Fetch the role of the active user by userId
+            var role = await _context.Users
+                .Where(u => u.Id == userId && u.Status == "Active")
+                .Select(u => u.Role)
+                .FirstOrDefaultAsync();
+
+            // role will be null if user not found or inactive
+            return role;
+        }
+
+
         // NEW: Get user by external ID for social logins
         public async Task<User?> GetByExternalIdAsync(string externalId, string authProvider)
         {

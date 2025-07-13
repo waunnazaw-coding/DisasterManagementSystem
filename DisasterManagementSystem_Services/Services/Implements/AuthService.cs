@@ -62,11 +62,6 @@ namespace DisasterManagementSystem_Services.Services.Implements
             return Result<AuthResponseDto>.Success(MapToAuthResponseDto(tokens));
         }
 
-        public async Task<Result<UserResponseDto>> GetMeAsync(int userId)
-        {
-            // If you want to support int userId, implement accordingly or remove if not used.
-            return Result<UserResponseDto>.Failure("Not implemented for int userId.");
-        }
 
         public async Task<Result<UserResponseDto>> GetMeAsync(Guid userId)
         {

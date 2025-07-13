@@ -47,17 +47,19 @@ namespace DisasterManagementSystem_Api.Controllers
             var result = await _authService.GoogleLoginAsync(model);
             return result.Execute();
         }
-
         [Authorize]
         [HttpGet("profile")]
         public async Task<IResult> GetMe()
         {
             var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (!int.TryParse(userIdClaim, out int userId))
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
+            {
                 return Results.Unauthorized();
+            }
 
             var result = await _authService.GetMeAsync(userId);
             return result.Execute();
         }
+
     }
 }

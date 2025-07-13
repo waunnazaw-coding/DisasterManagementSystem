@@ -10,6 +10,7 @@ namespace DisasterManagementSystem_Data.Repositories.Interfaces
         Task AddAsync(User user);
         Task UpdateAsync(User user);
         Task<bool> EmailExistsAsync(string email);
+        Task<string?> GetUserRoleAsync(Guid userId);
         Task<User> GetMeAsync(Guid userId);
         // New method for social login
         Task<User?> GetByExternalIdAsync(string externalId, string authProvider);

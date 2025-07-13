@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.Data;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -33,12 +34,21 @@ namespace DisasterManagementSystem_Services.Services.Implements
             var refreshTokenExpiration =
                 DateTime.UtcNow.AddDays(double.Parse(jwtSettings["RefreshTokenExpirationDays"]));
 
+            // Fetch single user role as string
+            var role = await _userRepository.GetUserRoleAsync(user.Id);
+
             var claims = new List<Claim>
+    {
+        new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+        new Claim(JwtRegisteredClaimNames.Email, user.Email),
+        new Claim(ClaimTypes.Name, user.Name)
+    };
+
+            // Add the single role claim if available
+            if (!string.IsNullOrEmpty(role))
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.Name)
-            };
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -66,6 +76,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 RefreshToken = refreshToken
             };
         }
+
 
         public ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
         {
