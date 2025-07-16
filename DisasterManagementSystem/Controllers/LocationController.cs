@@ -30,7 +30,7 @@ namespace DisasterManagementSystem_API.Controllers
             return result.Execute();
         }
 
-        [HttpPost("crate")]
+        [HttpPost("create")]
         public async Task<IResult> Create([FromBody] LocationCreateDto dto)
         {
             var result = await _locationService.AddAsync(dto);
