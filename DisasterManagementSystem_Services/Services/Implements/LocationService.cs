@@ -9,11 +9,16 @@ public class LocationService : IlocationService
 {
     private readonly IlocationRepository _repository;
     private readonly INominatimGeocodingService _geocodingService;
+    private readonly GeoJsonWriter _geoJsonWriter;
+
     public LocationService(IlocationRepository repository, INominatimGeocodingService geocodingService)
     {
         _repository = repository;
         _geocodingService = geocodingService;
+        _geoJsonWriter = new GeoJsonWriter();
     }
+
+    private bool IsFinite(double value) => !(double.IsNaN(value) || double.IsInfinity(value));
 
     public async Task<Result<LocationDto>> GetByIdAsync(int id)
     {
@@ -21,14 +26,30 @@ public class LocationService : IlocationService
         if (loc == null)
             return Result<LocationDto>.NotFoundError("Location not found.");
 
+        var centroid = loc.Geography?.Centroid;
+        double? lat = null, lon = null;
+
+        if (centroid != null && IsFinite(centroid.X) && IsFinite(centroid.Y))
+        {
+            lat = centroid.Y;
+            lon = centroid.X;
+        }
+        else
+        {
+            lat = null;
+            lon = null;
+        }
+
         var dto = new LocationDto
         {
             Id = loc.Id,
             Name = loc.Name,
-            GeoJson = loc.Geography != null ? new GeoJsonWriter().Write(loc.Geography) : null,
+            GeoJson = loc.Geography != null ? _geoJsonWriter.Write(FixPolygonOrientation(loc.Geography)) : null,
             Address = loc.Address,
             Country = loc.Country,
-            Region = loc.Region
+            Region = loc.Region,
+            Latitude = SanitizeNullableDouble(lat),
+            Longitude = SanitizeNullableDouble(lon)
         };
 
         return Result<LocationDto>.Success(dto);
@@ -37,22 +58,35 @@ public class LocationService : IlocationService
     public async Task<Result<IEnumerable<LocationDto>>> GetAllAsync()
     {
         var all = await _repository.GetAllAsync();
-        var writer = new GeoJsonWriter();
 
-        var result = all.Select(loc => new LocationDto
+        var result = all.Select(loc =>
         {
-            Id = loc.Id,
-            Name = loc.Name,
-            GeoJson = loc.Geography != null ? writer.Write(loc.Geography) : null,
-            Address = loc.Address,
-            Country = loc.Country,
-            Region = loc.Region
+            var centroid = loc.Geography?.Centroid;
+            double? lat = null, lon = null;
+
+            if (centroid != null && IsFinite(centroid.X) && IsFinite(centroid.Y))
+            {
+                lat = centroid.Y;
+                lon = centroid.X;
+            }
+
+            return new LocationDto
+            {
+                Id = loc.Id,
+                Name = loc.Name,
+                GeoJson = loc.Geography != null ? _geoJsonWriter.Write(loc.Geography) : null,
+                Address = loc.Address,
+                Country = loc.Country,
+                Region = loc.Region,
+                Latitude = SanitizeNullableDouble(lat),
+                Longitude = SanitizeNullableDouble(lon)
+            };
         });
 
         return Result<IEnumerable<LocationDto>>.Success(result);
     }
 
-    public async Task<Result<AppLocation>> AddAsync(LocationCreateDto dto)
+    public async Task<Result<LocationDto>> AddAsync(LocationCreateDto dto)
     {
         Geometry geom;
         try
@@ -62,11 +96,15 @@ public class LocationService : IlocationService
         }
         catch (Exception ex)
         {
-            throw new ArgumentException("Invalid GeoJSON: ", ex.Message);
+            return Result<LocationDto>.ValidationError($"Invalid GeoJSON: {ex.Message}");
         }
 
         geom = FixPolygonOrientation(geom);
+
         var centroid = geom.Centroid;
+        if (!IsFinite(centroid.X) || !IsFinite(centroid.Y))
+            return Result<LocationDto>.ValidationError("Geometry centroid has invalid coordinate values.");
+
         var geoInfo = await _geocodingService.ReverseGeocodeAsync(centroid.Y, centroid.X);
 
         var location = new AppLocation
@@ -81,7 +119,20 @@ public class LocationService : IlocationService
         await _repository.AddAsync(location);
         await _repository.SaveChangesAsync();
 
-        return Result<AppLocation>.Success(location, "Location added successfully.");
+        // Return a sanitized DTO instead of raw entity
+        var createdDto = new LocationDto
+        {
+            Id = location.Id,
+            Name = location.Name,
+            GeoJson = location.Geography != null ? _geoJsonWriter.Write(FixPolygonOrientation(location.Geography)) : null,
+            Address = location.Address,
+            Country = location.Country,
+            Region = location.Region,
+            Latitude = SanitizeNullableDouble(location.Geography?.Centroid?.Y),
+            Longitude = SanitizeNullableDouble(location.Geography?.Centroid?.X)
+        };
+
+        return Result<LocationDto>.Success(createdDto, "Location added successfully.");
     }
 
     public async Task<Result<AppLocation>> UpdateAsync(LocationUpdateDto dto)
@@ -90,29 +141,34 @@ public class LocationService : IlocationService
         if (existing == null)
             return Result<AppLocation>.NotFoundError("Location not found.");
 
-        // Fix GeoJson if it's provided
         if (!string.IsNullOrWhiteSpace(dto.GeoJson))
         {
-            var reader = new GeoJsonReader();
+            Geometry geom;
             try
             {
-                var geom = FixPolygonOrientation(reader.Read<Geometry>(dto.GeoJson));
-                existing.Geography = geom;
-
-                // Optional: reverse geocode if location changed
-                var center = geom.Centroid;
-                var geoInfo = await _geocodingService.ReverseGeocodeAsync(center.Y, center.X);
-                existing.Address = geoInfo?.Address;
-                existing.Region = geoInfo?.Region;
-                existing.Country = geoInfo?.Country;
+                var reader = new GeoJsonReader();
+                geom = reader.Read<Geometry>(dto.GeoJson);
+                geom = FixPolygonOrientation(geom);
             }
-            catch
+            catch (Exception ex)
             {
-                return Result<AppLocation>.ValidationError("Invalid GeoJSON.");
+                return Result<AppLocation>.ValidationError($"Invalid GeoJSON: {ex.Message}");
             }
+
+            var centroid = geom.Centroid;
+            if (!IsFinite(centroid.X) || !IsFinite(centroid.Y))
+                return Result<AppLocation>.ValidationError("Geometry centroid has invalid coordinate values.");
+
+            existing.Geography = geom;
+
+            var geoInfo = await _geocodingService.ReverseGeocodeAsync(centroid.Y, centroid.X);
+            existing.Address = geoInfo?.Address;
+            existing.Region = geoInfo?.Region;
+            existing.Country = geoInfo?.Country;
         }
 
         existing.Name = dto.Name;
+
         await _repository.UpdateAsync(existing);
         await _repository.SaveChangesAsync();
 
@@ -132,8 +188,6 @@ public class LocationService : IlocationService
 
         return Result<bool>.Success(true, "Location deleted successfully.");
     }
-
-
 
     private Geometry FixPolygonOrientation(Geometry geometry)
     {
@@ -161,10 +215,12 @@ public class LocationService : IlocationService
             return new MultiPolygon(fixedPolygons, geometry.Factory);
         }
 
-        // For other geometry types, return as is
         return geometry;
     }
 
-
-
+    private double? SanitizeNullableDouble(double? value)
+    {
+        if (!value.HasValue) return null;
+        return double.IsNaN(value.Value) || double.IsInfinity(value.Value) ? null : value;
+    }
 }
