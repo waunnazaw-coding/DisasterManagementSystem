@@ -9,6 +9,7 @@ using DisasterManagementSystem_Data.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using DisasterManagementSystem_Services.Models;
+using DisasterManagementSystem_Services.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +50,7 @@ builder.Services.Configure<CloudinarySettings>(
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IReportPhotoRepository, ReportPhotoRepository>();
+builder.Services.AddScoped<IDonationRepository, DonationRepository>();
 
 builder.AddDomain();
 

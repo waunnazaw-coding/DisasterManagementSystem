@@ -23,7 +23,7 @@ public partial class Donation
 
     public string? Currency { get; set; }
 
-    public DateTime? DateReceived { get; set; }
+    public DateTime DateReceived { get; set; }
 
     public string SourceType { get; set; } = null!;
 
