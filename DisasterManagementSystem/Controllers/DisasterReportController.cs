@@ -2,6 +2,7 @@ using DisasterManagementSystem_Data.Models;
 using DisasterManagementSystem_Services.Models;
 using DisasterManagementSystem_Services.Models.LocationDtos;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace DisasterManagementSystem_API.Controllers
 {
@@ -30,11 +31,18 @@ namespace DisasterManagementSystem_API.Controllers
             return result.Execute();
         }
 
-        [HttpPost("create")]
-        public async Task<IResult> Create([FromBody] DisasterReportCreateDto dto)
+        [HttpPost("submit-form")]
+        public async Task<IActionResult> SubmitForm([FromBody] FormCreateDto dto)
         {
-            var result = await _reportService.AddAsync(dto);
-            return result.Execute();
+            if (!ModelState.IsValid)
+                return BadRequest(Result<string>.Failure("Invalid form data"));
+
+            var result = await _reportService.AddFormAsync(dto);
+
+            if (!result.IsSuccess)
+                return BadRequest(result);
+                
+            return Ok(result);
         }
 
         [HttpPut("update/{id}")]

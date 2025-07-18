@@ -16,9 +16,10 @@ public class LocationRepository : IlocationRepository
     public async Task<IEnumerable<Location>> GetAllAsync() =>
         await _context.Locations.ToListAsync();
 
-    public async Task AddAsync(Location disasterArea)
+    public Task AddAsync(Location disasterArea)
     {
-        await _context.Locations.AddAsync(disasterArea);
+        _context.Locations.AddAsync(disasterArea);
+        return Task.CompletedTask;
     }
 
     public Task UpdateAsync(Location location)

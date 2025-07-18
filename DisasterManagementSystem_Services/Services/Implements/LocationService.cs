@@ -1,7 +1,7 @@
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
 using DisasterManagementSystem_Services.Models;
-using AppLocation = DisasterManagementSystem_Data.Models.Location;
+using AppLocation = DisasterManagementSystem_Data.Models.Location;  
 using DisasterManagementSystem_Services.Models.LocationDtos;
 using NetTopologySuite.IO;
 
