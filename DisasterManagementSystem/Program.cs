@@ -11,6 +11,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using DisasterManagementSystem_Services.Models;
 using DisasterManagementSystem_Services.Services.Interfaces;
+using System.Text.Json.Serialization;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -71,10 +73,20 @@ builder.Services.Configure<CloudinarySettings>(
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IReportPhotoRepository, ReportPhotoRepository>();
 builder.Services.AddScoped<IDonationRepository, DonationRepository>();
+// Repositories
+builder.Services.AddScoped<IlocationRepository, LocationRepository>();
+builder.Services.AddScoped<IDisasterReportRepository, DisasterReportRepository>();
+builder.Services.AddScoped<IDisasterTypeRepository, DisasterTypeRepository>();
 
 builder.AddDomain();
 
-builder.Services.AddControllers();
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
