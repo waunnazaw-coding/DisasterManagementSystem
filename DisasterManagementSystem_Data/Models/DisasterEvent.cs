@@ -13,8 +13,6 @@ public partial class DisasterEvent
 
     public DateOnly StartDate { get; set; }
 
-    public DateOnly? EndDate { get; set; }
-
     public int LocationId { get; set; }
 
     public string? Severity { get; set; }
@@ -26,6 +24,10 @@ public partial class DisasterEvent
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    public Guid CreatedUserId { get; set; }
+
+    public Guid? UpdatedUserId { get; set; }
 
     public virtual ICollection<AssistanceRequest> AssistanceRequests { get; set; } = new List<AssistanceRequest>();
 
