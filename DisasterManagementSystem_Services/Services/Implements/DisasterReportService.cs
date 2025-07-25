@@ -11,30 +11,19 @@ public class DisasterReportService : IDisasterReportService
 {
     private readonly AppDbContext _context;
     private readonly IDisasterReportRepository _disasterReportRepository;
-    private readonly IlocationRepository _locationRepository;
-    private readonly IDisasterTypeRepository _disasterTypeRepository;
-    private readonly IReportPhotoRepository _reportPhotoRepository;
-    private readonly GeoJsonReader _geoJsonReader;
     private readonly IlocationService _locationService;
     private readonly IReportPhotoService _reportPhotoService;
 
     public DisasterReportService(
         IDisasterReportRepository disasterReportRepository,
-        IlocationRepository locationRepository,
-        IDisasterTypeRepository disasterTypeRepository,
-        IReportPhotoRepository reportPhotoRepository,
         IlocationService locaitonService,
         IReportPhotoService reportPhotoService,
         AppDbContext context
     )
     {
         _disasterReportRepository = disasterReportRepository;
-        _locationRepository = locationRepository;
-        _disasterTypeRepository = disasterTypeRepository;
-        _reportPhotoRepository = reportPhotoRepository;
         _context = context;
         _locationService = locaitonService;
-        _geoJsonReader = new GeoJsonReader();
         _reportPhotoService = reportPhotoService;
     }
 

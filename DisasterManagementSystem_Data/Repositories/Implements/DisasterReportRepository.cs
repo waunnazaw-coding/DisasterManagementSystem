@@ -16,10 +16,10 @@ public class DisasterReportRepository : IDisasterReportRepository
     public async Task<IEnumerable<DisasterReport>> GetAllAsync() =>
         await _context.DisasterReports.ToListAsync();
 
-    public Task AddAsync(DisasterReport report)
+    public async Task AddAsync(DisasterReport report)
     {
-        _context.DisasterReports.AddAsync(report);
-        return Task.CompletedTask;
+        await _context.DisasterReports.AddAsync(report);
+        await _context.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(DisasterReport report)
