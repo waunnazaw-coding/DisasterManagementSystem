@@ -1,4 +1,5 @@
 ﻿using DisasterManagementSystem_Data.Models;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace DisasterManagementSystem_Data.Repositories.Interfaces
 {
@@ -12,7 +13,10 @@ namespace DisasterManagementSystem_Data.Repositories.Interfaces
         Task<bool> EmailExistsAsync(string email);
         Task<string?> GetUserRoleAsync(Guid userId);
         Task<User> GetMeAsync(Guid userId);
-        // New method for social login
+        void Attach(User entity);
+        EntityEntry<User> Entry(User entity);
+        Task SaveChangesAsync();
+
         Task<User?> GetByExternalIdAsync(string externalId, string authProvider);
     }
 }

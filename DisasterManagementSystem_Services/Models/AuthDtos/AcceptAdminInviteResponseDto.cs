@@ -4,5 +4,4 @@ public class AcceptAdminInviteResponseDto
 {
     public string Email { get; set; } = default!;
     public bool IsAdmin { get; set; }
-    public string Message { get; set; } = default!;
 }

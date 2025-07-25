@@ -43,6 +43,8 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<RequestAssignment> RequestAssignments { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+    
+    public virtual DbSet<UserReliefTeam> UserReliefTeams { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -443,6 +445,23 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.RefreshTokenExpiryTime);
             
+        });
+        
+        modelBuilder.Entity<UserReliefTeam>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__UserReli__3214EC07DA567340");
+
+            entity.ToTable("UserReliefTeam");
+
+            entity.HasOne(d => d.ReliefTeam).WithMany(p => p.UserReliefTeams)
+                .HasForeignKey(d => d.ReliefTeamId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__UserRelie__Relie__40F9A68C");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserReliefTeams)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__UserRelie__UserI__40058253");
         });
 
         OnModelCreatingPartial(modelBuilder);

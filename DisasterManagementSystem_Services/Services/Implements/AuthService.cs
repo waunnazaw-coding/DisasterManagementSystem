@@ -7,6 +7,7 @@ using DisasterManagementSystem_Services.Models.AuthDtos;
 using DisasterManagementSystem_Services.Services.Interfaces;
 using Google.Apis.Auth;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
 namespace DisasterManagementSystem_Services.Services.Implements
@@ -16,12 +17,14 @@ namespace DisasterManagementSystem_Services.Services.Implements
         private readonly IUserRepository _userRepository;
         private readonly IJwtService _jwtService;
         private readonly IConfiguration _configuration;
+        private readonly IEmailSenderService _emailSender;
 
-        public AuthService(IUserRepository userRepository, IJwtService jwtService, IConfiguration configuration)
+        public AuthService(IUserRepository userRepository, IJwtService jwtService, IConfiguration configuration , IEmailSenderService emailSender)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _jwtService = jwtService ?? throw new ArgumentNullException(nameof(jwtService));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _emailSender = emailSender;
         }
 
         public async Task<Result<AuthResponseDto>> RegisterAsync(RegisterDto model)
@@ -62,7 +65,137 @@ namespace DisasterManagementSystem_Services.Services.Implements
             return Result<AuthResponseDto>.Success(MapToAuthResponseDto(tokens));
         }
 
+        
+        public async Task<ResetPasswordResponseDto> ResetPasswordAsync(ResetPasswordRequestDto dto)
+        {
+            var principal = _jwtService.GetPrincipalFromExpiredToken(dto.Token);
+            if (principal == null)
+                return new ResetPasswordResponseDto { Success = false, Message = "Invalid or expired token." };
 
+            var userIdClaim = principal.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userIdClaim, out var userId))
+                return new ResetPasswordResponseDto { Success = false, Message = "Invalid token claims." };
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null || !string.Equals(user.Email, dto.Email, StringComparison.OrdinalIgnoreCase))
+                return new ResetPasswordResponseDto { Success = false, Message = "User not found or email mismatch." };
+
+            var updatedUser = new User
+            {
+                Id = user.Id,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword),
+                AuthProvider = null
+            };
+
+            // Attach the user and mark only specific fields modified
+            _userRepository.Attach(updatedUser);
+            var entry = _userRepository.Entry(updatedUser);
+            entry.Property(u => u.PasswordHash).IsModified = true;
+            entry.Property(u => u.AuthProvider).IsModified = true;
+
+            await _userRepository.SaveChangesAsync();
+
+            return new ResetPasswordResponseDto { Success = true, Message = "Password reset successful." };
+        }
+
+
+        public async Task<Result<AdminInviteResponseDto>> SendAdminInviteAsync(AdminInviteRequestDto inviteDto)
+        {
+            var user = await _userRepository.GetByEmailAsync(inviteDto.Email);
+
+            if (user == null)
+            {
+                user = new User
+                {
+                    Email = inviteDto.Email,
+                    Name = inviteDto.Name ?? "",
+                    Role = "User",        // default role
+                    Status = "Active",   // custom status tracking
+                    CreatedAt = DateTime.UtcNow,
+                    AuthProvider = null
+                };
+
+                await _userRepository.AddAsync(user);
+            }
+            else
+            {
+                if (user.Role == "Admin")
+                    return Result<AdminInviteResponseDto>.Failure("User is already an admin.");
+
+                user.Status = "Active";
+                await _userRepository.UpdateAsync(user);
+            }
+
+            var inviteToken = _jwtService.GenerateAdminInviteToken(user.Id, TimeSpan.FromHours(24));
+
+            var frontendBaseUrl = _configuration["Frontend:BaseUrl"] ?? "https://yourfrontend.app";
+            var inviteUrl = $"https://www.youtube.com/";
+
+            var subject = "You are invited to become an Admin";
+            var htmlMessage = $@"
+                <p>Hello {user.Name ?? user.Email},</p>
+                <p>You have been invited to join as an <strong>Admin</strong> on our system.</p>
+                <p>Please click the link below to set your password and activate your admin account:</p>
+                <p><a href='{inviteUrl}'>Accept Admin Invitation</a></p>
+                <p>This link will expire in 24 hours.</p>
+                <p>If you did not expect this invitation, please ignore this email.</p>
+            ";
+
+            await _emailSender.SendEmailAsync(user.Email, subject, htmlMessage);
+
+            var responseDto = new AdminInviteResponseDto
+            {
+                Email = user.Email,
+                InviteSentAt = DateTime.UtcNow,
+                InviteUrl = inviteUrl
+            };
+
+            return Result<AdminInviteResponseDto>.Success(responseDto);
+        }
+
+
+        public async Task<Result<AcceptAdminInviteResponseDto>> AcceptAdminInviteAsync(AcceptAdminInviteRequestDto acceptDto)
+        {
+            var principal = _jwtService.GetPrincipalFromExpiredToken(acceptDto.Token);
+            if (principal == null)
+                return Result<AcceptAdminInviteResponseDto>.Failure("Invalid or expired invite token.");
+
+            var userIdClaim = principal.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (!Guid.TryParse(userIdClaim, out var userId))
+                return Result<AcceptAdminInviteResponseDto>.Failure("Invalid token claims.");
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null || !string.Equals(user.Email, acceptDto.Email, StringComparison.OrdinalIgnoreCase))
+                return Result<AcceptAdminInviteResponseDto>.Failure("User not found or email mismatch.");
+
+            var updatedUser = new User
+            {
+                Id = user.Id,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(acceptDto.NewPassword),
+                AuthProvider = null,
+                Role = "Admin",
+                Status = "Active"
+            };
+
+            _userRepository.Attach(updatedUser);
+            var entry = _userRepository.Entry(updatedUser);
+            entry.Property(u => u.PasswordHash).IsModified = true;
+            entry.Property(u => u.AuthProvider).IsModified = true;
+            entry.Property(u => u.Role).IsModified = true;
+            entry.Property(u => u.Status).IsModified = true;
+
+            await _userRepository.SaveChangesAsync();
+
+            var responseDto = new AcceptAdminInviteResponseDto
+            {
+                Email = user.Email,
+                IsAdmin = true,
+            };
+
+            return Result<AcceptAdminInviteResponseDto>.Success(responseDto);
+        }
+
+        
         public async Task<Result<UserResponseDto>> GetMeAsync(Guid userId)
         {
             var user = await _userRepository.GetByIdAsync(userId);

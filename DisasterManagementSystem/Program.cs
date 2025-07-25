@@ -1,8 +1,6 @@
 using DisasterManagementSystem_Data.Models;
 using DisasterManagementSystem_Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using System;
 using System.Text;
 using DisasterManagementSystem_Data.Repositories.Implements;
 using DisasterManagementSystem_Data.Repositories.Interfaces;
@@ -12,6 +10,9 @@ using System.Security.Claims;
 using DisasterManagementSystem_Services.Models;
 using DisasterManagementSystem_Services.Services.Interfaces;
 using System.Text.Json.Serialization;
+using DisasterManagementSystem_Services.Services.Implements;
+using DisasterManagementSystem;
+using FluentEmail.MailKitSmtp;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,31 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
         sqlOptions => sqlOptions.UseNetTopologySuite()));
+
+// Add email settings configuration
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+// Get the EmailSettings early to configure FluentEmail
+var emailSettings = builder.Configuration.GetSection("EmailSettings").Get<EmailSettings>();
+if (emailSettings == null)
+{
+    throw new InvalidOperationException("EmailSettings not configured in appsettings.json");
+}
+
+builder.Services
+    .AddFluentEmail(emailSettings.SenderEmail, emailSettings.SenderName) // Default sender
+    .AddMailKitSender(new SmtpClientOptions
+    {
+        Server = emailSettings.SmtpServer,
+        Port = emailSettings.SmtpPort,
+        UseSsl = false,
+        RequiresAuthentication = true,
+        User = emailSettings.SmtpUser,
+        Password = emailSettings.SmtpPass
+    });
+
+// Register your custom IEmailSender implementation that uses FluentEmail
+builder.Services.AddTransient<IEmailSenderService, EmailSenderService>();
 
 // Add CORS policy
 builder.Services.AddCors(options =>
@@ -77,6 +103,10 @@ builder.Services.AddScoped<IDonationRepository, DonationRepository>();
 builder.Services.AddScoped<IlocationRepository, LocationRepository>();
 builder.Services.AddScoped<IDisasterReportRepository, DisasterReportRepository>();
 builder.Services.AddScoped<IDisasterTypeRepository, DisasterTypeRepository>();
+
+builder.Services.AddScoped<IUserReliefTeamRepository, UserReliefTeamRepository>();
+builder.Services.AddScoped<IReliefTeamRepository, ReliefTeamRepository>();
+
 
 builder.AddDomain();
 
