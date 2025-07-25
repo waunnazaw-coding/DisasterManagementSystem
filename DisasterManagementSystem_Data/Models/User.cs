@@ -20,12 +20,12 @@ public partial class User
     public string Role { get; set; } = null!;
 
     public string Status { get; set; } = null!;
-    
-    public string? RefreshToken { get; set; }
-    
-    public DateTime? RefreshTokenExpiryTime { get; set; }
 
     public DateTime? CreatedAt { get; set; }
+
+    public string? RefreshToken { get; set; }
+
+    public DateTime? RefreshTokenExpiryTime { get; set; }
 
     public virtual ICollection<AssistanceRequest> AssistanceRequests { get; set; } = new List<AssistanceRequest>();
 

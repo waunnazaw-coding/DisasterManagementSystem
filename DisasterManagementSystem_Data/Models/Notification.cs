@@ -15,5 +15,11 @@ public partial class Notification
 
     public DateTime? CreatedAt { get; set; }
 
+    public string? Type { get; set; }
+
+    public int? RelatedEntityId { get; set; }
+
+    public string? Status { get; set; }
+
     public virtual User User { get; set; } = null!;
 }

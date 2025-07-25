@@ -34,6 +34,7 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
         {
             return await _context.Donations
                 .Include(d => d.DonorUser)
+               // .OrderByDescending(d => d.DateReceived) // or whatever your date property is called
                 .ToListAsync();
         }
 
@@ -59,6 +60,16 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
             _context.Donations.Remove(donation);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<List<Donation>> GetRecentAsync()
+        {
+            return await _context.Donations
+                .Include(d => d.DonorUser)
+                .Where(d => d.Status == "Verified")
+                .OrderByDescending(d => d.DateReceived)
+                .Take(3) // Get last 5 donations
+                .ToListAsync();
         }
     }
     }
