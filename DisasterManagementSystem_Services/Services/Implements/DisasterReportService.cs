@@ -1,6 +1,8 @@
 using DisasterManagementSystem_Data.Models;
 using DisasterManagementSystem_Data.Repositories.Interfaces;
 using DisasterManagementSystem_Services.Models;
+using DisasterManagementSystem_Services.Models.LocationDtos;
+using DisasterManagementSystem_Services.Services;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using AppLocation = DisasterManagementSystem_Data.Models.Location;
@@ -13,12 +15,16 @@ public class DisasterReportService : IDisasterReportService
     private readonly IDisasterTypeRepository _disasterTypeRepository;
     private readonly IReportPhotoRepository _reportPhotoRepository;
     private readonly GeoJsonReader _geoJsonReader;
+    private readonly IlocationService _locationService;
+    private readonly IReportPhotoService _reportPhotoService;
 
     public DisasterReportService(
         IDisasterReportRepository disasterReportRepository,
         IlocationRepository locationRepository,
         IDisasterTypeRepository disasterTypeRepository,
         IReportPhotoRepository reportPhotoRepository,
+        IlocationService locaitonService,
+        IReportPhotoService reportPhotoService,
         AppDbContext context
     )
     {
@@ -27,7 +33,9 @@ public class DisasterReportService : IDisasterReportService
         _disasterTypeRepository = disasterTypeRepository;
         _reportPhotoRepository = reportPhotoRepository;
         _context = context;
+        _locationService = locaitonService;
         _geoJsonReader = new GeoJsonReader();
+        _reportPhotoService = reportPhotoService;
     }
 
     public async Task<Result<DisasterReport>> GetByIdAsync(int id)
@@ -50,25 +58,26 @@ public class DisasterReportService : IDisasterReportService
 
         try
         {
-            var geometry = _geoJsonReader.Read<Geometry>(dto.GeoJson);
-            var location = new AppLocation
+            // Call LocationService to create location
+            var locationResult = await _locationService.AddAsync(new LocationCreateDto
             {
                 Name = dto.LocationName,
-                Geography = geometry,
-                Address = dto.Address,
-                Country = dto.Country,
-                Region = dto.Region
-            };
-            await _locationRepository.AddAsync(location);
-            await _context.SaveChangesAsync();
+                GeoJson = dto.GeoJson,
+            });
 
+            if (!locationResult.IsSuccess)
+                return Result<FormCreateDto>.Failure(locationResult.Message);
+
+            var locationId = locationResult.Data.Id;
+
+            // Create DisasterReport
             var report = new DisasterReport
             {
                 DisasterEventId = dto.DisasterEventId,
                 UserId = dto.UserId,
-                LocationId = location.Id,
+                LocationId = locationId,
                 AddressDetail = dto.AddressDetail,
-                Type = dto.Type, //Situation report,...
+                Type = dto.Type,
                 Title = dto.Title,
                 Description = dto.Description,
                 Severity = dto.Severity,
@@ -80,25 +89,13 @@ public class DisasterReportService : IDisasterReportService
             await _disasterReportRepository.AddAsync(report);
             await _context.SaveChangesAsync();
 
-            var disasterType = new DisasterType
+            // Create ReportPhoto
+            if (dto.Files != null && dto.Files.Length > 0)
             {
-                Name = dto.DisasterTypeName,
-                Category = dto.Category,
-                Description = dto.DisasterTypeDescription
-            };
-            await _disasterTypeRepository.AddAsync(disasterType);
-            await _context.SaveChangesAsync();
-
-            var photo = new ReportPhoto
-            {
-                FilePath = dto.FilePath,
-                FileType = dto.FileType,
-                FileSize = dto.FileSize,
-                UploadedAt = dto.UploadedAt ?? DateTime.UtcNow,
-                DisasterReportId = report.Id
-            };
-            await _reportPhotoRepository.AddAsync(photo);
-            await _context.SaveChangesAsync();
+                var photoResult = await _reportPhotoService.UploadReportPhotosAsync(report.Id, dto.Files);
+                if (!photoResult.IsSuccess)
+                    throw new Exception(photoResult.Message);
+            }
 
             await transaction.CommitAsync();
             return Result<FormCreateDto>.Success(dto, "Form submitted successfully.");

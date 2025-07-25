@@ -1,5 +1,5 @@
 ﻿using DisasterManagementSystem_Services.Models;
-using DisasterManagementSystem_Services.Services.Interfaces;
+using DisasterManagementSystem_Services.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,4 +1,5 @@
 using System;
+using Microsoft.AspNetCore.Http;
 
 namespace DisasterManagementSystem_Services.Models
 {
@@ -7,9 +8,6 @@ namespace DisasterManagementSystem_Services.Models
         // ---------- Location ----------
         public string LocationName { get; set; } = null!;
         public string GeoJson { get; set; } = null!;
-        public string? Address { get; set; }
-        public string? Country { get; set; }
-        public string? Region { get; set; }
 
         // ---------- DisasterReport ----------
         public Guid UserId { get; set; }                  // required
@@ -21,15 +19,8 @@ namespace DisasterManagementSystem_Services.Models
         public string? Severity { get; set; }
         public string? Source { get; set; }
 
-        // ---------- DisasterType ----------
-        public string DisasterTypeName { get; set; } = null!;
-        public string Category { get; set; } = null!;
-        public string? DisasterTypeDescription { get; set; }
 
         // ---------- ReportPhoto ----------
-        public string FilePath { get; set; } = null!;
-        public string FileType { get; set; } = null!;
-        public long? FileSize { get; set; }
-        public DateTime? UploadedAt { get; set; }
+        public IFormFile[] Files { get; set; } = Array.Empty<IFormFile>();
     }
 }

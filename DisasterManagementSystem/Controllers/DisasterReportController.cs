@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using DisasterManagementSystem_Data.Models;
 using DisasterManagementSystem_Services.Models;
 using DisasterManagementSystem_Services.Models.LocationDtos;
@@ -32,16 +33,26 @@ namespace DisasterManagementSystem_API.Controllers
         }
 
         [HttpPost("submit-form")]
-        public async Task<IActionResult> SubmitForm([FromBody] FormCreateDto dto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> SubmitForm([FromForm] FormCreateDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(Result<string>.Failure("Invalid form data"));
+
+            // Get UserId from claims
+            var userIdClaim = User.FindFirst("sub") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                return Unauthorized(Result<string>.Failure("User ID not found in token"));
+            }
+
+            dto.UserId = userId;
 
             var result = await _reportService.AddFormAsync(dto);
 
             if (!result.IsSuccess)
                 return BadRequest(result);
-                
+
             return Ok(result);
         }
 

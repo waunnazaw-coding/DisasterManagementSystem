@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace DisasterManagementSystem_Services.Services.Interfaces
+namespace DisasterManagementSystem_Services.Services
 {
     public interface IReportPhotoService
     {
