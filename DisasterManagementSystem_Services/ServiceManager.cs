@@ -1,9 +1,10 @@
 ﻿using DisasterManagementSystem_Data.Repositories;
 using DisasterManagementSystem_Services.Services.Implements;
 using DisasterManagementSystem_Services.Services;
+using DisasterManagementSystem_Services.Services.Interfaces;
+using log4net.Appender;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using DisasterManagementSystem_Services.Services.Interfaces;
 
 namespace DisasterManagementSystem_Services
 {
@@ -19,6 +20,7 @@ namespace DisasterManagementSystem_Services
             builder.Services.AddScoped<IJwtService, JwtService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IReportPhotoService, ReportPhotoService>();
+            builder.Services.AddScoped<IDonationService,DonationService>();
         }
     }
 }

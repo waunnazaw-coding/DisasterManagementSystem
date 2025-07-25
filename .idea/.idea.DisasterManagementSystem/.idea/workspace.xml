@@ -9,9 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="373ff947-e936-4a3b-91b4-d8bb06058b3d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.DisasterManagementSystem/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DisasterManagementSystem/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="373ff947-e936-4a3b-91b4-d8bb06058b3d" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -130,6 +128,7 @@
       <workItem from="1752218631730" duration="461000" />
       <workItem from="1752221578716" duration="4328000" />
       <workItem from="1752256818097" duration="999000" />
+      <workItem from="1752433618906" duration="618000" />
     </task>
     <servers />
   </component>
@@ -151,24 +150,5 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/DisasterManagementSystem/Controllers/AuthoController.cs</url>
-          <line>24</line>
-          <properties documentPath="D:\DisasterManagementSystem\Backend\DisasterManagementSystem\DisasterManagementSystem\Controllers\AuthoController.cs" containingFunctionPresentation="Method 'Register'">
-            <startOffsets>
-              <option value="776" />
-            </startOffsets>
-            <endOffsets>
-              <option value="800" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

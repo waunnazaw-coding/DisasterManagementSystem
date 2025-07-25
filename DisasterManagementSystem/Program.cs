@@ -10,7 +10,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using DisasterManagementSystem_Services.Models;
+using DisasterManagementSystem_Services.Services.Interfaces;
 using System.Text.Json.Serialization;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,10 +25,13 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // React app URL
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials(); // if you use cookies or credentials
+        policy.WithOrigins(
+                "http://localhost:5173",
+                "http://localhost:5174"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // if you use cookies or credentials
     });
 });
 
@@ -67,13 +72,14 @@ builder.Services.Configure<CloudinarySettings>(
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IReportPhotoRepository, ReportPhotoRepository>();
-
-builder.AddDomain();
-
+builder.Services.AddScoped<IDonationRepository, DonationRepository>();
 // Repositories
 builder.Services.AddScoped<IlocationRepository, LocationRepository>();
 builder.Services.AddScoped<IDisasterReportRepository, DisasterReportRepository>();
 builder.Services.AddScoped<IDisasterTypeRepository, DisasterTypeRepository>();
+
+builder.AddDomain();
+
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
