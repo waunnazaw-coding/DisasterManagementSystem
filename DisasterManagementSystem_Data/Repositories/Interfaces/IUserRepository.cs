@@ -14,5 +14,11 @@ namespace DisasterManagementSystem_Data.Repositories.Interfaces
         Task<User> GetMeAsync(Guid userId);
         // New method for social login
         Task<User?> GetByExternalIdAsync(string externalId, string authProvider);
+        Task DeleteAsync(User user);
+        Task<int> CountAsync(string search = null, string role = null, string status = null);
+        Task<IEnumerable<User>> GetAllAsync(); // Add this line
+
+        // IUserRepository.cs
+        Task<IEnumerable<User>> GetPaginatedAsync(int skip, int take, string search = null, string role = null, string status = null);
     }
 }

@@ -73,5 +73,76 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
             return await _context.Users.SingleOrDefaultAsync(u =>
                 u.ExternalId == externalId && u.AuthProvider == authProvider);
         }
+
+        public async Task DeleteAsync(User user)
+        {
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> CountAsync(string search = null, string role = null, string status = null)
+        {
+            var query = _context.Users.AsQueryable();
+
+            // Apply same filters as GetPaginatedAsync
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(u =>
+                    u.Name.Contains(search) ||
+                    u.Email.Contains(search));
+            }
+
+            if (!string.IsNullOrEmpty(role))
+            {
+                query = query.Where(u => u.Role == role);
+            }
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(u => u.Status == status);
+            }
+
+            return await query.CountAsync();
+        }
+        // UserRepository.cs
+        public async Task<IEnumerable<User>> GetAllAsync()
+        {
+            return await _context.Users.ToListAsync();
+        }
+
+        // UserRepository.cs
+     public async Task<IEnumerable<User>> GetPaginatedAsync(
+    int skip,
+    int take,
+    string search = null,
+    string role = null,
+    string status = null)
+        {
+            var query = _context.Users.AsQueryable();
+
+            // Apply filters
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(u =>
+                    u.Name.Contains(search) ||
+                    u.Email.Contains(search));
+            }
+
+            if (!string.IsNullOrEmpty(role))
+            {
+                query = query.Where(u => u.Role == role);
+            }
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(u => u.Status == status);
+            }
+
+            return await query
+                .OrderBy(u => u.Name)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
+        }
     }
 }
