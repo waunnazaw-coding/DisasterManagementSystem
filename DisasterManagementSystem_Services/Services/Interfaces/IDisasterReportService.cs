@@ -6,6 +6,8 @@ public interface IDisasterReportService
     Task<Result<DisasterReport>> GetByIdAsync(int id);
     Task<Result<IEnumerable<DisasterReport>>> GetAllAsync();
     Task<Result<FormCreateDto>> AddFormAsync(FormCreateDto dto);
-    Task<Result<DisasterReport>> UpdateAsync(DisasterReportUpdateDto dto);
+    Task<Result<FormUpdateDto>> UpdateFormAsync(FormUpdateDto dto);
     Task<Result<bool>> DeleteAsync(int id);
+    Task<Result<bool>> ApproveAsync(int id);
+    Task<Result<bool>> DisapproveAsync(int id);
 }

@@ -20,11 +20,14 @@ namespace DisasterManagementSystem_API.Controllers
         }
 
         [HttpGet("all")]
-        public async Task<IResult> GetAll()
+        public async Task<IActionResult> GetAll()
         {
             var result = await _eventService.GetAllAsync();
-            return result.Execute();
+            if (result.IsSuccess)
+                return Ok(new { isSuccess = true, data = result.Data });
+            return BadRequest(result.Message);
         }
+
 
         [HttpGet("{id}")]
         public async Task<IResult> GetById(int id)
@@ -37,15 +40,10 @@ namespace DisasterManagementSystem_API.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> SubmitForm([FromForm] EventFormCreateDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(Result<string>.Failure("Invalid form data"));
-
             var result = await _eventService.AddEventFormAsync(dto);
-
-            if (!result.IsSuccess)
-                return BadRequest(result);
-
-            return Ok(result);
+            if (result.IsSuccess)
+                return Ok(result);
+            return BadRequest(result.Message);
         }
 
         [HttpPut("update/{id}")]
@@ -63,5 +61,16 @@ namespace DisasterManagementSystem_API.Controllers
             var result = await _eventService.DeleteAsync(id);
             return result.Execute();
         }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchEvents([FromQuery] string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return BadRequest("Search term is required.");
+
+            var events = await _eventService.SearchByNameAsync(name);
+            return Ok(events);
+        }
+
     }
 }

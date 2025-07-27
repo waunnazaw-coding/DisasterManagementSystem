@@ -12,6 +12,7 @@ using System.Security.Claims;
 using DisasterManagementSystem_Services.Models;
 using DisasterManagementSystem_Services.Services.Interfaces;
 using System.Text.Json.Serialization;
+using DisasterManagementSystem_Data.Repositories;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -76,7 +77,9 @@ builder.Services.AddScoped<IDonationRepository, DonationRepository>();
 // Repositories
 builder.Services.AddScoped<IlocationRepository, LocationRepository>();
 builder.Services.AddScoped<IDisasterReportRepository, DisasterReportRepository>();
+builder.Services.AddScoped<IDisasterEventRepository, DisasterEventRepository>();
 builder.Services.AddScoped<IDisasterTypeRepository, DisasterTypeRepository>();
+builder.Services.AddScoped<IImpactRepository, ImpactRepository>();
 
 builder.AddDomain();
 

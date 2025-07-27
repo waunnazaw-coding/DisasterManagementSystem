@@ -96,32 +96,126 @@ public class DisasterReportService : IDisasterReportService
         }
     }
 
-    public async Task<Result<DisasterReport>> UpdateAsync(DisasterReportUpdateDto dto)
+    public async Task<Result<FormUpdateDto>> UpdateFormAsync(FormUpdateDto dto)
     {
-        var existing = await _disasterReportRepository.GetByIdAsync(dto.Id);
-        if (existing == null)
-            return Result<DisasterReport>.NotFoundError("Report not found.");
+        using var transaction = await _context.Database.BeginTransactionAsync();
 
-        existing.AddressDetail = dto.AddressDetail;
-        existing.Type = dto.Type;
-        existing.Title = dto.Title;
-        existing.Description = dto.Description;
-        existing.Severity = dto.Severity;
-        existing.Source = dto.Source;
-        existing.Status = dto.Status ?? "Pending";
-        existing.UpdatedAt = DateTime.UtcNow;
+        try
+        {
+            // Find existing report
+            var report = await _disasterReportRepository.GetByIdAsync(dto.Id);
+            if (report == null)
+                return Result<FormUpdateDto>.Failure("Disaster report not found.");
 
-        await _disasterReportRepository.UpdateAsync(existing);
-        return Result<DisasterReport>.Success(existing, "Report updated.");
+            // Update Location if LocationName or GeoJson provided
+            if (!string.IsNullOrEmpty(dto.LocationName) || !string.IsNullOrEmpty(dto.GeoJson))
+            {
+                var locationUpdateResult = await _locationService.UpdateAsync(new LocationUpdateDto
+                {
+                    Id = report.LocationId,
+                    Name = dto.LocationName,
+                    GeoJson = dto.GeoJson
+                });
+
+                if (!locationUpdateResult.IsSuccess)
+                    return Result<FormUpdateDto>.Failure(locationUpdateResult.Message);
+            }
+
+            // Update DisasterReport fields if provided (null means no change)
+            if (dto.DisasterEventId.HasValue) report.DisasterEventId = dto.DisasterEventId.Value;
+            if (dto.UserId.HasValue) report.UserId = dto.UserId.Value;
+            if (dto.AddressDetail != null) report.AddressDetail = dto.AddressDetail;
+            if (dto.Type != null) report.Type = dto.Type;
+            if (dto.Title != null) report.Title = dto.Title;
+            if (dto.Description != null) report.Description = dto.Description;
+            if (dto.Severity != null) report.Severity = dto.Severity;
+            if (dto.Source != null) report.Source = dto.Source;
+
+            report.UpdatedAt = DateTime.UtcNow;
+
+            _context.DisasterReports.Update(report);
+            await _context.SaveChangesAsync();
+
+            // Handle photo updates if any files provided
+            if (dto.Files != null && dto.Files.Length > 0)
+            {
+                // You can choose to replace or add photos here
+                // Example: Add new photos
+                var photoResult = await _reportPhotoService.UploadReportPhotosAsync(report.Id, dto.Files);
+                if (!photoResult.IsSuccess)
+                    throw new Exception(photoResult.Message);
+            }
+
+            await transaction.CommitAsync();
+            return Result<FormUpdateDto>.Success(dto, "Form updated successfully.");
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            return Result<FormUpdateDto>.Failure($"Error updating form: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<bool>> ApproveAsync(int id)
+    {
+        var report = await _disasterReportRepository.GetByIdAsync(id);
+        if (report == null)
+            return Result<bool>.NotFoundError($"Disaster report with ID {id} not found.");
+
+        try
+        {
+            report.Status = "Verified";  // use Verified here
+            report.UpdatedAt = DateTime.UtcNow;
+
+            await _disasterReportRepository.UpdateAsync(report);
+
+            return Result<bool>.Success(true, "Disaster report verified successfully.");
+        }
+        catch (Exception ex)
+        {
+            var innerMsg = ex.InnerException != null ? ex.InnerException.Message : "No inner exception";
+            return Result<bool>.Failure($"Error verifying disaster report: {ex.Message}. Inner exception: {innerMsg}");
+        }
+    }
+
+    public async Task<Result<bool>> DisapproveAsync(int id)
+    {
+        var report = await _disasterReportRepository.GetByIdAsync(id);
+        if (report == null)
+            return Result<bool>.NotFoundError($"Disaster report with ID {id} not found.");
+
+        try
+        {
+            report.Status = "Rejected";  // Use Rejected instead of Disapproved
+            report.UpdatedAt = DateTime.UtcNow;
+
+            await _disasterReportRepository.UpdateAsync(report);
+
+            return Result<bool>.Success(true, "Disaster report rejected successfully.");
+        }
+        catch (Exception ex)
+        {
+            var innerMsg = ex.InnerException != null ? ex.InnerException.Message : "No inner exception";
+            return Result<bool>.Failure($"Error rejecting disaster report: {ex.Message}. Inner exception: {innerMsg}");
+        }
     }
 
     public async Task<Result<bool>> DeleteAsync(int id)
     {
         var report = await _disasterReportRepository.GetByIdAsync(id);
         if (report == null)
-            return Result<bool>.NotFoundError("Report not found.");
+            return Result<bool>.NotFoundError($"Disaster report with ID {id} not found.");
 
-        await _disasterReportRepository.DeleteAsync(id);
-        return Result<bool>.Success(true, "Report deleted.");
+        try
+        {
+            await _disasterReportRepository.DeleteAsync(id);
+            await _context.SaveChangesAsync();
+            return Result<bool>.Success(true, "Disaster report deleted successfully.");
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Failure($"Error deleting disaster report: {ex.Message}");
+        }
     }
+
 }

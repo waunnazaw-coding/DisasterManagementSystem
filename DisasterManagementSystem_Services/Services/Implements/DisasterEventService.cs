@@ -5,6 +5,7 @@ using DisasterManagementSystem_Data.Repositories;
 using DisasterManagementSystem_Services.Models;
 using DisasterManagementSystem_Services.Models.LocationDtos;
 using DisasterManagementSystem_Services.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace DisasterManagementSystem_Data.Service
@@ -15,17 +16,21 @@ namespace DisasterManagementSystem_Data.Service
         private readonly IDisasterEventRepository _disasterEventRepository;
         private readonly IlocationService _locationService;
         private readonly IReportPhotoService _reportPhotoService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
         public DisasterEventService(
             AppDbContext context,
             IDisasterEventRepository disasterEventRepository,
             IlocationService locationService,
-            IReportPhotoService reportPhotoService
+            IReportPhotoService reportPhotoService,
+            IHttpContextAccessor httpContextAccessor
         )
         {
             _context = context;
             _disasterEventRepository = disasterEventRepository;
             _locationService = locationService;
             _reportPhotoService = reportPhotoService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Result<DisasterEvent>> GetByIdAsync(int id)
@@ -36,11 +41,52 @@ namespace DisasterManagementSystem_Data.Service
                 : Result<DisasterEvent>.Failure("Disaster event not found.");
         }
 
-        public async Task<Result<IEnumerable<DisasterEvent>>> GetAllAsync()
+        public async Task<Result<IEnumerable<DisasterEventListDto>>> GetAllAsync()
         {
-            var disasterEvents = await _disasterEventRepository.GetAllAsync();
-            return Result<IEnumerable<DisasterEvent>>.Success(disasterEvents);
+            var events = await _disasterEventRepository.GetAllAsync();
+
+            var eventDtos = events.Select(e => new DisasterEventListDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+                DisasterTypeName = e.DisasterType?.Name ?? "Unknown",
+                StartDate = e.StartDate,
+                LocationName = e.Location?.Name ?? "Unknown",
+                Region = e.Location?.Region,
+                Country = e.Location?.Country,
+                Severity = e.Severity,
+                Status = e.Status,
+                Description = e.Description,
+                CreatedUserId = e.CreatedUserId,
+                CreatedAt = e.CreatedAt,
+                UpdatedUserId = e.UpdatedUserId,
+                UpdatedAt = e.UpdatedAt
+            });
+
+            return Result<IEnumerable<DisasterEventListDto>>.Success(eventDtos);
         }
+
+        public async Task<IEnumerable<DisasterEventListDto>> SearchByNameAsync(string name)
+        {
+            var events = await _disasterEventRepository.SearchByNameAsync(name);
+
+            return events.Select(e => new DisasterEventListDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+                DisasterTypeName = e.DisasterType.Name,
+                StartDate = e.StartDate,
+                LocationName = e.Location.Name,
+                Severity = e.Severity,
+                Status = e.Status,
+                Description = e.Description,
+                CreatedUserId = e.CreatedUserId,
+                CreatedAt = e.CreatedAt,
+                UpdatedUserId = e.UpdatedUserId,
+                UpdatedAt = e.UpdatedAt
+            });
+        }
+
 
         public async Task<Result<EventFormCreateDto>> AddEventFormAsync(EventFormCreateDto dto)
         {
@@ -59,18 +105,23 @@ namespace DisasterManagementSystem_Data.Service
 
                 dto.LocationId = locationResult.Data.Id;
 
+                // Get the current user ID (from HttpContext)
+                string? currentUserId = _httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
                 // Add disaster event
                 var disasterEvent = new DisasterEvent
                 {
                     Name = dto.Name,
                     DisasterTypeId = dto.DisasterTypeId,
                     StartDate = dto.StartDate,
-                    EndDate = dto.EndDate,
                     LocationId = dto.LocationId,
                     Severity = dto.Severity,
-                    Status = dto.Status,
+                    Status = "Active",
                     Description = dto.Description,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedUserId = Guid.Parse(currentUserId!),
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedUserId = null,  // ensure null
+                    UpdatedAt = null       // ensure null
                 };
 
                 await _disasterEventRepository.AddAsync(disasterEvent);
@@ -84,6 +135,7 @@ namespace DisasterManagementSystem_Data.Service
                 return Result<EventFormCreateDto>.Failure($"Error creating disaster event: {ex.Message}");
             }
         }
+
 
         public async Task<Result<DisasterEvent>> UpdateAsync(DisasterEvent disasterEvent)
         {

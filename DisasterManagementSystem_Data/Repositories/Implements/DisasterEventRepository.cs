@@ -13,10 +13,26 @@ namespace DisasterManagementSystem_Data.Repositories
         }
 
         public async Task<DisasterEvent?> GetByIdAsync(int id) =>
-           await _context.DisasterEvents.FindAsync(id);
+            await _context.DisasterEvents
+                .Include(e => e.DisasterType) // Include DisasterType
+                .Include(e => e.Location)     // Include Location
+                .FirstOrDefaultAsync(e => e.Id == id);
 
         public async Task<IEnumerable<DisasterEvent>> GetAllAsync() =>
-            await _context.DisasterEvents.ToListAsync();
+            await _context.DisasterEvents
+                .Include(e => e.DisasterType) // Include DisasterType
+                .Include(e => e.Location)     // Include Location
+                .ToListAsync();
+
+        public async Task<IEnumerable<DisasterEvent>> SearchByNameAsync(string name)
+        {
+            return await _context.DisasterEvents
+                .Include(e => e.DisasterType)
+                .Include(e => e.Location)
+                .Where(e => e.Name.Contains(name))
+                .ToListAsync();
+        }
+
 
         public async Task AddAsync(DisasterEvent disasterEvent)
         {

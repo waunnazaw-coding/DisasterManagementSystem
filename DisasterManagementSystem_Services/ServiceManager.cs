@@ -5,6 +5,7 @@ using DisasterManagementSystem_Services.Services.Interfaces;
 using log4net.Appender;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using DisasterManagementSystem_Data.Service;
 
 namespace DisasterManagementSystem_Services
 {
@@ -14,13 +15,16 @@ namespace DisasterManagementSystem_Services
         {
             builder.Services.AddScoped<IlocationService, LocationService>();
             builder.Services.AddScoped<IDisasterReportService, DisasterReportService>();
+            builder.Services.AddScoped<IDisasterEventService, DisasterEventService>();
             builder.Services.AddScoped<IDisasterTypeService, DisasterTypeService>();
+            builder.Services.AddScoped<IImpactService, ImpactService>();
 
             builder.Services.AddHttpClient<INominatimGeocodingService, NominatimGeocodingService>();
             builder.Services.AddScoped<IJwtService, JwtService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IReportPhotoService, ReportPhotoService>();
-            builder.Services.AddScoped<IDonationService,DonationService>();
+            builder.Services.AddScoped<IDonationService, DonationService>();
+            builder.Services.AddHttpContextAccessor();
         }
     }
 }
