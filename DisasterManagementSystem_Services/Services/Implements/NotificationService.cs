@@ -4,6 +4,7 @@ using DisasterManagementSystem_Services.Hubs;
 using DisasterManagementSystem_Services.Models.NotificationDto.cs;
 using DisasterManagementSystem_Services.Services.Interfaces;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,17 +18,19 @@ namespace DisasterManagementSystem_Services.Services.Implements
         private readonly INotificationRepository _notificationRepo;
         private readonly IUserRepository _userRepo;
         private readonly IHubContext<NotificationHub> _hubContext;
+        private readonly ILogger<NotificationService> _logger;
 
         public NotificationService(
             INotificationRepository notificationRepo,
             IUserRepository userRepo,
-            IHubContext<NotificationHub> hubContext)
+            IHubContext<NotificationHub> hubContext,
+            ILogger<NotificationService> logger)
         {
             _notificationRepo = notificationRepo;
             _userRepo = userRepo;
             _hubContext = hubContext;
+            _logger = logger;
         }
-
         public async Task<NotificationDto> CreateNotificationAsync(CreateNotificationDto dto)
         {
             var notification = new Notification
@@ -36,11 +39,13 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 Message = dto.Message,
                 Type = dto.Type,
                 RelatedEntityId = dto.RelatedEntityId,
-                Status = dto.Status
+                Status = dto.Status,
+                CreatedAt = DateTime.UtcNow
             };
 
             var created = await _notificationRepo.AddAsync(notification);
 
+            // Send real-time notification
             await _hubContext.Clients.User(dto.UserId.ToString())
                 .SendAsync("ReceiveNotification", MapToDto(created));
 
@@ -81,35 +86,59 @@ namespace DisasterManagementSystem_Services.Services.Implements
 
         public async Task NotifyAdminsForNewRequest(Guid userId, int requestId, string requestType)
         {
-            var admins = await _userRepo.GetUsersByRoleAsync("Admin");
-            var message = $"New assistance request for {requestType}";
-
-            foreach (var admin in admins)
+            try
             {
-                await CreateNotificationAsync(new CreateNotificationDto
+                var admins = await _userRepo.GetUsersByRoleAsync("Admin");
+                var user = await _userRepo.GetByIdAsync(userId);
+                var message = $"New assistance request for {requestType} from {user?.Name}";
+
+                foreach (var admin in admins)
                 {
-                    UserId = admin.Id,
-                    Message = message,
-                    Type = "Request",
-                    RelatedEntityId = requestId,
-                    Status = "Pending"
-                });
+                    var notification = await CreateNotificationAsync(new CreateNotificationDto
+                    {
+                        UserId = admin.Id,
+                        Message = message,
+                        Type = "Request",
+                        RelatedEntityId = requestId,
+                        Status = "Pending"
+                    });
+
+                    // Send real-time notification to admin group
+                    await _hubContext.Clients.Group("Admins")
+                        .SendAsync("ReceiveAdminNotification", notification);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error notifying admins for new request");
             }
         }
 
         public async Task NotifyUserForRequestUpdate(Guid userId, int requestId, string requestType, string status)
         {
-            var message = $"Your request for {requestType} has been {status.ToLower()}";
-
-            await CreateNotificationAsync(new CreateNotificationDto
+            try
             {
-                UserId = userId,
-                Message = message,
-                Type = "Request",
-                RelatedEntityId = requestId,
-                Status = status
-            });
+                var message = $"Your request for {requestType} has been {status.ToLower()}";
+
+                var notification = await CreateNotificationAsync(new CreateNotificationDto
+                {
+                    UserId = userId,
+                    Message = message,
+                    Type = "Request",
+                    RelatedEntityId = requestId,
+                    Status = status
+                });
+
+                // Send real-time notification to user
+                await _hubContext.Clients.User(userId.ToString())
+                    .SendAsync("ReceiveNotification", notification);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error notifying user for request update");
+            }
         }
+
 
         public async Task<List<NotificationDto>> GetUserNotificationsAsync(Guid userId)
         {

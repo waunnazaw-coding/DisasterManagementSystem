@@ -15,11 +15,13 @@ namespace DisasterManagementSystem_Services.Hubs
         public override async Task OnConnectedAsync()
         {
             var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var role = Context.User?.FindFirst(ClaimTypes.Role)?.Value;
+
             if (!string.IsNullOrEmpty(userId))
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, userId);
 
-                if (Context.User.IsInRole("Admin"))
+                if (role == "Admin")
                 {
                     await Groups.AddToGroupAsync(Context.ConnectionId, "Admins");
                 }
@@ -31,11 +33,13 @@ namespace DisasterManagementSystem_Services.Hubs
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var role = Context.User?.FindFirst(ClaimTypes.Role)?.Value;
+
             if (!string.IsNullOrEmpty(userId))
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId);
 
-                if (Context.User.IsInRole("Admin"))
+                if (role == "Admin")
                 {
                     await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Admins");
                 }

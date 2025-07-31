@@ -8,4 +8,6 @@ public interface IlocationRepository
     Task UpdateAsync(Location location);
     Task DeleteAsync(int id);
     Task SaveChangesAsync();
+
+    Task<bool> ExistsAsync(int id);
 }

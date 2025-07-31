@@ -7,4 +7,5 @@ public interface IDisasterReportRepository
     Task AddAsync(DisasterReport report);
     Task UpdateAsync(DisasterReport report);
     Task DeleteAsync(int id);
+    Task<bool> ExistsAsync(int id);
 }

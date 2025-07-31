@@ -1,10 +1,10 @@
 using DisasterManagementSystem_Data.Models;
+using DisasterManagementSystem_Data.Repositories;
 using DisasterManagementSystem_Data.Repositories.Implements;
 using DisasterManagementSystem_Data.Repositories.Interfaces;
-using DisasterManagementSystem_Services;
 using DisasterManagementSystem_Services.Hubs;
 using DisasterManagementSystem_Services.Models;
-using DisasterManagementSystem_Services.Services.Interfaces;
+using DisasterManagementSystem_Services.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -80,7 +80,10 @@ builder.Services.AddScoped<IlocationRepository, LocationRepository>();
 builder.Services.AddScoped<IDisasterReportRepository, DisasterReportRepository>();
 builder.Services.AddScoped<IDisasterTypeRepository, DisasterTypeRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
-
+builder.Services.AddScoped<IAssistanceRequestRepository, AssistanceRequestRepository>();
+builder.Services.AddScoped<IlocationRepository,LocationRepository>();
+builder.Services.AddScoped<IDisasterEventRepository, DisasterEventRepository>();
+builder.Services.AddScoped<IDisasterEventRepository, DisasterEventRepository>();
 builder.AddDomain();
 
 

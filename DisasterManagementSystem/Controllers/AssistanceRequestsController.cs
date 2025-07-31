@@ -1,81 +1,119 @@
 ﻿using DisasterManagementSystem_Data.Models;
 using DisasterManagementSystem_Data.Repositories;
+using DisasterManagementSystem_Services.Models.AssistanceRequestDtos;
+using DisasterManagementSystem_Services.Models.AssistanceRequestDtos.DisasterManagementSystem_Service.Models.Dtos;
+using DisasterManagementSystem_Services.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace DisasterManagementSystem_Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AssistanceRequestsController : ControllerBase
     {
-        private readonly IAssistanceRequestRepository _repository;
+        private readonly IAssistanceRequestService _requestService;
 
-        public AssistanceRequestsController(IAssistanceRequestRepository repository)
+        public AssistanceRequestsController(IAssistanceRequestService requestService)
         {
-            _repository = repository;
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var requests = await _repository.GetAllAsync();
-            return Ok(requests);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var request = await _repository.GetByIdAsync(id);
-            if (request == null) return NotFound();
-            return Ok(request);
+            _requestService = requestService;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] AssistanceRequest request)
+        public async Task<IResult> CreateRequest([FromBody] CreateAssistanceRequestDto requestDto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            request.CreatedAt = DateTime.UtcNow;
-            await _repository.AddAsync(request);
-            await _repository.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = request.Id }, request);
+            if (!ModelState.IsValid)
+                return Results.BadRequest(ModelState);
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdClaim, out Guid userId))
+                return Results.Unauthorized();
+
+            var result = await _requestService.CreateRequestAsync(requestDto, userId);
+            return result.Execute();
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IResult> GetAllRequests()
+        {
+            var result = await _requestService.GetAllRequestsAsync();
+            return result.Execute();
+        }
+
+        [HttpGet("my-requests")]
+        public async Task<IResult> GetMyRequests()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdClaim, out Guid userId))
+                return Results.Unauthorized();
+
+            var result = await _requestService.GetUserRequestsAsync(userId);
+            return result.Execute();
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IResult> GetRequestById(int id)
+        {
+            var result = await _requestService.GetRequestByIdAsync(id);
+            return result.Execute();
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] AssistanceRequest updatedRequest)
+        public async Task<IResult> UpdateRequest(int id, [FromBody] UpdateAssistanceRequestDto requestDto)
         {
-            var existing = await _repository.GetByIdAsync(id);
-            if (existing == null) return NotFound();
+            if (!ModelState.IsValid)
+                return Results.BadRequest(ModelState);
 
-            existing.SupportType = updatedRequest.SupportType;
-            existing.Quantity = updatedRequest.Quantity;
-            existing.Unit = updatedRequest.Unit;
-            existing.Description = updatedRequest.Description;
-            existing.Priority = updatedRequest.Priority;
-            existing.Status = updatedRequest.Status;
-            existing.ContactName = updatedRequest.ContactName;
-            existing.ContactPhone = updatedRequest.ContactPhone;
-            existing.Email = updatedRequest.Email;
-            existing.DetailedAddress = updatedRequest.DetailedAddress;
-            existing.Source = updatedRequest.Source;
-            existing.UpdatedAt = DateTime.UtcNow;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdClaim, out Guid userId))
+                return Results.Unauthorized();
 
-            await _repository.UpdateAsync(existing);
-            await _repository.SaveChangesAsync();
-
-            return NoContent();
+            var result = await _requestService.UpdateRequestAsync(id, requestDto, userId);
+            return result.Execute();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IResult> DeleteRequest(int id)
         {
-            var request = await _repository.GetByIdAsync(id);
-            if (request == null) return NotFound();
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdClaim, out Guid userId))
+                return Results.Unauthorized();
 
-            await _repository.DeleteAsync(id);
-            await _repository.SaveChangesAsync();
+            var result = await _requestService.DeleteRequestAsync(id, userId);
+            return result.Execute();
+        }
 
-            return NoContent();
+        [HttpPut("{id}/status")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IResult> UpdateRequestStatus(int id, [FromBody] UpdateRequestStatusDto statusDto)
+        {
+            if (!ModelState.IsValid)
+                return Results.BadRequest(ModelState);
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdClaim, out Guid userId))
+                return Results.Unauthorized();
+
+            var result = await _requestService.UpdateRequestStatusAsync(id, statusDto, userId);
+            return result.Execute();
+        }
+
+        [HttpGet("disaster/{disasterEventId}")]
+        public async Task<IResult> GetRequestsByDisaster(int disasterEventId)
+        {
+            var result = await _requestService.GetRequestsByDisasterAsync(disasterEventId);
+            return result.Execute();
+        }
+
+        [HttpGet("status/{status}")]
+        public async Task<IResult> GetRequestsByStatus(string status)
+        {
+            var result = await _requestService.GetRequestsByStatusAsync(status);
+            return result.Execute();
         }
 
     }
