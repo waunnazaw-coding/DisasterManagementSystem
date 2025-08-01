@@ -32,21 +32,24 @@ namespace DisasterManagementSystem_Services.Services.Implements
             _cloudinary = new Cloudinary(account);
         }
 
-        public async Task<Result<List<UploadPhotoResultDTO>>> UploadReportPhotosAsync(int disasterReportId, IFormFile[] files)
+        public async Task<Result<List<UploadPhotoResultDTO>>> UploadReportPhotosAsync(int disasterReportId, IFormFile[] files, List<string> descriptions)
         {
             try
             {
                 if (files == null || files.Length == 0)
                     return Result<List<UploadPhotoResultDTO>>.ValidationError("No files provided");
 
+                if (descriptions == null || descriptions.Count != files.Length)
+                    return Result<List<UploadPhotoResultDTO>>.ValidationError("Descriptions count must match number of files");
+
                 var uploadedPhotos = new List<UploadPhotoResultDTO>();
 
-                foreach (var file in files)
+                for (int i = 0; i < files.Length; i++)
                 {
-                    if (file.Length == 0)
-                        continue;
+                    var file = files[i];
+                    var description = descriptions[i];
 
-                    if (!file.ContentType.StartsWith("image/"))
+                    if (file.Length == 0 || !file.ContentType.StartsWith("image/"))
                         continue;
 
                     var uploadResult = await UploadToCloudinary(file);
@@ -58,7 +61,8 @@ namespace DisasterManagementSystem_Services.Services.Implements
                         FilePath = uploadResult.SecureUrl.AbsoluteUri,
                         FileType = file.ContentType,
                         FileSize = file.Length,
-                        UploadedAt = DateTime.UtcNow
+                        UploadedAt = DateTime.UtcNow,
+                        Description = description // ✅ store description
                     };
 
                     var savedPhoto = await _photoRepository.AddAsync(photo);
@@ -69,7 +73,8 @@ namespace DisasterManagementSystem_Services.Services.Implements
                         FilePath = savedPhoto.FilePath,
                         FileType = savedPhoto.FileType,
                         FileSize = savedPhoto.FileSize,
-                        UploadedAt = savedPhoto.UploadedAt
+                        UploadedAt = savedPhoto.UploadedAt,
+                        Description = savedPhoto.Description
                     });
                 }
 
@@ -84,7 +89,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
             }
         }
 
-        public async Task<Result<List<UploadPhotoResultDTO>>> UploadEventPhotosAsync(int disasterEventId, IFormFile[] files)
+        public async Task<Result<List<UploadPhotoResultDTO>>> UploadEventPhotosAsync(int disasterEventId, IFormFile[] files, List<string> descriptions)
         {
             try
             {
@@ -93,12 +98,15 @@ namespace DisasterManagementSystem_Services.Services.Implements
 
                 var uploadedPhotos = new List<UploadPhotoResultDTO>();
 
-                foreach (var file in files)
-                {
-                    if (file.Length == 0)
-                        continue;
+                if (descriptions == null || descriptions.Count != files.Length)
+                    return Result<List<UploadPhotoResultDTO>>.ValidationError("Descriptions count must match the number of files");
 
-                    if (!file.ContentType.StartsWith("image/"))
+                for (int i = 0; i < files.Length; i++)
+                {
+                    var file = files[i];
+                    var description = descriptions[i];
+
+                    if (file.Length == 0 || !file.ContentType.StartsWith("image/"))
                         continue;
 
                     var uploadResult = await UploadToCloudinary(file);
@@ -110,7 +118,8 @@ namespace DisasterManagementSystem_Services.Services.Implements
                         FilePath = uploadResult.SecureUrl.AbsoluteUri,
                         FileType = file.ContentType,
                         FileSize = file.Length,
-                        UploadedAt = DateTime.UtcNow
+                        UploadedAt = DateTime.UtcNow,
+                        Description = description // ✅ apply matching description
                     };
 
                     var savedPhoto = await _photoRepository.AddAsync(photo);
@@ -121,7 +130,8 @@ namespace DisasterManagementSystem_Services.Services.Implements
                         FilePath = savedPhoto.FilePath,
                         FileType = savedPhoto.FileType,
                         FileSize = savedPhoto.FileSize,
-                        UploadedAt = savedPhoto.UploadedAt
+                        UploadedAt = savedPhoto.UploadedAt,
+                        Description = savedPhoto.Description
                     });
                 }
 
@@ -162,7 +172,8 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     FilePath = uploadResult.SecureUrl.AbsoluteUri,
                     FileType = file.ContentType,
                     FileSize = file.Length,
-                    UploadedAt = DateTime.UtcNow
+                    UploadedAt = DateTime.UtcNow,
+                    Description = existingPhoto.Description // Keep the existing description
                 };
 
                 var result = await _photoRepository.UpdateAsync(updatedPhoto);
@@ -178,7 +189,8 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     FilePath = result.FilePath,
                     FileType = result.FileType,
                     FileSize = result.FileSize,
-                    UploadedAt = result.UploadedAt
+                    UploadedAt = result.UploadedAt,
+                    Description = result.Description
                 });
             }
             catch (Exception ex)
@@ -186,6 +198,27 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 return Result<UploadPhotoResultDTO>.Failure($"Error updating photo: {ex.Message}");
             }
         }
+
+        public async Task<Result<bool>> UpdatePhotoDescriptionAsync(int photoId, string newDescription)
+        {
+            try
+            {
+                var existingPhoto = await _photoRepository.GetByIdAsync(photoId);
+                if (existingPhoto == null)
+                    return Result<bool>.Failure("Photo not found");
+
+                existingPhoto.Description = newDescription;
+                await _photoRepository.UpdateAsync(existingPhoto);
+
+                return Result<bool>.Success(true, "Photo description updated successfully");
+            }
+            catch (Exception ex)
+            {
+                return Result<bool>.Failure($"Error updating photo description: {ex.Message}");
+            }
+        }
+
+
 
         public async Task<Result<List<UploadPhotoResultDTO>>> GetPhotosByReportIdAsync(int reportId)
         {
@@ -198,7 +231,8 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     FilePath = p.FilePath,
                     FileType = p.FileType,
                     FileSize = p.FileSize,
-                    UploadedAt = p.UploadedAt
+                    UploadedAt = p.UploadedAt,
+                    Description = p.Description
                 }).ToList();
 
                 return Result<List<UploadPhotoResultDTO>>.Success(result);
@@ -220,7 +254,8 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     FilePath = p.FilePath,
                     FileType = p.FileType,
                     FileSize = p.FileSize,
-                    UploadedAt = p.UploadedAt
+                    UploadedAt = p.UploadedAt,
+                    Description = p.Description
                 }).ToList();
 
                 return Result<List<UploadPhotoResultDTO>>.Success(result);
@@ -245,7 +280,8 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     FilePath = photo.FilePath,
                     FileType = photo.FileType,
                     FileSize = photo.FileSize,
-                    UploadedAt = photo.UploadedAt
+                    UploadedAt = photo.UploadedAt,
+                    Description = photo.Description
                 });
             }
             catch (Exception ex)

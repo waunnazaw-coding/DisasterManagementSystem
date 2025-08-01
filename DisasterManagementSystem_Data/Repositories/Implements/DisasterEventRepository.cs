@@ -14,8 +14,9 @@ namespace DisasterManagementSystem_Data.Repositories
 
         public async Task<DisasterEvent?> GetByIdAsync(int id) =>
             await _context.DisasterEvents
-                .Include(e => e.DisasterType) // Include DisasterType
-                .Include(e => e.Location)     // Include Location
+                .Include(e => e.DisasterType)
+                .Include(e => e.Location)
+                .Include(e => e.Impacts) // Include impacts navigation collection
                 .FirstOrDefaultAsync(e => e.Id == id);
 
         public async Task<IEnumerable<DisasterEvent>> GetAllAsync() =>

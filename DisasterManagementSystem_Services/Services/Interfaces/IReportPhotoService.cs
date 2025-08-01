@@ -11,9 +11,10 @@ namespace DisasterManagementSystem_Services.Services
 {
     public interface IReportPhotoService
     {
-        Task<Result<List<UploadPhotoResultDTO>>> UploadReportPhotosAsync(int disasterReportId, IFormFile[] files);
-        Task<Result<List<UploadPhotoResultDTO>>> UploadEventPhotosAsync(int disasterEventId, IFormFile[] files);
+        Task<Result<List<UploadPhotoResultDTO>>> UploadReportPhotosAsync(int disasterReportId, IFormFile[] files, List<string> descriptions);
+        Task<Result<List<UploadPhotoResultDTO>>> UploadEventPhotosAsync(int disasterEventId, IFormFile[] files, List<string> descriptions);
         Task<Result<UploadPhotoResultDTO>> UpdatePhotoAsync(int photoId, IFormFile file);
+        Task<Result<bool>> UpdatePhotoDescriptionAsync(int photoId, string newDescription);
         Task<Result<List<UploadPhotoResultDTO>>> GetPhotosByReportIdAsync(int reportId);
         Task<Result<List<UploadPhotoResultDTO>>> GetPhotosByEventIdAsync(int eventId);
         Task<Result<UploadPhotoResultDTO>> GetPhotoByIdAsync(int photoId);

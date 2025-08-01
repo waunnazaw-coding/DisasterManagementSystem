@@ -1,8 +1,9 @@
-// IImpactRepository.cs
 using DisasterManagementSystem_Data.Models;
-using System.Threading.Tasks;
 
 public interface IImpactRepository
 {
     Task AddRangeAsync(IEnumerable<Impact> impacts);
+    Task<IEnumerable<Impact>> GetAllAsync();
+    Task<IEnumerable<Impact>> GetByDisasterEventIdAsync(int disasterEventId);
+    Task<Impact?> GetByIdAsync(int id);
 }

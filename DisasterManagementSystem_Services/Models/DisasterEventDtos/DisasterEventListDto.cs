@@ -13,6 +13,7 @@ namespace DisasterManagementSystem_Services.Models
         public string LocationName { get; set; } = null!;
         public string? Region { get; set; }
         public string? Country { get; set; }
+        public string LocationGeoJson { get; set; }
 
         // Event Details
         public string? Severity { get; set; }
@@ -24,5 +25,8 @@ namespace DisasterManagementSystem_Services.Models
         public DateTime? CreatedAt { get; set; }
         public Guid? UpdatedUserId { get; set; }
         public DateTime? UpdatedAt { get; set; }
+
+        // New computed property for total affected people
+        public int? AffectedPeople { get; set; }
     }
 }

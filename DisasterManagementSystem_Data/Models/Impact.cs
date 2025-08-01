@@ -7,7 +7,7 @@ public partial class Impact
 {
     public int Id { get; set; }
 
-    public int? DisasterEventId { get; set; }
+    public int DisasterEventId { get; set; }
 
     public int? DisasterReportId { get; set; }
 

@@ -28,13 +28,36 @@ namespace DisasterManagementSystem_API.Controllers
             return BadRequest(result.Message);
         }
 
+        [HttpGet("withlocation/{id}")]
+        public async Task<IActionResult> GetByIdWithLocation(int id)
+        {
+            var result = await _eventService.GetByIdWithLocationAsync(id);
+
+            if (!result.IsSuccess)
+                return NotFound(new { message = result.Message });
+
+            return Ok(result.Data);
+        }
+
+        [HttpGet("all-with-impacts")]
+        public async Task<IActionResult> GetAllWithImpacts()
+        {
+            var data = await _eventService.GetAllWithAffectedPeopleAsync();
+            return Ok(new { isSuccess = true, data });
+        }
+
 
         [HttpGet("{id}")]
-        public async Task<IResult> GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             var result = await _eventService.GetByIdAsync(id);
-            return result.Execute();
+            if (result.IsSuccess)
+            {
+                return Ok(new { isSuccess = true, data = result.Data });
+            }
+            return NotFound(new { isSuccess = false, message = result.Message });
         }
+
 
         [HttpPost("submit-form")]
         [Consumes("multipart/form-data")]
@@ -47,14 +70,19 @@ namespace DisasterManagementSystem_API.Controllers
         }
 
         [HttpPut("update/{id}")]
-        public async Task<IResult> Update(int id, [FromBody] DisasterEvent dto)
+        public async Task<IActionResult> UpdateEvent(int id, [FromForm] EventFormUpdateDto dto)
         {
             if (id != dto.Id)
-                return Results.BadRequest("ID mismatch");
+                return BadRequest("Event ID mismatch.");
 
-            var result = await _eventService.UpdateAsync(dto);
-            return result.Execute();
+            var result = await _eventService.UpdateEventFormAsync(dto);
+
+            if (!result.IsSuccess)
+                return BadRequest(result.Message);
+
+            return Ok(result.Data);
         }
+
         [HttpDelete("delete/{id}")]
         public async Task<IResult> Delete(int id)
         {
@@ -70,6 +98,17 @@ namespace DisasterManagementSystem_API.Controllers
 
             var events = await _eventService.SearchByNameAsync(name);
             return Ok(events);
+        }
+
+        [HttpGet("update/{id}")]
+        public async Task<IActionResult> GetUpdateDto(int id)
+        {
+            var result = await _eventService.GetByIdForUpdateAsync(id);
+            if (result.IsSuccess)
+            {
+                return Ok(new { isSuccess = true, data = result.Data });
+            }
+            return NotFound(new { isSuccess = false, message = result.Message });
         }
 
     }

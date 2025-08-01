@@ -81,7 +81,7 @@ public class DisasterReportService : IDisasterReportService
             // Create ReportPhoto
             if (dto.Files != null && dto.Files.Length > 0)
             {
-                var photoResult = await _reportPhotoService.UploadReportPhotosAsync(report.Id, dto.Files);
+                var photoResult = await _reportPhotoService.UploadReportPhotosAsync(report.Id, dto.Files, dto.NewPhotoDescriptions);
                 if (!photoResult.IsSuccess)
                     throw new Exception(photoResult.Message);
             }
@@ -141,7 +141,7 @@ public class DisasterReportService : IDisasterReportService
             {
                 // You can choose to replace or add photos here
                 // Example: Add new photos
-                var photoResult = await _reportPhotoService.UploadReportPhotosAsync(report.Id, dto.Files);
+                var photoResult = await _reportPhotoService.UploadReportPhotosAsync(report.Id, dto.Files, dto.NewPhotoDescriptions );
                 if (!photoResult.IsSuccess)
                     throw new Exception(photoResult.Message);
             }

@@ -9,6 +9,7 @@ namespace DisasterManagementSystem_Services.Models
     public class UploadPhotoResultDTO
     {
         public int Id { get; set; }
+        public string? Description { get; set; }
         public string FilePath { get; set; } = null!;
         public string FileType { get; set; } = null!;
         public long? FileSize { get; set; }

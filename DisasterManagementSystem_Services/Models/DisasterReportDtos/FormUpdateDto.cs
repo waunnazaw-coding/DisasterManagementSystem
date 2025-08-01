@@ -23,5 +23,6 @@ namespace DisasterManagementSystem_Services.Models
 
         // ---------- ReportPhoto ----------
         public IFormFile[]? Files { get; set; }
+        public List<string> NewPhotoDescriptions { get; set; }
     }
 }

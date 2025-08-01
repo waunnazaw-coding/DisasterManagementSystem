@@ -7,6 +7,8 @@ public partial class ReportPhoto
 {
     public int Id { get; set; }
 
+    public string? Description { get; set; }
+
     public int? DisasterEventId { get; set; }
 
     public int? DisasterReportId { get; set; }
