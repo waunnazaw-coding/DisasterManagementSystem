@@ -51,6 +51,53 @@ namespace DisasterManagementSystem_Services.Services.Implements
 
             return MapToDto(created);
         }
+        public async Task NotifyAdminsForNewDonation(Donation donation)
+        {
+            try
+            {
+                var admins = await _userRepo.GetUsersByRoleAsync("Admin");
+                var donorName = donation.DonorUser?.Name ?? "Anonymous";
+                var message = $"New donation received: {donation.Type} from {donorName}";
+
+                foreach (var admin in admins)
+                {
+                    await CreateNotificationAsync(new CreateNotificationDto
+                    {
+                        UserId = admin.Id,
+                        Message = message,
+                        Type = "Donation",
+                        RelatedEntityId = donation.Id,
+                        Status = "New"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error notifying admins about new donation");
+            }
+        }
+        public async Task NotifyDonorAboutStatusChange(Donation donation)
+        {
+            try
+            {
+                if (!donation.DonorUserId.HasValue) return;
+
+                var message = $"Your donation ({donation.Type}) has been {donation.Status.ToLower()}";
+
+                await CreateNotificationAsync(new CreateNotificationDto
+                {
+                    UserId = donation.DonorUserId.Value,
+                    Message = message,
+                    Type = "Donation",
+                    RelatedEntityId = donation.Id,
+                    Status = donation.Status
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error notifying donor about status change");
+            }
+        }
 
         public async Task NotifyAdminsForNewReport(Guid userId, int reportId, string reportTitle)
         {

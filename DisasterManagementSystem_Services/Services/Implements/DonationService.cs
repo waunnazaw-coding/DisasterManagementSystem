@@ -2,6 +2,7 @@
 using DisasterManagementSystem_Data.Repositories.Interfaces;
 using DisasterManagementSystem_Services.Models;
 using DisasterManagementSystem_Services.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +14,19 @@ namespace DisasterManagementSystem_Services.Services.Implements
     {
         private readonly IDonationRepository _donationRepository;
         private readonly IUserRepository _userRepository;
+        private readonly INotificationService _notificationService;
+        private readonly ILogger<DonationService> _logger;
 
-        public DonationService(IDonationRepository donationRepository, IUserRepository userRepository)
+        public DonationService(
+         IDonationRepository donationRepository,
+         IUserRepository userRepository,
+         INotificationService notificationService,
+         ILogger<DonationService> logger)
         {
             _donationRepository = donationRepository;
             _userRepository = userRepository;
+            _notificationService = notificationService;
+            _logger = logger;
         }
 
         public async Task<Result<DonationDto>> CreateDonationAsync(CreateDonationDto donationDto, Guid userId)
@@ -96,6 +105,8 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 // Save to database
                 var createdDonation = await _donationRepository.CreateAsync(donation);
 
+                // Notify admins about new donation
+                await _notificationService.NotifyAdminsForNewDonation(createdDonation);
                 // Create response DTO
                 var donationDtoResponse = new DonationDto
                 {
@@ -251,6 +262,12 @@ namespace DisasterManagementSystem_Services.Services.Implements
 
                 // Save changes
                 await _donationRepository.UpdateAsync(donation);
+
+                // Notify donor about status change
+                if (donation.DonorUserId.HasValue && donation.Status != "Pending")
+                {
+                    await _notificationService.NotifyDonorAboutStatusChange(donation);
+                }
 
                 // Create response DTO
                 var donationDto = new DonationDto

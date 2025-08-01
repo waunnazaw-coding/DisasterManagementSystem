@@ -210,16 +210,14 @@ namespace DisasterManagementSystem_Services.Services.Implements
             }
         }
 
-        public async Task<Result<AssistanceRequestDto>> UpdateRequestAsync(
-         int id,
-         UpdateAssistanceRequestDto updateDto,
-         Guid userId)
+     
+     public async Task<Result<AssistanceRequestDto>> UpdateRequestAsync(
+    int id,
+    UpdateAssistanceRequestDto updateDto,
+    Guid userId)
         {
             try
             {
-             
-              
-
                 // Get existing request
                 var existingRequest = await _requestRepository.GetByIdAsync(id);
                 if (existingRequest == null)
@@ -233,22 +231,28 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 if (existingRequest.Status != "Pending")
                     return Result<AssistanceRequestDto>.ValidationError("Only pending requests can be modified");
 
-                // Validate references
-                if (updateDto.LocationId.HasValue && updateDto.LocationId.Value != 0)
+                // Validate references only if they're being changed
+                if (updateDto.LocationId.HasValue &&
+                    updateDto.LocationId.Value != existingRequest.LocationId)
                 {
                     if (!await _locationRepository.ExistsAsync(updateDto.LocationId.Value))
                         return Result<AssistanceRequestDto>.ValidationError("Invalid location reference");
                 }
 
-                if (updateDto.DisasterEventId.HasValue)
+                if (updateDto.DisasterEventId.HasValue &&
+                    updateDto.DisasterEventId.Value != existingRequest.DisasterEventId)
                 {
                     if (!await _disasterEventRepository.ExistsAsync(updateDto.DisasterEventId.Value))
                         return Result<AssistanceRequestDto>.ValidationError("Invalid disaster event reference");
                 }
 
                 // Apply updates
-                existingRequest.DisasterEventId = updateDto.DisasterEventId;
-                existingRequest.LocationId = updateDto.LocationId == 0 ? null : updateDto.LocationId;
+                if (updateDto.DisasterEventId.HasValue)
+                    existingRequest.DisasterEventId = updateDto.DisasterEventId;
+
+                if (updateDto.LocationId.HasValue)
+                    existingRequest.LocationId = updateDto.LocationId;
+
                 existingRequest.SupportType = updateDto.SupportType;
                 existingRequest.Quantity = updateDto.Quantity;
                 existingRequest.Unit = updateDto.Unit;
@@ -282,7 +286,6 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 return Result<AssistanceRequestDto>.Failure("Error updating request");
             }
         }
-
         public async Task<Result<bool>> DeleteRequestAsync(int id, Guid userId)
         {
             try
@@ -434,6 +437,33 @@ namespace DisasterManagementSystem_Services.Services.Implements
             catch (Exception ex)
             {
                 return Result<List<AssistanceRequestDto>>.Failure($"Error retrieving requests by status: {ex.Message}");
+            }
+        }
+
+
+        // In AssistanceRequestService.cs
+        public async Task<Result<RequestStatsDto>> GetRequestStatsAsync()
+        {
+            try
+            {
+                var requests = await _requestRepository.GetAllAsync();
+
+                var stats = new RequestStatsDto
+                {
+                    TotalCount = requests.Count(),
+                    PendingCount = requests.Count(r => r.Status == "Pending"),
+                    ApprovedCount = requests.Count(r => r.Status == "Approved"),
+                    //InProgressCount = requests.Count(r => r.Status == "InProgress"),
+                    FulfilledCount = requests.Count(r => r.Status == "Fulfilled"),
+                    RejectedCount = requests.Count(r => r.Status == "Rejected")
+                };
+
+                return Result<RequestStatsDto>.Success(stats);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting request statistics");
+                return Result<RequestStatsDto>.Failure("Error getting request statistics");
             }
         }
 

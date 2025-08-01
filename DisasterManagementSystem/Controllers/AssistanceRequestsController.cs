@@ -72,6 +72,9 @@ namespace DisasterManagementSystem_Api.Controllers
             if (!Guid.TryParse(userIdClaim, out Guid userId))
                 return Results.Unauthorized();
 
+            // Ensure the DTO has the ID from the route
+            if (requestDto == null) requestDto = new UpdateAssistanceRequestDto();
+
             var result = await _requestService.UpdateRequestAsync(id, requestDto, userId);
             return result.Execute();
         }
@@ -113,6 +116,14 @@ namespace DisasterManagementSystem_Api.Controllers
         public async Task<IResult> GetRequestsByStatus(string status)
         {
             var result = await _requestService.GetRequestsByStatusAsync(status);
+            return result.Execute();
+        }
+        // In AssistanceRequestsController.cs
+        [HttpGet("stats")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IResult> GetRequestStats()
+        {
+            var result = await _requestService.GetRequestStatsAsync();
             return result.Execute();
         }
 

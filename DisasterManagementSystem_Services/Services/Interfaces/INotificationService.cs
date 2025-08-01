@@ -1,4 +1,5 @@
-﻿using DisasterManagementSystem_Services.Models.NotificationDto.cs;
+﻿using DisasterManagementSystem_Data.Models;
+using DisasterManagementSystem_Services.Models.NotificationDto.cs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,5 +18,7 @@ namespace DisasterManagementSystem_Services.Services.Interfaces
         Task NotifyUserForReportUpdate(Guid userId, int reportId, string reportTitle, string status);
         Task NotifyAdminsForNewRequest(Guid userId, int requestId, string requestType);
         Task NotifyUserForRequestUpdate(Guid userId, int requestId, string requestType, string status);
+        Task NotifyAdminsForNewDonation(Donation donation);
+        Task NotifyDonorAboutStatusChange(Donation donation);
     }
 }
