@@ -453,7 +453,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     TotalCount = requests.Count(),
                     PendingCount = requests.Count(r => r.Status == "Pending"),
                     ApprovedCount = requests.Count(r => r.Status == "Approved"),
-                    //InProgressCount = requests.Count(r => r.Status == "InProgress"),
+                    InProgressCount = requests.Count(r => r.Status == "InProgress"),
                     FulfilledCount = requests.Count(r => r.Status == "Fulfilled"),
                     RejectedCount = requests.Count(r => r.Status == "Rejected")
                 };
