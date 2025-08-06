@@ -38,9 +38,11 @@ namespace DisasterManagementSystem_Api.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IResult> GetAllRequests()
+        public async Task<IResult> GetAllRequests([FromQuery] bool includeAssignments = false)
         {
-            var result = await _requestService.GetAllRequestsAsync();
+            var result = includeAssignments
+                ? await _requestService.GetAllRequestsWithAssignmentsAsync()
+                : await _requestService.GetAllRequestsAsync();
             return result.Execute();
         }
 

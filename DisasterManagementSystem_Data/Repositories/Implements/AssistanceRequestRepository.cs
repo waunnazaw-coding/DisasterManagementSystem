@@ -155,5 +155,20 @@ namespace DisasterManagementSystem_Data.Repositories
             if (!disasterEventId.HasValue) return null;
             return await _context.DisasterEvents.FindAsync(disasterEventId.Value);
         }
+        // Add this method to your AssistanceRequestRepository
+        public async Task<IEnumerable<AssistanceRequest>> GetAllWithAssignmentsAsync()
+        {
+            return await _context.AssistanceRequests
+                .Include(r => r.DisasterEvent)
+                .Include(r => r.User)
+                .Include(r => r.Location)
+                .Include(r => r.DisasterReport)
+                .Include(r => r.RequestAssignments)
+                    .ThenInclude(a => a.AssignedByNavigation) // This is the correct navigation property
+                .Include(r => r.RequestAssignments)
+                    .ThenInclude(a => a.ReliefTeam)
+                .AsNoTracking()
+                .ToListAsync();
+        }
     }
 }

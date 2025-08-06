@@ -47,5 +47,24 @@ namespace DisasterManagementSystem_Services.Hubs
 
             await base.OnDisconnectedAsync(exception);
         }
+
+
+        public async Task JoinTeam(int teamId)
+        {
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"Team-{teamId}");
+            }
+        }
+
+        public async Task LeaveTeam(int teamId)
+        {
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"Team-{teamId}");
+            }
+        }
     }
 }

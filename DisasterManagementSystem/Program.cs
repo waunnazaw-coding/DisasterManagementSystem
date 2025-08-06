@@ -84,6 +84,8 @@ builder.Services.AddScoped<IAssistanceRequestRepository, AssistanceRequestReposi
 builder.Services.AddScoped<IlocationRepository,LocationRepository>();
 builder.Services.AddScoped<IDisasterEventRepository, DisasterEventRepository>();
 builder.Services.AddScoped<IDisasterEventRepository, DisasterEventRepository>();
+builder.Services.AddScoped<IReliefTeamRepository, ReliefTeamRepository>();
+builder.Services.AddScoped<IRequestAssignmentRepository, RequestAssignmentRepository>();    
 builder.AddDomain();
 
 

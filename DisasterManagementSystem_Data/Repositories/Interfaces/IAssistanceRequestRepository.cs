@@ -19,6 +19,7 @@ namespace DisasterManagementSystem_Data.Repositories
         Task<IEnumerable<AssistanceRequest>> GetByStatusAsync(string status);
         Task LoadRelatedEntitiesAsync(AssistanceRequest request);
         Task<DisasterEvent?> GetDisasterEventAsync(int? disasterEventId);
+        Task<IEnumerable<AssistanceRequest>> GetAllWithAssignmentsAsync();
     }
 }
 

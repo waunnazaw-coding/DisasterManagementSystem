@@ -21,5 +21,7 @@ namespace DisasterManagementSystem_Services.Services.Interfaces
         Task<Result<List<AssistanceRequestDto>>> GetRequestsByDisasterAsync(int disasterEventId);
         Task<Result<List<AssistanceRequestDto>>> GetRequestsByStatusAsync(string status);
         Task<Result<RequestStatsDto>> GetRequestStatsAsync();
+
+        Task<Result<List<AssistanceRequestDto>>> GetAllRequestsWithAssignmentsAsync();
     }
 }

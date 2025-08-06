@@ -467,6 +467,50 @@ namespace DisasterManagementSystem_Services.Services.Implements
             }
         }
 
+        public async Task<Result<List<AssistanceRequestDto>>> GetAllRequestsWithAssignmentsAsync()
+        {
+            try
+            {
+                var requests = await _requestRepository.GetAllWithAssignmentsAsync();
+                var requestDtos = new List<AssistanceRequestDto>();
+
+                foreach (var request in requests)
+                {
+                    var user = request.UserId.HasValue
+                        ? await _userRepository.GetByIdAsync(request.UserId.Value)
+                        : null;
+
+                    var requestDto = MapToDto(request, user);
+
+                    // Always include assignments array, even if empty
+                    requestDto.Assignments = request.RequestAssignments?.Select(a => new RequestAssignmentDto
+                    {
+                        Id = a.Id,
+                        AssistanceRequestId = a.AssistanceRequestId,
+                        ReliefTeamId = a.ReliefTeamId,
+                        ReliefTeamName = a.ReliefTeam?.Name,
+                        AssignedById = a.AssignedBy,
+                        AssignedByName = a.AssignedByNavigation?.Name,
+                        AssignedAt = a.AssignedAt,
+                        Status = a.Status,
+                        Priority = a.Priority,
+                        Notes = a.Notes,
+                        CompletedAt = a.CompletedAt,
+                        LastUpdatedById = a.LastUpdatedBy,
+                        UpdatedAt = a.UpdatedAt
+                    }).ToList() ?? new List<RequestAssignmentDto>();
+
+                    requestDtos.Add(requestDto);
+                }
+
+                return Result<List<AssistanceRequestDto>>.Success(requestDtos);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting requests with assignments");
+                return Result<List<AssistanceRequestDto>>.Failure("Error getting requests with assignments");
+            }
+        }
         private AssistanceRequestDto MapToDto(AssistanceRequest request, User user)
         {
             return new AssistanceRequestDto

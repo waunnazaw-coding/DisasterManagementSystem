@@ -2,6 +2,7 @@
 using DisasterManagementSystem_Data.Repositories.Implements;
 using DisasterManagementSystem_Data.Repositories.Interfaces;
 using DisasterManagementSystem_Services.Services.Implements;
+using DisasterManagementSystem_Services.Services.Implements.DisasterManagementSystem_Services.Services.Implements;
 using DisasterManagementSystem_Services.Services.Interfaces;
 using log4net.Appender;
 using Microsoft.AspNetCore.Builder;
@@ -25,6 +26,8 @@ namespace DisasterManagementSystem_Services.Services
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<IAssistanceRequestService, AssistanceRequestService>();
             builder.Services.AddScoped<IDisasterEventService, DisasterEventService>();
+            builder.Services.AddScoped<IReliefTeamService, ReliefTeamService>();
+            builder.Services.AddScoped<IRequestAssignmentService, RequestAssignmentService>();
         }
     }
 }

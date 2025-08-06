@@ -1,9 +1,12 @@
 ﻿using DisasterManagementSystem_Data.Models;
+using DisasterManagementSystem_Data.Repositories;
+using DisasterManagementSystem_Data.Repositories.Implements;
 using DisasterManagementSystem_Data.Repositories.Interfaces;
 using DisasterManagementSystem_Services.Hubs;
 using DisasterManagementSystem_Services.Models.NotificationDto.cs;
 using DisasterManagementSystem_Services.Services.Interfaces;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -17,19 +20,28 @@ namespace DisasterManagementSystem_Services.Services.Implements
     {
         private readonly INotificationRepository _notificationRepo;
         private readonly IUserRepository _userRepo;
+        private readonly IAssistanceRequestRepository _requestRepository;
+        private readonly IReliefTeamRepository _reliefTeamRepository;
         private readonly IHubContext<NotificationHub> _hubContext;
         private readonly ILogger<NotificationService> _logger;
+        private readonly AppDbContext _context;
 
         public NotificationService(
             INotificationRepository notificationRepo,
             IUserRepository userRepo,
+            IAssistanceRequestRepository requestRepository,
+            IReliefTeamRepository reliefTeamRepository,
             IHubContext<NotificationHub> hubContext,
-            ILogger<NotificationService> logger)
+            ILogger<NotificationService> logger,
+            AppDbContext context)
         {
-            _notificationRepo = notificationRepo;
-            _userRepo = userRepo;
-            _hubContext = hubContext;
-            _logger = logger;
+            _notificationRepo = notificationRepo ?? throw new ArgumentNullException(nameof(notificationRepo));
+            _userRepo = userRepo ?? throw new ArgumentNullException(nameof(userRepo));
+            _requestRepository = requestRepository ?? throw new ArgumentNullException(nameof(requestRepository));
+            _reliefTeamRepository = reliefTeamRepository ?? throw new ArgumentNullException(nameof(reliefTeamRepository));
+            _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
         public async Task<NotificationDto> CreateNotificationAsync(CreateNotificationDto dto)
         {
@@ -198,7 +210,117 @@ namespace DisasterManagementSystem_Services.Services.Implements
             var notification = await _notificationRepo.MarkAsReadAsync(notificationId);
             return notification != null ? MapToDto(notification) : null;
         }
+        public async Task NotifyReliefTeamAboutAssignment(int reliefTeamId, int requestId, Guid assignedByUserId)
+        {
+            try
+            {
+                // Get request details
+                var request = await _requestRepository.GetByIdAsync(requestId);
+                if (request == null)
+                {
+                    _logger.LogError("Request {RequestId} not found", requestId);
+                    return;
+                }
 
+                // Get assigner details
+                var assigner = await _userRepo.GetByIdAsync(assignedByUserId);
+                var assignerName = assigner?.Name ?? "System Admin";
+
+                // Get relief team details
+                var reliefTeam = await _reliefTeamRepository.GetByIdAsync(reliefTeamId);
+                if (reliefTeam == null)
+                {
+                    _logger.LogError("Relief team {ReliefTeamId} not found", reliefTeamId);
+                    return;
+                }
+
+                if (!reliefTeam.UserId.HasValue)
+                {
+                    _logger.LogWarning("Relief team {ReliefTeamId} has no associated user", reliefTeamId);
+                    return;
+                }
+
+                var message = $"New request assigned to your team: {request.SupportType} " +
+                             $"(Priority: {request.Priority}) by {assignerName}";
+
+                // Create notification for the relief team's user
+                try
+                {
+                    var notification = new Notification
+                    {
+                        UserId = reliefTeam.UserId.Value, // Send to relief team's user
+                        Message = message,
+                        Type = "TeamAssignment",
+                        RelatedEntityId = requestId,
+                        Status = "New",
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await _notificationRepo.AddAsync(notification);
+
+                    // Send real-time notification to relief team's user
+                    await _hubContext.Clients.User(reliefTeam.UserId.Value.ToString())
+                        .SendAsync("ReceiveNotification", new
+                        {
+                            notification.Id,
+                            notification.Message,
+                            notification.Type,
+                            notification.RelatedEntityId,
+                            notification.CreatedAt
+                        });
+
+                    _logger.LogInformation("Notification created for relief team user {UserId}", reliefTeam.UserId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error notifying relief team user {UserId}", reliefTeam.UserId);
+                }
+
+                // Optional: Also notify individual team members if needed
+                //var teamMembers = await _reliefTeamRepository.GetTeamMembersAsync(reliefTeamId);
+                //if (teamMembers != null && teamMembers.Any())
+                //{
+                //    foreach (var member in teamMembers)
+                //    {
+                //        try
+                //        {
+                //            // Skip if this is the relief team's main user (already notified)
+                //            if (member.Id == reliefTeam.UserId) continue;
+
+                //            var memberNotification = new Notification
+                //            {
+                //                UserId = member.Id,
+                //                Message = message,
+                //                Type = "TeamAssignment",
+                //                RelatedEntityId = requestId,
+                //                Status = "New",
+                //                CreatedAt = DateTime.UtcNow
+                //            };
+
+                //            await _notificationRepo.AddAsync(memberNotification);
+
+                //            await _hubContext.Clients.User(member.Id.ToString())
+                //                .SendAsync("ReceiveNotification", new
+                //                {
+                //                    memberNotification.Id,
+                //                    memberNotification.Message,
+                //                    memberNotification.Type,
+                //                    memberNotification.RelatedEntityId,
+                //                    memberNotification.CreatedAt
+                //                });
+                //        }
+                //        catch (Exception ex)
+                //        {
+                //            _logger.LogError(ex, "Error notifying team member {UserId}", member.Id);
+                //        }
+                //    }
+                //}
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error notifying relief team about assignment");
+            }
+        }
         public async Task<int> GetUnreadCountAsync(Guid userId)
         {
             return await _notificationRepo.GetUnreadCountAsync(userId);

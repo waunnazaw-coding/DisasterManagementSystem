@@ -81,5 +81,7 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
                 .Where(u => u.Role == role)
                 .ToListAsync();
         }
+
+        
     }
 }

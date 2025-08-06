@@ -20,5 +20,7 @@ namespace DisasterManagementSystem_Services.Services.Interfaces
         Task NotifyUserForRequestUpdate(Guid userId, int requestId, string requestType, string status);
         Task NotifyAdminsForNewDonation(Donation donation);
         Task NotifyDonorAboutStatusChange(Donation donation);
+
+        Task NotifyReliefTeamAboutAssignment(int reliefTeamId, int requestId, Guid assignedByUserId);
     }
 }

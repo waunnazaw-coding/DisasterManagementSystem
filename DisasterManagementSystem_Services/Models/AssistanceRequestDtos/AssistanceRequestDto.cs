@@ -31,6 +31,7 @@ namespace DisasterManagementSystem_Services.Models.AssistanceRequestDtos
             public DateTime? CreatedAt { get; set; }
             public DateTime? UpdatedAt { get; set; }
             public DateTime? FulfilledAt { get; set; }
+            public List<RequestAssignmentDto> Assignments { get; set; } = new();
         }
     }
 }
