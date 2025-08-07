@@ -1,6 +1,7 @@
 ﻿using DisasterManagementSystem_Data.Models;
 using DisasterManagementSystem_Data.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace DisasterManagementSystem_Data.Repositories.Implements
 {
@@ -23,6 +24,22 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
         public async Task<User?> GetByRefreshTokenAsync(string refreshToken)
         {
             return await _context.Users.SingleOrDefaultAsync(u => u.RefreshToken == refreshToken);
+        }
+        
+        
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        public void Attach(User entity)
+        {
+            _context.Attach(entity);
+        }
+
+        public EntityEntry<User> Entry(User entity)
+        {
+            return _context.Entry(entity);
         }
 
         public async Task AddAsync(User user)

@@ -42,4 +42,6 @@ public partial class User
     public virtual ICollection<RequestAssignment> RequestAssignmentAssignedByNavigations { get; set; } = new List<RequestAssignment>();
 
     public virtual ICollection<RequestAssignment> RequestAssignmentLastUpdatedByNavigations { get; set; } = new List<RequestAssignment>();
+    
+    public virtual ICollection<UserReliefTeam> UserReliefTeams { get; set; } = new List<UserReliefTeam>();
 }
