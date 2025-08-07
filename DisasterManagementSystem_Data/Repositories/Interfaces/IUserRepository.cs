@@ -16,5 +16,11 @@ namespace DisasterManagementSystem_Data.Repositories.Interfaces
         Task<User?> GetByExternalIdAsync(string externalId, string authProvider);
        Task<List<User>> GetUsersByRoleAsync(string role);
 
+        Task DeleteAsync(User user);
+        Task<int> CountAsync(string search = null, string role = null, string status = null);
+        Task<IEnumerable<User>> GetAllAsync(); // Add this line
+
+        // IUserRepository.cs
+        Task<IEnumerable<User>> GetPaginatedAsync(int skip, int take, string search = null, string role = null, string status = null);
     }
 }

@@ -28,6 +28,7 @@ namespace DisasterManagementSystem_Services.Services
             builder.Services.AddScoped<IDisasterEventService, DisasterEventService>();
             builder.Services.AddScoped<IReliefTeamService, ReliefTeamService>();
             builder.Services.AddScoped<IRequestAssignmentService, RequestAssignmentService>();
+            builder.Services.AddScoped<IUserService, UserService>();
         }
     }
 }
