@@ -2,5 +2,5 @@
 
 public class OperationResponseDto
 {
-    
+    public string Message { get; set; } = string.Empty;
 }

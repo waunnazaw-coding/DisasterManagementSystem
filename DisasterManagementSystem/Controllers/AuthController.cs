@@ -39,8 +39,19 @@ namespace DisasterManagementSystem_Api.Controllers
             var result = await _authService.LoginAsync(model);
             return result.Execute();
         }
-        
-        
+
+
+        [HttpPost("refresh-token")]
+        public async Task<IResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return Results.BadRequest(ModelState);
+
+            var result = await _authService.RefreshTokenAsync(request.AccessToken, request.RefreshToken);
+            return result.Execute();
+        }
+
+
         // Admin invite endpoint - only Admins should call this
         [HttpPost("admin-invite")]
         //[Authorize(Roles = "Admin,SysAdmin")]

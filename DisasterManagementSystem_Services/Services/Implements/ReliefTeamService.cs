@@ -91,7 +91,7 @@ public class ReliefTeamService : IReliefTeamService
 
             // Generate reset/set password token (valid 24h)
             var token = _jwtService.GenerateToken(user.Id, user.Role, TimeSpan.FromHours(24));
-            var resetUrl = $"http://localhost:5137/reset-password?token={token}";
+            var resetUrl = $"http://localhost:5173/reset-password?token={token}";
 
             var subject = "Relief Team Invitation - Set Your Password";
             var body = $@"
@@ -130,4 +130,125 @@ public class ReliefTeamService : IReliefTeamService
             return Result<ReliefTeamResponseDTO>.Failure($"Failed to create relief team: {ex.Message}");
         }
     }
+    
+     public async Task<Result<List<ReliefTeamResponseDTO>>> GetAllAsync()
+        {
+            try
+            {
+                var teams = await _reliefTeamRepository.GetAllAsync();
+                var dtos = teams.Select(t => new ReliefTeamResponseDTO
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    ContactInfo = t.ContactInfo,
+                    LocationId = t.LocationId,
+                    Address = t.Address,
+                    Status = t.Status,
+                    TeamLeaderName = t.TeamLeaderName,
+                    SocialMediaURL = t.SocialMediaUrl,
+                    Email = t.Email,
+                    Phone = t.Phone,
+                    NumberOfMembers = t.NumberOfMembers,
+                    Specialization = t.Specialization,
+                    EquipmentDetails = t.EquipmentDetails,
+                    EstablishedDate = t.EstablishedDate,
+                    CreatedAt = t.CreatedAt,
+                    UpdatedAt = t.UpdatedAt
+                }).ToList();
+
+                return Result<List<ReliefTeamResponseDTO>>.Success(dtos);
+            }
+            catch (Exception ex)
+            {
+                return Result<List<ReliefTeamResponseDTO>>.Failure($"Error getting relief teams: {ex.Message}");
+            }
+        }
+
+        public async Task<Result<ReliefTeamResponseDTO>> GetByIdAsync(int id)
+        {
+            try
+            {
+                var team = await _reliefTeamRepository.GetByIdAsync(id);
+                if (team == null)
+                    return Result<ReliefTeamResponseDTO>.NotFoundError("Relief team not found.");
+
+                var dto = new ReliefTeamResponseDTO
+                {
+                    Id = team.Id,
+                    Name = team.Name,
+                    ContactInfo = team.ContactInfo,
+                    LocationId = team.LocationId,
+                    Address = team.Address,
+                    Status = team.Status,
+                    TeamLeaderName = team.TeamLeaderName,
+                    SocialMediaURL = team.SocialMediaUrl,
+                    Email = team.Email,
+                    Phone = team.Phone,
+                    NumberOfMembers = team.NumberOfMembers,
+                    Specialization = team.Specialization,
+                    EquipmentDetails = team.EquipmentDetails,
+                    EstablishedDate = team.EstablishedDate,
+                    CreatedAt = team.CreatedAt,
+                    UpdatedAt = team.UpdatedAt
+                };
+
+                return Result<ReliefTeamResponseDTO>.Success(dto);
+            }
+            catch (Exception ex)
+            {
+                return Result<ReliefTeamResponseDTO>.Failure($"Error retrieving relief team: {ex.Message}");
+            }
+        }
+        
+        public async Task<Result<OperationResponseDto>> UpdateAsync(int id, UpdateReliefTeamRequestDto dto)
+        {
+            try
+            {
+                var team = await _reliefTeamRepository.GetByIdAsync(id);
+                if (team == null)
+                    return Result<OperationResponseDto>.NotFoundError("Relief team not found.");
+
+                // Update properties
+                team.Name = dto.Name;
+                team.Email = dto.Email;
+                team.ContactInfo = dto.ContactInfo;
+                //team.LocationId = dto.LocationId;
+                team.Address = dto.Address;
+                team.Status = dto.Status ?? team.Status;
+                team.TeamLeaderName = dto.TeamLeaderName;
+                team.SocialMediaUrl = dto.SocialMediaURL;
+                team.Phone = dto.Phone;
+                team.NumberOfMembers = dto.NumberOfMembers;
+                team.Specialization = dto.Specialization;
+                team.EquipmentDetails = dto.EquipmentDetails;
+                team.EstablishedDate = dto.EstablishedDate;
+                team.UpdatedAt = DateTime.UtcNow;
+
+                await _reliefTeamRepository.UpdateAsync(team);
+
+                return Result<OperationResponseDto>.Success(new OperationResponseDto { Message = "Relief team updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return Result<OperationResponseDto>.Failure($"Error updating relief team: {ex.Message}");
+            }
+        }
+
+        public async Task<Result<OperationResponseDto>> DeleteAsync(int id)
+        {
+            try
+            {
+                var team = await _reliefTeamRepository.GetByIdAsync(id);
+                if (team == null)
+                    return Result<OperationResponseDto>.NotFoundError("Relief team not found.");
+
+                await _reliefTeamRepository.DeleteAsync(team);
+                return Result<OperationResponseDto>.Success(new OperationResponseDto { Message = "Relief team deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return Result<OperationResponseDto>.Failure($"Error deleting relief team: {ex.Message}");
+            }
+        }
+
 }

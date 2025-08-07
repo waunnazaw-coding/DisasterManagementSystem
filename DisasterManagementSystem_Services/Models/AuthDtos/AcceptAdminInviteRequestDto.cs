@@ -2,7 +2,7 @@
 
 public class AcceptAdminInviteRequestDto
 {
-    public string Email { get; set; } = default!;
-    public string Token { get; set; } = default!;
-    public string NewPassword { get; set; } = default!;
+    public string Email { get; set; } 
+    public string Token { get; set; } 
+    public string NewPassword { get; set; }
 }

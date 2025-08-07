@@ -4,9 +4,10 @@ namespace DisasterManagementSystem_Data.Repositories.Interfaces;
 
 public interface IReliefTeamRepository
 {
+    Task AddAsync(ReliefTeam entity);
+    Task<IEnumerable<ReliefTeam>> GetAllAsync();
     Task<ReliefTeam?> GetByIdAsync(int id);
-    Task<ReliefTeam?> GetByEmailAsync(string email);
-    Task AddAsync(ReliefTeam team);
-    void Update(ReliefTeam team);
+    Task UpdateAsync(ReliefTeam entity);
+    Task DeleteAsync(ReliefTeam entity);
     Task SaveChangesAsync();
 }
