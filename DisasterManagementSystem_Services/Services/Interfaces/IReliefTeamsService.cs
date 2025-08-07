@@ -3,7 +3,7 @@ using DisasterManagementSystem_Services.Models.ReliefTeamDtos;
 
 namespace DisasterManagementSystem_Services.Services.Interfaces;
 
-public interface IReliefTeamService
+public interface IReliefTeamsService
 {
     Task<Result<ReliefTeamResponseDTO>>  CreateReliefTeamAndInviteAsync(CreateReliefTeamRequestDto dto);
     Task<Result<List<ReliefTeamResponseDTO>>> GetAllAsync();

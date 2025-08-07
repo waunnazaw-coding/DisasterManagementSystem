@@ -2,7 +2,7 @@
 
 namespace DisasterManagementSystem_Data.Repositories.Interfaces;
 
-public interface IReliefTeamRepository
+public interface IReliefTeamsRepository
 {
     Task AddAsync(ReliefTeam entity);
     Task<IEnumerable<ReliefTeam>> GetAllAsync();

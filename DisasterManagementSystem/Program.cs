@@ -105,7 +105,7 @@ builder.Services.AddScoped<IDisasterReportRepository, DisasterReportRepository>(
 builder.Services.AddScoped<IDisasterTypeRepository, DisasterTypeRepository>();
 
 builder.Services.AddScoped<IUserReliefTeamRepository, UserReliefTeamRepository>();
-builder.Services.AddScoped<IReliefTeamRepository, ReliefTeamRepository>();
+builder.Services.AddScoped<IReliefTeamsRepository, ReliefTeamsRepository>();
 
 
 builder.AddDomain();

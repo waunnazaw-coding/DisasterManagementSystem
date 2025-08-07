@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 using DisasterManagementSystem_Data.Repositories;
 using DisasterManagementSystem_Services.Services.Interfaces;
 
-public class ReliefTeamService : IReliefTeamService
+public class ReliefTeamsService : IReliefTeamsService
 {
     private readonly IUserRepository _userRepository;
-    private readonly IReliefTeamRepository _reliefTeamRepository;
+    private readonly IReliefTeamsRepository _reliefTeamRepository;
     private readonly IUserReliefTeamRepository _userReliefTeamRepository;
     private readonly IJwtService _jwtService;
     private readonly IEmailSenderService _emailSender;
 
-    public ReliefTeamService(
+    public ReliefTeamsService(
         IUserRepository userRepository,
-        IReliefTeamRepository reliefTeamRepository,
+        IReliefTeamsRepository reliefTeamRepository,
         IUserReliefTeamRepository userReliefTeamRepository,
         IJwtService jwtService,
         IEmailSenderService emailSender)

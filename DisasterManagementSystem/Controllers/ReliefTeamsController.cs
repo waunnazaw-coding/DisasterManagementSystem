@@ -8,9 +8,9 @@ using DisasterManagementSystem_Services.Services.Interfaces;
 [Route("api/[controller]")]
 public class ReliefTeamController : ControllerBase
 {
-    private readonly IReliefTeamService _reliefTeamService;
+    private readonly IReliefTeamsService _reliefTeamService;
 
-    public ReliefTeamController(IReliefTeamService reliefTeamService)
+    public ReliefTeamController(IReliefTeamsService reliefTeamService)
     {
         _reliefTeamService = reliefTeamService;
     }

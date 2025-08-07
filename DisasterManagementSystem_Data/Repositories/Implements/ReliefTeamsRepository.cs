@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DisasterManagementSystem_Data.Repositories.Implements
 {
-    public class ReliefTeamRepository : IReliefTeamRepository
+    public class ReliefTeamsRepository : IReliefTeamsRepository
     {
         private readonly AppDbContext _context;
 
-        public ReliefTeamRepository(AppDbContext context)
+        public ReliefTeamsRepository(AppDbContext context)
         {
             _context = context;
         }
