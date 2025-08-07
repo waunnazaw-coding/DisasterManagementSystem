@@ -41,4 +41,9 @@ public class DisasterReportRepository : IDisasterReportRepository
             throw new KeyNotFoundException($"DisasterType with ID {id} not found.");
         }
     }
+    // In DisasterReportRepository.cs
+    public async Task<bool> ExistsAsync(int id)
+    {
+        return await _context.DisasterReports.AnyAsync(r => r.Id == id);
+    }
 }

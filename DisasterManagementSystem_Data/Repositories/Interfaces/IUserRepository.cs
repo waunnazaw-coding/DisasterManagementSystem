@@ -14,5 +14,7 @@ namespace DisasterManagementSystem_Data.Repositories.Interfaces
         Task<User> GetMeAsync(Guid userId);
         // New method for social login
         Task<User?> GetByExternalIdAsync(string externalId, string authProvider);
+       Task<List<User>> GetUsersByRoleAsync(string role);
+
     }
 }

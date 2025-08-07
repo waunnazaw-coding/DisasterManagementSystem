@@ -1,16 +1,17 @@
 using DisasterManagementSystem_Data.Models;
-using DisasterManagementSystem_Services;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Text;
+using DisasterManagementSystem_Data.Repositories;
 using DisasterManagementSystem_Data.Repositories.Implements;
 using DisasterManagementSystem_Data.Repositories.Interfaces;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
+using DisasterManagementSystem_Services.Hubs;
 using DisasterManagementSystem_Services.Models;
-using DisasterManagementSystem_Services.Services.Interfaces;
+using DisasterManagementSystem_Services.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json.Serialization;
 
 
@@ -34,7 +35,8 @@ builder.Services.AddCors(options =>
             .AllowCredentials(); // if you use cookies or credentials
     });
 });
-
+// Add SignalR
+builder.Services.AddSignalR();
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 
@@ -77,7 +79,13 @@ builder.Services.AddScoped<IDonationRepository, DonationRepository>();
 builder.Services.AddScoped<IlocationRepository, LocationRepository>();
 builder.Services.AddScoped<IDisasterReportRepository, DisasterReportRepository>();
 builder.Services.AddScoped<IDisasterTypeRepository, DisasterTypeRepository>();
-
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IAssistanceRequestRepository, AssistanceRequestRepository>();
+builder.Services.AddScoped<IlocationRepository,LocationRepository>();
+builder.Services.AddScoped<IDisasterEventRepository, DisasterEventRepository>();
+builder.Services.AddScoped<IDisasterEventRepository, DisasterEventRepository>();
+builder.Services.AddScoped<IReliefTeamRepository, ReliefTeamRepository>();
+builder.Services.AddScoped<IRequestAssignmentRepository, RequestAssignmentRepository>();    
 builder.AddDomain();
 
 
@@ -110,5 +118,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();

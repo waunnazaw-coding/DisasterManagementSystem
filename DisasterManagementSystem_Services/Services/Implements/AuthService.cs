@@ -74,6 +74,8 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 Id = user.Id,
                 Name = user.Name,
                 Email = user.Email,
+                CreatedAt=user.CreatedAt,
+                
                 // Profile = user.Profile // Uncomment if applicable
             };
 

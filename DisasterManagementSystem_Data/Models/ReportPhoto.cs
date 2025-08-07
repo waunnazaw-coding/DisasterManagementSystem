@@ -19,7 +19,7 @@ public partial class ReportPhoto
 
     public DateTime? UploadedAt { get; set; }
 
-    public virtual DisasterEvent DisasterEvent { get; set; } 
+    public virtual DisasterEvent? DisasterEvent { get; set; }
 
-    public virtual DisasterReport DisasterReport { get; set; } 
+    public virtual DisasterReport? DisasterReport { get; set; }
 }

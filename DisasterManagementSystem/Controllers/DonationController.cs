@@ -59,6 +59,56 @@ namespace DisasterManagementSystem_Api.Controllers
             return result.Execute();
         }
 
+        // New endpoint for updating donation status
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id}/status")]
+        public async Task<IResult> UpdateDonationStatus(int id, [FromBody] UpdateStatusDto statusDto)
+        {
+            if (!ModelState.IsValid)
+                return Results.BadRequest(ModelState);
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdClaim, out Guid userId))
+                return Results.Unauthorized();
+
+            var result = await _donationService.UpdateDonationStatusAsync(id, statusDto.Status, userId);
+            return result.Execute();
+        }
+
+        // New endpoint for updating donation by user
+        [HttpPut("{id}")]
+        public async Task<IResult> UpdateDonation(int id, [FromBody] UpdateDonationDto donationDto)
+        {
+            if (!ModelState.IsValid)
+                return Results.BadRequest(ModelState);
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdClaim, out Guid userId))
+                return Results.Unauthorized();
+
+            var result = await _donationService.UpdateDonationAsync(id, donationDto, userId);
+            return result.Execute();
+        }
+
+        // New endpoint for deleting donation by user
+        [HttpDelete("{id}")]
+        public async Task<IResult> DeleteDonation(int id)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdClaim, out Guid userId))
+                return Results.Unauthorized();
+
+            var result = await _donationService.DeleteDonationAsync(id, userId);
+            return result.Execute();
+        }
+        [HttpGet("recent")]
+        public async Task<IResult> GetRecentDonations()
+       {
+            var result = await _donationService.GetRecentDonationsAsync();
+            return result.Execute();
+        }
+
+
         //[Authorize(Roles = "Admin")]
         //[HttpPost("distribute")]
         ////public async Task<IResult> DistributeDonation([FromBody] DonationDistributionDto distributionDto)

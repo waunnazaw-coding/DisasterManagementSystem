@@ -26,7 +26,10 @@ public class LocationRepository : IlocationRepository
         _context.Entry(location).State = EntityState.Modified;
         return Task.CompletedTask;
     }
-
+    public async Task<bool> ExistsAsync(int id)
+    {
+        return await _context.DisasterReports.AnyAsync(r => r.Id == id);
+    }
 
     public async Task DeleteAsync(int id)
     {

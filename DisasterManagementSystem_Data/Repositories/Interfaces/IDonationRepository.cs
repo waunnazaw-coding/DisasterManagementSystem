@@ -15,5 +15,6 @@ namespace DisasterManagementSystem_Data.Repositories.Interfaces
         Task<List<Donation>> GetByUserIdAsync(Guid userId);
         Task UpdateAsync(Donation donation);
         Task<bool> DeleteAsync(int id);
+        Task<List<Donation>> GetRecentAsync();
     }
 }

@@ -73,5 +73,15 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
             return await _context.Users.SingleOrDefaultAsync(u =>
                 u.ExternalId == externalId && u.AuthProvider == authProvider);
         }
+
+
+        public async Task<List<User>> GetUsersByRoleAsync(string role)
+        {
+            return await _context.Users
+                .Where(u => u.Role == role)
+                .ToListAsync();
+        }
+
+        
     }
 }
