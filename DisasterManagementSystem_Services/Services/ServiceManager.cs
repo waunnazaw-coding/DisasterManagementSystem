@@ -32,6 +32,7 @@ namespace DisasterManagementSystem_Services.Services
 
             builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
             builder.Services.AddScoped<IReliefTeamsService, ReliefTeamsService>();
+            builder.Services.AddScoped<IReliefTeamActivityService, ReliefTeamActivityService>();
         }
     }
 }
