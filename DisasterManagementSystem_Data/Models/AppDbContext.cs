@@ -45,6 +45,14 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<User> Users { get; set; }
     
     public virtual DbSet<UserReliefTeam> UserReliefTeams { get; set; }
+    
+    public virtual DbSet<Resource> Resources { get; set; }
+    
+    public virtual DbSet<DisasterKnowledge> DisasterKnowledges { get; set; }
+    
+    public virtual DbSet<FinancialAllocation> FinancialAllocations { get; set; }
+    
+    public virtual DbSet<AllocationType> AllocationTypes { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -66,6 +74,14 @@ public partial class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AllocationType>(entity =>
+        {
+            entity.HasKey(e => e.AllocationTypeId).HasName("PK__Allocati__D797DE4307F78B1D");
+
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.Name).HasMaxLength(100);
+        });
+        
         modelBuilder.Entity<AssistanceRequest>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Assistan__3214EC077EEE1782");
@@ -109,6 +125,32 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK__Assistanc__UserI__693CA210");
         });
+        
+        modelBuilder.Entity<FinancialAllocation>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Financia__3214EC074AFABCBE");
+
+            entity.Property(e => e.AllocationDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Amount).HasColumnType("money");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
+            entity.Property(e => e.DetailDescription).HasMaxLength(1000);
+            entity.Property(e => e.DetailName).HasMaxLength(255);
+            entity.Property(e => e.Notes).HasMaxLength(255);
+
+            entity.HasOne(d => d.AllocationType).WithMany(p => p.FinancialAllocations)
+                .HasForeignKey(d => d.AllocationTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Financial__Alloc__756D6ECB");
+
+            entity.HasOne(d => d.Donation).WithMany(p => p.FinancialAllocations)
+                .HasForeignKey(d => d.DonationId)
+                .HasConstraintName("FK__Financial__Donat__74794A92");
+        });
 
         modelBuilder.Entity<DisasterEvent>(entity =>
         {
@@ -139,6 +181,41 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK__DisasterE__Locat__3D5E1FD2");
         });
 
+        modelBuilder.Entity<DisasterKnowledge>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Disaster__3214EC07FFDA8E10");
+
+            entity.ToTable("DisasterKnowledge");
+
+            entity.Property(e => e.ContentType).HasMaxLength(50);
+            entity.Property(e => e.DateCreated)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.DateUpdated)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.DisasterType).HasMaxLength(100);
+            entity.Property(e => e.Language).HasMaxLength(50);
+            entity.Property(e => e.ReferenceFrom).HasMaxLength(255);
+            entity.Property(e => e.Title).HasMaxLength(255);
+        });
+
+        modelBuilder.Entity<Resource>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Resource__3214EC071FDD38F7");
+
+            entity.Property(e => e.DateAdded)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.ResourceType).HasMaxLength(50);
+            entity.Property(e => e.Url).HasMaxLength(512);
+
+            entity.HasOne(d => d.DisasterKnowledge).WithMany(p => p.Resources)
+                .HasForeignKey(d => d.DisasterKnowledgeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Resources_DisasterKnowledge");
+        });
         modelBuilder.Entity<DisasterReport>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Disaster__3214EC0712CC2368");
@@ -203,7 +280,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasDefaultValue("Pending");
-            entity.Property(e => e.Type).HasMaxLength(50);
+           
             entity.Property(e => e.Unit).HasMaxLength(20);
 
             entity.HasOne(d => d.DonorUser).WithMany(p => p.Donations)

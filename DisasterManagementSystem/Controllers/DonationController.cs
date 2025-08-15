@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace DisasterManagementSystem_Api.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class DonationController : ControllerBase
@@ -76,6 +76,7 @@ namespace DisasterManagementSystem_Api.Controllers
         }
 
         // New endpoint for updating donation by user
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IResult> UpdateDonation(int id, [FromBody] UpdateDonationDto donationDto)
         {
@@ -91,6 +92,7 @@ namespace DisasterManagementSystem_Api.Controllers
         }
 
         // New endpoint for deleting donation by user
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IResult> DeleteDonation(int id)
         {
@@ -109,6 +111,21 @@ namespace DisasterManagementSystem_Api.Controllers
         }
 
 
+        /// GET api/donations/total-people-by-phone
+        [HttpGet("total-people")]
+        public async Task<IActionResult> GetTotalPeopleByPhone()
+        {
+            var totalPeople = await _donationService.GetTotalPeopleByPhoneAsync();
+            return Ok(new { TotalPeopleByPhone = totalPeople });
+        }
+
+        /// GET api/donations/total-amount-last-year
+        [HttpGet("total-amount")]
+        public async Task<IActionResult> GetTotalAmountLastYear()
+        {
+            var totalAmount = await _donationService.GetTotalAmountLastYearAsync();
+            return Ok(new { TotalAmountLastYear = totalAmount ?? 0 });
+        }
         //[Authorize(Roles = "Admin")]
         //[HttpPost("distribute")]
         ////public async Task<IResult> DistributeDonation([FromBody] DonationDistributionDto distributionDto)

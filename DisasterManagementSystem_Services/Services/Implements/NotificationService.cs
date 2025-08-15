@@ -69,7 +69,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
             {
                 var admins = await _userRepo.GetUsersByRoleAsync("Admin");
                 var donorName = donation.DonorUser?.Name ?? "Anonymous";
-                var message = $"New donation received: {donation.Type} from {donorName}";
+                var message = $"New donation received from {donorName}";
 
                 foreach (var admin in admins)
                 {
@@ -94,7 +94,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
             {
                 if (!donation.DonorUserId.HasValue) return;
 
-                var message = $"Your donation ({donation.Type}) has been {donation.Status.ToLower()}";
+                var message = $"Your donation  has been {donation.Status.ToLower()}";
 
                 await CreateNotificationAsync(new CreateNotificationDto
                 {

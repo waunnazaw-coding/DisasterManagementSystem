@@ -32,6 +32,13 @@ namespace DisasterManagementSystem_Services.Services
 
             builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
             builder.Services.AddScoped<IReliefTeamsService, ReliefTeamsService>();
+
+            builder.Services.AddScoped<IFinancialAllocationService, FinancialAllocationService>();
+            builder.Services.AddScoped<IReliefTeamService, ReliefTeamService>();
+            //builder.Services.AddScoped<IDisasterKnowledgeService, DisasterKnowledgeService>();
+
+            builder.Services.AddHttpContextAccessor(); // Important for IHttpContextAccessor
+            builder.Services.AddScoped<IUserContextService, UserContextService>();
         }
     }
 }

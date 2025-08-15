@@ -1,25 +1,26 @@
+using DisasterManagementSystem;
 using DisasterManagementSystem_Data.Models;
 using DisasterManagementSystem_Data.Repositories;
-using DisasterManagementSystem_Services;
-using Microsoft.EntityFrameworkCore;
-using System.Text;
 using DisasterManagementSystem_Data.Repositories.Implements;
 using DisasterManagementSystem_Data.Repositories.Interfaces;
+using DisasterManagementSystem_Services;
 using DisasterManagementSystem_Services.Hubs;
 using DisasterManagementSystem_Services.Models;
 using DisasterManagementSystem_Services.Services;
+using DisasterManagementSystem_Services.Services.Implements;
+using DisasterManagementSystem_Services.Services.Interfaces;
+using FluentEmail.MailKitSmtp;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using QuestPDF.Infrastructure;
 using System;
 using System.Security.Claims;
 using System.Text;
+using System.Text;
 using System.Text.Json.Serialization;
-using DisasterManagementSystem_Services.Services.Implements;
-using DisasterManagementSystem;
-using FluentEmail.MailKitSmtp;
-using DisasterManagementSystem_Services.Services.Interfaces;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -49,6 +50,9 @@ builder.Services
         User = emailSettings.SmtpUser,
         Password = emailSettings.SmtpPass
     });
+
+// please kindly ensure what license is appropriate for your project
+QuestPDF.Settings.License = LicenseType.Community;
 
 // Register your custom IEmailSender implementation that uses FluentEmail
 builder.Services.AddTransient<IEmailSenderService , EmailSenderService>();
@@ -121,6 +125,9 @@ builder.Services.AddScoped<IRequestAssignmentRepository, RequestAssignmentReposi
 
 builder.Services.AddScoped<IUserReliefTeamRepository, UserReliefTeamRepository>();
 builder.Services.AddScoped<IReliefTeamsRepository, ReliefTeamsRepository>();
+
+//builder.Services.AddScoped<IDisasterKnowledgeRepository, DisasterKnowledgeRepository>();
+builder.Services.AddScoped<IFinancialAllocationRepository, FinancialAllocationRepository>();
 
 
 builder.AddDomain();

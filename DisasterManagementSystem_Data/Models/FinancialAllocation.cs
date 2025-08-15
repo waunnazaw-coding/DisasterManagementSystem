@@ -13,9 +13,9 @@ public partial class FinancialAllocation
 
     public decimal Amount { get; set; }
 
-    public DateTime? AllocationDate { get; set; }
+    public DateTime AllocationDate { get; set; }
 
-    public string? CreatedBy { get; set; }
+    public Guid? CreatedBy { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
