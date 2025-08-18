@@ -1,7 +1,7 @@
 using DisasterManagementSystem_Data.Models;
 using DisasterManagementSystem_Services.Models;
 
-namespace DisasterManagementSystem_Data.Service
+namespace DisasterManagementSystem_Services.Service
 {
     public interface IDisasterEventService
     {

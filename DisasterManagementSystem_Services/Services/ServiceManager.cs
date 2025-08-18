@@ -1,9 +1,9 @@
 ﻿using DisasterManagementSystem_Data.Repositories;
 using DisasterManagementSystem_Services.Services.Implements;
 using DisasterManagementSystem_Services.Services.Interfaces;
-using log4net.Appender;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using DisasterManagementSystem_Services.Service;
 
 namespace DisasterManagementSystem_Services.Services
 {

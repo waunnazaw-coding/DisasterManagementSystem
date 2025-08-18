@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.IO;
 
-namespace DisasterManagementSystem_Data.Service
+namespace DisasterManagementSystem_Services.Service
 {
     public class DisasterEventService : IDisasterEventService
     {
