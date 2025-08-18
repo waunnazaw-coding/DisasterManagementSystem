@@ -40,6 +40,9 @@ namespace DisasterManagementSystem_Services.Services
 
             builder.Services.AddHttpContextAccessor(); // Important for IHttpContextAccessor
             builder.Services.AddScoped<IUserContextService, UserContextService>();
+            builder.Services.AddScoped<IGdacsDisasterService, GdacsDisasterService>();
+            builder.Services.AddScoped<IReverseGeocodingService, ReverseGeocodingService>();
+
         }
     }
 }

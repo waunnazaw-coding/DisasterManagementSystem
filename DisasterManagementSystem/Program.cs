@@ -207,6 +207,7 @@ builder.Services.AddCors(options =>
 
 // Add SignalR
 builder.Services.AddSignalR();
+builder.Services.AddHttpClient();
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 
@@ -259,6 +260,11 @@ builder.Services.AddScoped<IRequestAssignmentRepository, RequestAssignmentReposi
 builder.Services.AddScoped<IUserReliefTeamRepository, UserReliefTeamRepository>();
 builder.Services.AddScoped<IReliefTeamsRepository, ReliefTeamsRepository>();
 
+//builder.Services.AddScoped<IDisasterKnowledgeRepository, DisasterKnowledgeRepository>();
+builder.Services.AddScoped<IFinancialAllocationRepository, FinancialAllocationRepository>();
+
+builder.Services.AddScoped<IGdacsDisasterRepository, GdacsDisasterRepository>();
+builder.Services.AddHostedService<DisasterPollingService>();
 //builder.Services.AddScoped<IDisasterKnowledgeRepository, DisasterKnowledgeRepository>();
 builder.Services.AddScoped<IFinancialAllocationRepository, FinancialAllocationRepository>();
 
@@ -351,5 +357,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
+app.MapHub<DisasterNotificationHub>("/disasterNotifications");
 
 app.Run();

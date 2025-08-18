@@ -31,5 +31,7 @@
 		<PackageReference Include="QuestPDF" Version="2025.7.0" />
 
 		<PackageReference Include="ScottPlot" Version="5.0.55" />
+
+		<PackageReference Include="System.ServiceModel.Syndication" Version="9.0.8" />
 	</ItemGroup>
 </Project>

@@ -54,6 +54,8 @@ public partial class AppDbContext : DbContext
     
     public virtual DbSet<AllocationType> AllocationTypes { get; set; }
 
+    public virtual DbSet<GdacsdisasterEvent> GdacsdisasterEvents { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -150,6 +152,20 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.Donation).WithMany(p => p.FinancialAllocations)
                 .HasForeignKey(d => d.DonationId)
                 .HasConstraintName("FK__Financial__Donat__74794A92");
+        });
+
+        modelBuilder.Entity<GdacsdisasterEvent>(entity =>
+        {
+            entity.HasKey(e => e.EventId).HasName("PK__GDACSDis__7944C810340A7F77");
+
+            entity.ToTable("GDACSDisasterEvent");
+
+            entity.Property(e => e.EventId).HasMaxLength(50);
+            entity.Property(e => e.EventDate).HasColumnType("datetime");
+            entity.Property(e => e.EventType).HasMaxLength(100);
+            entity.Property(e => e.Impact).HasMaxLength(255);
+            entity.Property(e => e.Severity).HasMaxLength(50);
+            entity.Property(e => e.Status).HasMaxLength(50);
         });
 
         modelBuilder.Entity<DisasterEvent>(entity =>
