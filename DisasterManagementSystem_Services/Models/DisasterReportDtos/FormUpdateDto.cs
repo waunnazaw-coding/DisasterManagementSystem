@@ -22,7 +22,9 @@ namespace DisasterManagementSystem_Services.Models
         public string? Source { get; set; }
 
         // ---------- ReportPhoto ----------
-        public IFormFile[]? Files { get; set; }
-        public List<string> NewPhotoDescriptions { get; set; }
+        public IFormFile[]? NewPhotos { get; set; }
+        public List<string> NewPhotoDescription { get; set; }
+        public List<ExistingPhotoUpdateDto> ExistingPhotos { get; set; } = new();
+        public List<int> DeletedPhotoIds { get; set; } = new();
     }
 }

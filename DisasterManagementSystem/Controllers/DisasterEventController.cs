@@ -27,6 +27,14 @@ namespace DisasterManagementSystem_API.Controllers
                 return Ok(new { isSuccess = true, data = result.Data });
             return BadRequest(result.Message);
         }
+        [HttpGet("all-active")]
+        public async Task<IActionResult> GetAllActive()
+        {
+            var result = await _eventService.GetAllActiveAsync();
+            if (result.IsSuccess)
+                return Ok(new { isSuccess = true, data = result.Data });
+            return BadRequest(result.Message);
+        }
 
         [HttpGet("withlocation/{id}")]
         public async Task<IActionResult> GetByIdWithLocation(int id)
@@ -46,6 +54,15 @@ namespace DisasterManagementSystem_API.Controllers
             return Ok(new { isSuccess = true, data });
         }
 
+        [HttpGet("active-count")]
+        public async Task<IActionResult> GetActiveCount()
+        {
+            var result = await _eventService.GetActiveCountAsync();
+            if (result.IsSuccess)
+                return Ok(result.Data);
+
+            return NotFound(new { message = result.Message });
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
@@ -110,6 +127,7 @@ namespace DisasterManagementSystem_API.Controllers
             }
             return NotFound(new { isSuccess = false, message = result.Message });
         }
+
 
     }
 }

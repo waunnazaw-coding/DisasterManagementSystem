@@ -29,11 +29,14 @@ public class LocationRepository : IlocationRepository
     }
 
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(int locationId)
     {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-            _context.Locations.Remove(entity);
+        var location = await _context.Locations.FindAsync(locationId);
+        if (location != null)
+        {
+            _context.Locations.Remove(location);
+            await _context.SaveChangesAsync();
+        }
     }
 
     public async Task SaveChangesAsync() =>

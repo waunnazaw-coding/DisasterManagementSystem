@@ -20,14 +20,17 @@ public partial class DisasterEvent
     public string Status { get; set; } = null!;
 
     public string? Description { get; set; }
+    public string? Source { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
     public Guid CreatedUserId { get; set; }
+    public User? CreatedUser { get; set; }
 
     public Guid? UpdatedUserId { get; set; }
+    public User? UpdatedUser { get; set; }
 
     public virtual ICollection<AssistanceRequest> AssistanceRequests { get; set; } = new List<AssistanceRequest>();
 

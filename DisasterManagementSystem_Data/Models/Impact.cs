@@ -16,6 +16,7 @@ public partial class Impact
     public string? Value { get; set; }
 
     public string? ObjectName { get; set; }
+    public string? Status { get; set; } = "Pending";
 
     public virtual DisasterEvent? DisasterEvent { get; set; }
 

@@ -1,44 +1,141 @@
 using DisasterManagementSystem_Data.Models;
+using DisasterManagementSystem_Data.Repositories.Implements;
 using DisasterManagementSystem_Data.Repositories.Interfaces;
+using DisasterManagementSystem_Data.Service;
 using DisasterManagementSystem_Services.Models;
 using DisasterManagementSystem_Services.Models.LocationDtos;
 using DisasterManagementSystem_Services.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using AppLocation = DisasterManagementSystem_Data.Models.Location;
 
 public class DisasterReportService : IDisasterReportService
 {
-    private readonly AppDbContext _context;
+  private readonly AppDbContext _context;
     private readonly IDisasterReportRepository _disasterReportRepository;
     private readonly IlocationService _locationService;
     private readonly IReportPhotoService _reportPhotoService;
+    private readonly GeoJsonWriter _geoJsonWriter = new GeoJsonWriter();
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IDisasterEventService _disasterEventService;
+    private readonly IDisasterTypeRepository _disasterTypeRepository;
+    private readonly IDisasterTypeService _disasterTypeService;
+    private readonly IReportPhotoRepository _reportPhotoRepository;
 
     public DisasterReportService(
         IDisasterReportRepository disasterReportRepository,
-        IlocationService locaitonService,
+        IlocationService locationService,
         IReportPhotoService reportPhotoService,
-        AppDbContext context
+        AppDbContext context,
+        IDisasterEventService disasterEventService,
+        IDisasterTypeRepository disasterTypeRepository,
+        IDisasterTypeService disasterTypeService,
+        IReportPhotoRepository reportPhotoRepository,
+        IHttpContextAccessor httpContextAccessor
     )
     {
         _disasterReportRepository = disasterReportRepository;
         _context = context;
-        _locationService = locaitonService;
+        _locationService = locationService;
         _reportPhotoService = reportPhotoService;
+        _disasterEventService = disasterEventService;
+        _disasterTypeRepository = disasterTypeRepository;
+        _disasterTypeService = disasterTypeService;
+        _reportPhotoRepository = reportPhotoRepository;
+        _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<Result<DisasterReport>> GetByIdAsync(int id)
+    public async Task<Result<DisasterReportDetailsDto>> GetByIdAsync(int id)
     {
         var report = await _disasterReportRepository.GetByIdAsync(id);
-        return report != null
-            ? Result<DisasterReport>.Success(report)
-            : Result<DisasterReport>.NotFoundError("Report not found.");
+        if (report == null)
+            return Result<DisasterReportDetailsDto>.NotFoundError("Report not found.");
+
+        var location = report.Location;
+
+        LocationDto locationDto = null;
+        if (location != null)
+        {
+            var centroid = location.Geography?.Centroid;
+            double? lat = null, lon = null;
+
+            if (centroid != null &&
+                !double.IsNaN(centroid.X) && !double.IsInfinity(centroid.X) &&
+                !double.IsNaN(centroid.Y) && !double.IsInfinity(centroid.Y))
+            {
+                lat = centroid.Y;
+                lon = centroid.X;
+            }
+
+            locationDto = new LocationDto
+            {
+                Id = location.Id,
+                Name = location.Name,
+                GeoJson = location.Geography != null ? _geoJsonWriter.Write(FixPolygonOrientation(location.Geography)) : null,
+                Address = location.Address,
+                Country = location.Country,
+                Region = location.Region,
+                Latitude = lat,
+                Longitude = lon
+            };
+        }
+
+        var photoDtos = report.ReportPhotos.Select(photo => new ReportPhotoDto
+        {
+            Id = photo.Id,
+            FilePath = photo.FilePath,
+            Description = photo.Description,
+        }).ToList();
+
+        var dto = new DisasterReportDetailsDto
+        {
+            Id = report.Id,
+            Title = report.Title,
+            Description = report.Description,
+            Type = report.Type,
+            Severity = report.Severity,
+            Source = report.Source,
+            Status = report.Status,
+            CreatedAt = report.CreatedAt,
+            UpdatedAt = report.UpdatedAt,
+            LocationName = locationDto.Address,
+            DisasterEventId = report.DisasterEventId,
+            AddressDetail = report.AddressDetail,
+            LocationGeoJson = locationDto?.GeoJson,
+            ReportPhotos = photoDtos
+        };
+        return Result<DisasterReportDetailsDto>.Success(dto);
     }
 
     public async Task<Result<IEnumerable<DisasterReport>>> GetAllAsync()
     {
         var all = await _disasterReportRepository.GetAllAsync();
-        return Result<IEnumerable<DisasterReport>>.Success(all);
+
+        var reportDtos = all.Select(report => new DisasterReport
+        {
+            Id = report.Id,
+            Title = report.Title,
+            Description = report.Description,
+            Type = report.Type,
+            Severity = report.Severity,
+            Source = report.Source,
+            Status = report.Status,
+            CreatedAt = report.CreatedAt,
+            UpdatedAt = report.UpdatedAt,
+            LocationId = report.LocationId,
+            DisasterEventId = report.DisasterEventId,
+            UserId = report.UserId,
+            AddressDetail = report.AddressDetail,
+            Location = new AppLocation
+            {
+                Id = report.Location?.Id ?? 0,
+                Name = report.Location?.Address,
+            },
+
+        });
+        return Result<IEnumerable<DisasterReport>>.Success(reportDtos);
     }
 
     public async Task<Result<FormCreateDto>> AddFormAsync(FormCreateDto dto)
@@ -76,14 +173,22 @@ public class DisasterReportService : IDisasterReportService
                 Status = "Pending"
             };
             await _disasterReportRepository.AddAsync(report);
-            await _context.SaveChangesAsync();
 
             // Create ReportPhoto
-            if (dto.Files != null && dto.Files.Length > 0)
+            if (dto.ReportPhotos != null && dto.ReportPhotos.Length > 0)
             {
-                var photoResult = await _reportPhotoService.UploadReportPhotosAsync(report.Id, dto.Files, dto.NewPhotoDescriptions);
-                if (!photoResult.IsSuccess)
-                    throw new Exception(photoResult.Message);
+                var descriptions = dto.NewPhotoDescription ?? new List<string>();
+                var uploadResult = await _reportPhotoService.UploadEventPhotosAsync
+                (
+                    report.Id,
+                    dto.ReportPhotos,
+                    descriptions
+                );
+                if (!uploadResult.IsSuccess)
+                {
+                    await transaction.RollbackAsync();
+                    return Result<FormCreateDto>.Failure(uploadResult.Message);
+                }
             }
 
             await transaction.CommitAsync();
@@ -136,14 +241,53 @@ public class DisasterReportService : IDisasterReportService
             _context.DisasterReports.Update(report);
             await _context.SaveChangesAsync();
 
-            // Handle photo updates if any files provided
-            if (dto.Files != null && dto.Files.Length > 0)
+
+            // ---------- Handle Photo Deletion ----------
+            if (dto.DeletedPhotoIds.Any())
             {
-                // You can choose to replace or add photos here
-                // Example: Add new photos
-                var photoResult = await _reportPhotoService.UploadReportPhotosAsync(report.Id, dto.Files, dto.NewPhotoDescriptions );
-                if (!photoResult.IsSuccess)
-                    throw new Exception(photoResult.Message);
+                foreach (var photoId in dto.DeletedPhotoIds)
+                {
+                    var deleteResult = await _reportPhotoService.DeletePhotoAsync(photoId);
+                    if (!deleteResult.IsSuccess)
+                    {
+                        await transaction.RollbackAsync();
+                        return Result<FormUpdateDto>.Failure(
+                            $"Failed to delete photo with ID {photoId}: {deleteResult.Message}"
+                        );
+                    }
+                }
+            }
+            // ---------- Handle Updating Existing Photos' Descriptions ----------
+            if (dto.ExistingPhotos != null && dto.ExistingPhotos.Count > 0)
+            {
+                foreach (var existingPhotoDto in dto.ExistingPhotos)
+                {
+                    var updateResult = await _reportPhotoService.UpdatePhotoDescriptionAsync(existingPhotoDto.Id, existingPhotoDto.Description);
+                    if (!updateResult.IsSuccess)
+                    {
+                        await transaction.RollbackAsync();
+                        return Result<FormUpdateDto>.Failure($"Failed to update photo description for photo ID {existingPhotoDto.Id}: {updateResult.Message}");
+                    }
+                }
+            }
+            // ---------- Handle Adding New Photos ----------
+            if (dto.NewPhotos != null && dto.NewPhotos.Length > 0)
+            {
+                var descriptions = dto.NewPhotoDescription ?? new List<string>();
+
+                var uploadResult = await _reportPhotoService.UploadEventPhotosAsync(
+                    dto.Id,
+                    dto.NewPhotos,
+                    descriptions
+                );
+
+                if (!uploadResult.IsSuccess)
+                {
+                    await transaction.RollbackAsync();
+                    return Result<FormUpdateDto>.Failure(
+                        $"Failed to upload new photos: {uploadResult.Message}"
+                    );
+                }
             }
 
             await transaction.CommitAsync();
@@ -156,38 +300,89 @@ public class DisasterReportService : IDisasterReportService
         }
     }
 
-    public async Task<Result<bool>> ApproveAsync(int id)
+    public async Task<Result<bool>> ApproveAsync(int reportId)
     {
-        var report = await _disasterReportRepository.GetByIdAsync(id);
+        // 1. Get the report
+        var report = await _disasterReportRepository.GetByIdAsync(reportId);
         if (report == null)
-            return Result<bool>.NotFoundError($"Disaster report with ID {id} not found.");
+            return Result<bool>.NotFoundError($"Disaster report with ID {reportId} not found.");
+
+        // 2. Get current user (approver)
+        var currentUserIdStr = _httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(currentUserIdStr))
+            return Result<bool>.Failure("User is not authenticated.");
+        var currentUserId = Guid.Parse(currentUserIdStr);
 
         try
         {
-            report.Status = "Verified";  // use Verified here
+            // 3. Approve report
+            report.Status = "Verified";
             report.UpdatedAt = DateTime.UtcNow;
-
             await _disasterReportRepository.UpdateAsync(report);
 
-            return Result<bool>.Success(true, "Disaster report verified successfully.");
+            // 4. Map report → EventFormCreateDto
+            var disasterType = await _disasterTypeService.GetAllAsync(); // get all types
+            var typeMatch = disasterType.Data.FirstOrDefault(dt => dt.Name == report.Type);
+            if (typeMatch == null)
+                return Result<bool>.Failure($"DisasterType '{report.Type}' not found.");
+
+            var eventDto = new EventFormCreateDto
+            {
+                Name = report.Title ?? report.Type,
+                DisasterTypeId = typeMatch.Id,
+                StartDate = report.CreatedAt.HasValue ? DateOnly.FromDateTime(report.CreatedAt.Value) : DateOnly.FromDateTime(DateTime.UtcNow),
+                LocationId = report.LocationId,
+                Severity = report.Severity ?? "Low",
+                Description = report.Description,
+                Source = report.Source,
+                CreatedUserId = currentUserId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedUserId = null,
+                UpdatedAt = null
+            };
+
+            // 5. Create DisasterEvent
+            var addEventResult = await _disasterEventService.ReportToEventFormAsync(eventDto);
+            if (!addEventResult.IsSuccess)
+                return Result<bool>.Failure($"Failed to create event: {addEventResult.Message}");
+
+            // Populate the DTO Id with the created DisasterEvent Id
+            eventDto.Id = addEventResult.Data.Id;
+
+            // 6. Reassign report photos to the new event
+            var photos = await _reportPhotoRepository.GetByReportIdAsync(report.Id);
+            foreach (var photo in photos)
+            {
+                photo.DisasterEventId = eventDto.Id.Value;
+                photo.DisasterReportId = null; // detach from report
+                await _reportPhotoRepository.UpdateAsync(photo);
+            }
+
+
+            return Result<bool>.Success(true, "Report approved and event created successfully.");
         }
         catch (Exception ex)
         {
-            var innerMsg = ex.InnerException != null ? ex.InnerException.Message : "No inner exception";
-            return Result<bool>.Failure($"Error verifying disaster report: {ex.Message}. Inner exception: {innerMsg}");
+            return Result<bool>.Failure($"Error approving report: {ex.Message}");
         }
     }
 
-    public async Task<Result<bool>> DisapproveAsync(int id)
+    public async Task<Result<bool>> DisapproveAsync(int reportId)
     {
-        var report = await _disasterReportRepository.GetByIdAsync(id);
+        var report = await _disasterReportRepository.GetByIdAsync(reportId);
         if (report == null)
-            return Result<bool>.NotFoundError($"Disaster report with ID {id} not found.");
+            return Result<bool>.NotFoundError($"Disaster report with ID {reportId} not found.");
 
         try
         {
-            report.Status = "Rejected";  // Use Rejected instead of Disapproved
+            // Set report as rejected
+            report.Status = "Rejected";
             report.UpdatedAt = DateTime.UtcNow;
+
+            // Optional: set the user who rejected
+            var currentUserId = _httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(currentUserId))
+                report.UserId = Guid.Parse(currentUserId);
 
             await _disasterReportRepository.UpdateAsync(report);
 
@@ -199,6 +394,7 @@ public class DisasterReportService : IDisasterReportService
             return Result<bool>.Failure($"Error rejecting disaster report: {ex.Message}. Inner exception: {innerMsg}");
         }
     }
+
 
     public async Task<Result<bool>> DeleteAsync(int id)
     {
@@ -216,6 +412,13 @@ public class DisasterReportService : IDisasterReportService
         {
             return Result<bool>.Failure($"Error deleting disaster report: {ex.Message}");
         }
+    }
+
+    // You may need to implement this method if not already present:
+    private static object FixPolygonOrientation(object geography)
+    {
+        // Implement polygon orientation fix logic here if needed.
+        return geography;
     }
 
 }

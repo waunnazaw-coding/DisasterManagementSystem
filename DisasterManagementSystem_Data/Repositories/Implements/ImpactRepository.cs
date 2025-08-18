@@ -14,7 +14,7 @@ public class ImpactRepository : IImpactRepository
     public async Task AddRangeAsync(IEnumerable<Impact> impacts)
     {
         await _context.Impacts.AddRangeAsync(impacts);
-        await _context.SaveChangesAsync();
+        // No SaveChanges here — caller will commit
     }
 
     public async Task<IEnumerable<Impact>> GetAllAsync()
@@ -32,6 +32,26 @@ public class ImpactRepository : IImpactRepository
 
     public async Task<Impact?> GetByIdAsync(int id)
     {
-        return await _context.Impacts.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id);
+        return await _context.Impacts.FindAsync(id);
+    }
+
+    public async Task UpdateAsync(Impact impact)
+    {
+        var trackedEntity = await _context.Impacts.FindAsync(impact.Id);
+        if (trackedEntity == null)
+        {
+            throw new Exception("Impact not found");
+        }
+
+        trackedEntity.Type = impact.Type;
+        trackedEntity.Value = impact.Value;
+        trackedEntity.ObjectName = impact.ObjectName;
+
+        // EF will track changes — no SaveChanges here
+    }
+
+    public async Task DeleteAsync(Impact impact)
+    {
+        _context.Impacts.Remove(impact);
     }
 }

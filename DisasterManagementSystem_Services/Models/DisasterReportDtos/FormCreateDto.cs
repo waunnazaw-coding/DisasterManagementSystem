@@ -6,6 +6,7 @@ namespace DisasterManagementSystem_Services.Models
     public class FormCreateDto
     {
         // ---------- Location ----------
+        public int LocationId { get; set; }
         public string LocationName { get; set; } = null!;
         public string GeoJson { get; set; } = null!;
 
@@ -18,10 +19,10 @@ namespace DisasterManagementSystem_Services.Models
         public string? Description { get; set; }
         public string? Severity { get; set; }
         public string? Source { get; set; }
+        public string? Status { get; set; }
 
-
-        // ---------- ReportPhoto ----------
-        public IFormFile[] Files { get; set; } = Array.Empty<IFormFile>();
-        public List<string> NewPhotoDescriptions { get; set; }
+        // ---------- ReportPhoto ----------    
+        public IFormFile[] ReportPhotos { get; set; } = Array.Empty<IFormFile>();
+        public List<string> NewPhotoDescription { get; set; }
     }
 }

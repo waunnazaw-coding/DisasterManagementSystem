@@ -4,6 +4,7 @@ using DisasterManagementSystem_Services.Models;
 using AppLocation = DisasterManagementSystem_Data.Models.Location;
 using DisasterManagementSystem_Services.Models.LocationDtos;
 using NetTopologySuite.IO;
+using Newtonsoft.Json.Linq;
 
 public class LocationService : IlocationService
 {
@@ -165,7 +166,38 @@ public class LocationService : IlocationService
             try
             {
                 var reader = new GeoJsonReader();
-                geom = reader.Read<Geometry>(dto.GeoJson);
+
+                // Parse GeoJSON to JObject to inspect
+                var geoJsonObject = JObject.Parse(dto.GeoJson);
+                string geometryJson;
+
+                if (geoJsonObject["type"]?.ToString() == "FeatureCollection")
+                {
+                    // Extract geometry of first feature in the collection
+                    var firstFeature = geoJsonObject["features"]?.First;
+                    if (firstFeature == null)
+                        return Result<AppLocation>.ValidationError("FeatureCollection contains no features.");
+
+                    geometryJson = firstFeature["geometry"]?.ToString();
+                    if (string.IsNullOrWhiteSpace(geometryJson))
+                        return Result<AppLocation>.ValidationError("Feature geometry is missing.");
+                }
+                else if (geoJsonObject["type"]?.ToString() == "Feature")
+                {
+                    // If single Feature, extract its geometry
+                    geometryJson = geoJsonObject["geometry"]?.ToString();
+                    if (string.IsNullOrWhiteSpace(geometryJson))
+                        return Result<AppLocation>.ValidationError("Feature geometry is missing.");
+                }
+                else
+                {
+                    // Assume the input is a raw Geometry GeoJSON
+                    geometryJson = dto.GeoJson;
+                }
+
+                // Parse the extracted geometry JSON
+                geom = reader.Read<Geometry>(geometryJson);
+
                 geom = FixPolygonOrientation(geom);
             }
             catch (Exception ex)

@@ -89,7 +89,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
             }
         }
 
-        public async Task<Result<List<UploadPhotoResultDTO>>> UploadEventPhotosAsync(int disasterEventId, IFormFile[] files, List<string> descriptions)
+        public async Task<Result<List<UploadPhotoResultDTO>>> UploadEventPhotosAsync(int disasterReportId, IFormFile[] files, List<string> descriptions)
         {
             try
             {
@@ -113,8 +113,8 @@ namespace DisasterManagementSystem_Services.Services.Implements
 
                     var photo = new ReportPhoto
                     {
-                        DisasterEventId = disasterEventId,
-                        DisasterReportId = null,
+                        DisasterEventId = null,
+                        DisasterReportId = disasterReportId,
                         FilePath = uploadResult.SecureUrl.AbsoluteUri,
                         FileType = file.ContentType,
                         FileSize = file.Length,

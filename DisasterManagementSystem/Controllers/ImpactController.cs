@@ -52,5 +52,6 @@ namespace DisasterManagementSystem_Api.Controllers
 
             return Ok(impact);
         }
+
     }
 }

@@ -16,13 +16,29 @@ namespace DisasterManagementSystem_Data.Repositories
             await _context.DisasterEvents
                 .Include(e => e.DisasterType)
                 .Include(e => e.Location)
-                .Include(e => e.Impacts) // Include impacts navigation collection
+                .Include(e => e.Impacts)
+                .Include(e => e.ReportPhotos)
+                .Include(e => e.CreatedUser)
+                .Include(e => e.UpdatedUser)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
         public async Task<IEnumerable<DisasterEvent>> GetAllAsync() =>
             await _context.DisasterEvents
                 .Include(e => e.DisasterType) // Include DisasterType
                 .Include(e => e.Location)     // Include Location
+                .ToListAsync();
+
+        public async Task<int> CountVerifiedAsync()
+        {
+            return await _context.DisasterEvents
+                .CountAsync(e => e.Status == "Active");
+        }
+
+        public async Task<IEnumerable<DisasterEvent>> GetAllActive() =>
+            await _context.DisasterEvents
+                .Include(e => e.DisasterType)
+                .Include(e => e.Location)
+                .Where(e => e.Status == "Active")
                 .ToListAsync();
 
         public async Task<IEnumerable<DisasterEvent>> SearchByNameAsync(string name)

@@ -15,6 +15,7 @@ public class EventFormUpdateDto
     public DateOnly? StartDate { get; set; }
     public string? Severity { get; set; }
     public string? Description { get; set; }
+    public string? Source { get; set; }
 
     // ---------- Photo Handling ----------
 
@@ -34,4 +35,8 @@ public class EventFormUpdateDto
     /// List of existing photos to keep (not deleted)
     /// </summary>
     public List<ExistingPhotoUpdateDto> ExistingPhotos { get; set; } = new();
+
+    // Impact
+    public List<int> DeletedImpactIds { get; set; } = new();
+    public List<ImpactUpdateDto> ExistingImpacts { get; set; } = new();
 }

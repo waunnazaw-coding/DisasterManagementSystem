@@ -6,6 +6,6 @@ public interface IlocationRepository
     Task<IEnumerable<Location>> GetAllAsync();
     Task AddAsync(Location location);
     Task UpdateAsync(Location location);
-    Task DeleteAsync(int id);
+    Task DeleteAsync(int locationId);
     Task SaveChangesAsync();
 }

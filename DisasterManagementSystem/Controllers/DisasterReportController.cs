@@ -91,38 +91,28 @@ namespace DisasterManagementSystem_API.Controllers
             return Ok(result);
         }
 
-        [HttpPut("approve/{id}")]
+        // ---------------- Approve a report ----------------
+        [HttpPost("approve/{id}")]
         public async Task<IActionResult> Approve(int id)
         {
             var result = await _reportService.ApproveAsync(id);
 
             if (!result.IsSuccess)
-            {
-                if (result.IsNotFoundError)
-                    return NotFound(result);
-                else
-                    return BadRequest(result);
-            }
+                return BadRequest(new { message = result.Message });
 
-            return Ok(result);
+            return Ok(new { message = result.Message });
         }
 
-
-        [HttpPut("disapprove/{id}")]
+        // ---------------- Disapprove a report ----------------
+        [HttpPost("disapprove/{id}")]
         public async Task<IActionResult> Disapprove(int id)
         {
             var result = await _reportService.DisapproveAsync(id);
 
             if (!result.IsSuccess)
-            {
-                if (result.IsNotFoundError)
-                    return NotFound(result);
-                else
-                    return BadRequest(result);
-            }
+                return BadRequest(new { message = result.Message });
 
-            return Ok(result);
+            return Ok(new { message = result.Message });
         }
-
     }
 }
