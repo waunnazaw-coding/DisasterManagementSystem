@@ -20,6 +20,7 @@ using DisasterManagementSystem_Services.Services.Implements;
 using DisasterManagementSystem;
 using FluentEmail.MailKitSmtp;
 using DisasterManagementSystem_Services.Services.Interfaces;
+using DisasterManagementSystem_Data.Repositories;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -110,6 +111,7 @@ builder.Services.AddScoped<IDonationRepository, DonationRepository>();
 // Repositories
 builder.Services.AddScoped<IlocationRepository, LocationRepository>();
 builder.Services.AddScoped<IDisasterReportRepository, DisasterReportRepository>();
+builder.Services.AddScoped<IDisasterEventRepository, DisasterEventRepository>();
 builder.Services.AddScoped<IDisasterTypeRepository, DisasterTypeRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IAssistanceRequestRepository, AssistanceRequestRepository>();
@@ -122,6 +124,7 @@ builder.Services.AddScoped<IRequestAssignmentRepository, RequestAssignmentReposi
 builder.Services.AddScoped<IUserReliefTeamRepository, UserReliefTeamRepository>();
 builder.Services.AddScoped<IReliefTeamsRepository, ReliefTeamsRepository>();
 
+builder.Services.AddScoped<IImpactRepository, ImpactRepository>();
 
 builder.AddDomain();
 

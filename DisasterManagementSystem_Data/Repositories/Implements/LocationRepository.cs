@@ -16,9 +16,10 @@ public class LocationRepository : IlocationRepository
     public async Task<IEnumerable<Location>> GetAllAsync() =>
         await _context.Locations.ToListAsync();
 
-    public async Task AddAsync(Location disasterArea)
+    public Task AddAsync(Location disasterArea)
     {
-        await _context.Locations.AddAsync(disasterArea);
+        _context.Locations.AddAsync(disasterArea);
+        return Task.CompletedTask;
     }
 
     public Task UpdateAsync(Location location)
@@ -31,11 +32,14 @@ public class LocationRepository : IlocationRepository
         return await _context.DisasterReports.AnyAsync(r => r.Id == id);
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(int locationId)
     {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-            _context.Locations.Remove(entity);
+        var location = await _context.Locations.FindAsync(locationId);
+        if (location != null)
+        {
+            _context.Locations.Remove(location);
+            await _context.SaveChangesAsync();
+        }
     }
 
     public async Task SaveChangesAsync() =>

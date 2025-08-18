@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using DisasterManagementSystem_Data.Models;
 using DisasterManagementSystem_Services.Models;
 using DisasterManagementSystem_Services.Models.LocationDtos;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace DisasterManagementSystem_API.Controllers
 {
@@ -30,27 +32,87 @@ namespace DisasterManagementSystem_API.Controllers
             return result.Execute();
         }
 
-        [HttpPost("create")]
-        public async Task<IResult> Create([FromBody] DisasterReportCreateDto dto)
+        [HttpPost("submit-form")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> SubmitForm([FromForm] FormCreateDto dto)
         {
-            var result = await _reportService.AddAsync(dto);
-            return result.Execute();
+            if (!ModelState.IsValid)
+                return BadRequest(Result<string>.Failure("Invalid form data"));
+
+            // Get UserId from claims
+            var userIdClaim = User.FindFirst("sub") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                return Unauthorized(Result<string>.Failure("User ID not found in token"));
+            }
+
+            dto.UserId = userId;
+
+            var result = await _reportService.AddFormAsync(dto);
+
+            if (!result.IsSuccess)
+                return BadRequest(result);
+
+            return Ok(result);
         }
 
-        [HttpPut("update/{id}")]
-        public async Task<IResult> Update(int id, [FromBody] DisasterReportUpdateDto dto)
+        [HttpPut("update-form/{id}")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateForm(int id, [FromForm] FormUpdateDto dto)
         {
             if (id != dto.Id)
-                return Results.BadRequest("ID mismatch");
+                return BadRequest(Result<string>.Failure("ID mismatch"));
 
-            var result = await _reportService.UpdateAsync(dto);
-            return result.Execute();
+            if (!ModelState.IsValid)
+                return BadRequest(Result<string>.Failure("Invalid form data"));
+
+            var result = await _reportService.UpdateFormAsync(dto);
+
+            if (!result.IsSuccess)
+                return BadRequest(result);
+
+            return Ok(result);
         }
+
+
         [HttpDelete("delete/{id}")]
-        public async Task<IResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             var result = await _reportService.DeleteAsync(id);
-            return result.Execute();
+
+            if (!result.IsSuccess)
+            {
+                if (result.IsNotFoundError)
+                    return NotFound(result);
+                else
+                    return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+        // ---------------- Approve a report ----------------
+        [HttpPost("approve/{id}")]
+        public async Task<IActionResult> Approve(int id)
+        {
+            var result = await _reportService.ApproveAsync(id);
+
+            if (!result.IsSuccess)
+                return BadRequest(new { message = result.Message });
+
+            return Ok(new { message = result.Message });
+        }
+
+        // ---------------- Disapprove a report ----------------
+        [HttpPost("disapprove/{id}")]
+        public async Task<IActionResult> Disapprove(int id)
+        {
+            var result = await _reportService.DisapproveAsync(id);
+
+            if (!result.IsSuccess)
+                return BadRequest(new { message = result.Message });
+
+            return Ok(new { message = result.Message });
         }
     }
 }

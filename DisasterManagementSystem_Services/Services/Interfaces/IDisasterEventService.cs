@@ -1,15 +1,21 @@
-﻿using DisasterManagementSystem_Data.Models;
+using DisasterManagementSystem_Data.Models;
 using DisasterManagementSystem_Services.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DisasterManagementSystem_Services.Services.Interfaces
+namespace DisasterManagementSystem_Data.Service
 {
     public interface IDisasterEventService
     {
-        Task<Result<IEnumerable<DisasterEvent>>> GetAllAsync();
+        Task<Result<DisasterEventListDto>> GetByIdAsync(int id);
+        Task<Result<EventFormUpdateDto>> GetByIdForUpdateAsync(int eventId);
+        Task<Result<DisasterEventDetailsDto>> GetByIdWithLocationAsync(int eventId);
+        Task<Result<IEnumerable<DisasterEventListDto>>> GetAllAsync();
+        Task<Result<IEnumerable<DisasterEventListDto>>> GetAllActiveAsync();
+        Task<Result<int>> GetActiveCountAsync();
+        Task<List<DisasterEventListDto>> GetAllWithAffectedPeopleAsync();
+        Task<IEnumerable<DisasterEventListDto>> SearchByNameAsync(string name);
+        Task<Result<EventFormCreateDto>> AddEventFormAsync(EventFormCreateDto dto);
+        Task<Result<EventFormCreateDto>> ReportToEventFormAsync(EventFormCreateDto dto);
+        Task<Result<EventFormUpdateDto>> UpdateEventFormAsync(EventFormUpdateDto dto);
+        Task<Result<bool>> DeleteAsync(int id);
     }
 }

@@ -20,10 +20,10 @@ public class DisasterTypeRepository : IDisasterTypeRepository
         return await _context.DisasterTypes.ToListAsync();
     }
 
-    public async Task AddAsync(DisasterType disasterType)
+    public Task AddAsync(DisasterType disasterType)
     {
-        await _context.DisasterTypes.AddAsync(disasterType);
-        await _context.SaveChangesAsync();
+        _context.DisasterTypes.AddAsync(disasterType);
+        return Task.CompletedTask;
     }
 
     public async Task UpdateAsync(DisasterType disasterType)

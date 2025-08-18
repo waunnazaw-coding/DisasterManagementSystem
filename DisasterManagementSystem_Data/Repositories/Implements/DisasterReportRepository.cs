@@ -11,10 +11,23 @@ public class DisasterReportRepository : IDisasterReportRepository
     }
 
     public async Task<DisasterReport?> GetByIdAsync(int id) =>
-        await _context.DisasterReports.FindAsync(id);
+        await _context.DisasterReports
+        .Include(d => d.Location)
+        .Include(d => d.ReportPhotos)
+        .FirstOrDefaultAsync(d => d.Id == id);
 
     public async Task<IEnumerable<DisasterReport>> GetAllAsync() =>
-        await _context.DisasterReports.ToListAsync();
+        await _context.DisasterReports
+            .Include(d => d.Location)
+            .Include(d => d.ReportPhotos)
+            .ToListAsync();
+
+    public async Task<IEnumerable<DisasterReport>> GetAllConfirmedAsync() =>
+        await _context.DisasterReports
+            .Include(d => d.Location)
+            .Include(d => d.ReportPhotos)
+            .Where(d => d.Status == "Confirmed")
+            .ToListAsync();
 
     public async Task AddAsync(DisasterReport report)
     {

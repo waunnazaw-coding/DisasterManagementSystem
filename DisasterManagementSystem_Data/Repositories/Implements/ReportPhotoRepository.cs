@@ -18,7 +18,7 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
 
         public async Task<ReportPhoto> AddAsync(ReportPhoto photo)
         {
-            _context.ReportPhotos.Add(photo);
+            await _context.ReportPhotos.AddAsync(photo);
             await _context.SaveChangesAsync();
             return photo;
         }

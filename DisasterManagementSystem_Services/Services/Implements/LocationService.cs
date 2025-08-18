@@ -4,6 +4,7 @@ using DisasterManagementSystem_Services.Models;
 using AppLocation = DisasterManagementSystem_Data.Models.Location;
 using DisasterManagementSystem_Services.Models.LocationDtos;
 using NetTopologySuite.IO;
+using Newtonsoft.Json.Linq;
 
 public class LocationService : IlocationService
 {
@@ -88,23 +89,37 @@ public class LocationService : IlocationService
 
     public async Task<Result<LocationDto>> AddAsync(LocationCreateDto dto)
     {
-        Geometry geom;
+        Geometry? geom;
         try
         {
             var reader = new GeoJsonReader();
+
+            // Try to read as a raw Geometry first
             geom = reader.Read<Geometry>(dto.GeoJson);
+
+            // If null, try to read as FeatureCollection
+            if (geom == null)
+            {
+                var featureCollection = reader.Read<NetTopologySuite.Features.FeatureCollection>(dto.GeoJson);
+                geom = featureCollection?.FirstOrDefault()?.Geometry;
+            }
+
+            if (geom == null)
+                return Result<LocationDto>.ValidationError("Invalid GeoJSON: No valid geometry found.");
         }
         catch (Exception ex)
         {
             return Result<LocationDto>.ValidationError($"Invalid GeoJSON: {ex.Message}");
         }
 
+        // Ensure polygon orientation is fixed
         geom = FixPolygonOrientation(geom);
 
         var centroid = geom.Centroid;
         if (!IsFinite(centroid.X) || !IsFinite(centroid.Y))
             return Result<LocationDto>.ValidationError("Geometry centroid has invalid coordinate values.");
 
+        // Reverse geocode from centroid
         var geoInfo = await _geocodingService.ReverseGeocodeAsync(centroid.Y, centroid.X);
 
         var location = new AppLocation
@@ -124,7 +139,9 @@ public class LocationService : IlocationService
         {
             Id = location.Id,
             Name = location.Name,
-            GeoJson = location.Geography != null ? _geoJsonWriter.Write(FixPolygonOrientation(location.Geography)) : null,
+            GeoJson = location.Geography != null
+                ? _geoJsonWriter.Write(FixPolygonOrientation(location.Geography))
+                : null,
             Address = location.Address,
             Country = location.Country,
             Region = location.Region,
@@ -134,6 +151,8 @@ public class LocationService : IlocationService
 
         return Result<LocationDto>.Success(createdDto, "Location added successfully.");
     }
+
+
 
     public async Task<Result<AppLocation>> UpdateAsync(LocationUpdateDto dto)
     {
@@ -147,7 +166,38 @@ public class LocationService : IlocationService
             try
             {
                 var reader = new GeoJsonReader();
-                geom = reader.Read<Geometry>(dto.GeoJson);
+
+                // Parse GeoJSON to JObject to inspect
+                var geoJsonObject = JObject.Parse(dto.GeoJson);
+                string geometryJson;
+
+                if (geoJsonObject["type"]?.ToString() == "FeatureCollection")
+                {
+                    // Extract geometry of first feature in the collection
+                    var firstFeature = geoJsonObject["features"]?.First;
+                    if (firstFeature == null)
+                        return Result<AppLocation>.ValidationError("FeatureCollection contains no features.");
+
+                    geometryJson = firstFeature["geometry"]?.ToString();
+                    if (string.IsNullOrWhiteSpace(geometryJson))
+                        return Result<AppLocation>.ValidationError("Feature geometry is missing.");
+                }
+                else if (geoJsonObject["type"]?.ToString() == "Feature")
+                {
+                    // If single Feature, extract its geometry
+                    geometryJson = geoJsonObject["geometry"]?.ToString();
+                    if (string.IsNullOrWhiteSpace(geometryJson))
+                        return Result<AppLocation>.ValidationError("Feature geometry is missing.");
+                }
+                else
+                {
+                    // Assume the input is a raw Geometry GeoJSON
+                    geometryJson = dto.GeoJson;
+                }
+
+                // Parse the extracted geometry JSON
+                geom = reader.Read<Geometry>(geometryJson);
+
                 geom = FixPolygonOrientation(geom);
             }
             catch (Exception ex)

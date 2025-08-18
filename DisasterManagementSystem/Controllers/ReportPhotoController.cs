@@ -1,5 +1,5 @@
 ﻿using DisasterManagementSystem_Services.Models;
-using DisasterManagementSystem_Services.Services.Interfaces;
+using DisasterManagementSystem_Services.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,14 +22,16 @@ namespace DisasterManagementSystem_Api.Controllers
         /// <param name="reportId">The ID of the disaster report</param>
         /// <param name="files">Image files to upload</param>
         [HttpPost("upload/report")]
-        public async Task<IResult> UploadReportPhotos([FromQuery] int reportId, [FromForm] IFormFile[] files)
+        public async Task<IResult> UploadReportPhotos(
+            [FromQuery] int reportId,
+            [FromForm] IFormFile[] files,
+            [FromForm] List<string> descriptions // same order as files
+        )
         {
-            if (files == null || files.Length == 0)
-                return Results.BadRequest("Please select at least one file.");
-
-            var result = await _photoService.UploadReportPhotosAsync(reportId, files);
+            var result = await _photoService.UploadReportPhotosAsync(reportId, files, descriptions);
             return result.Execute();
         }
+
 
         /// <summary>
         /// Upload photos for a Disaster Event
@@ -37,12 +39,12 @@ namespace DisasterManagementSystem_Api.Controllers
         /// <param name="eventId">The ID of the disaster event</param>
         /// <param name="files">Image files to upload</param>
         [HttpPost("upload/event")]
-        public async Task<IResult> UploadEventPhotos([FromQuery] int eventId, [FromForm] IFormFile[] files)
+        public async Task<IResult> UploadEventPhotos([FromQuery] int eventId, [FromForm] IFormFile[] files, [FromForm] List<string> descriptions)
         {
             if (files == null || files.Length == 0)
                 return Results.BadRequest("Please select at least one file.");
 
-            var result = await _photoService.UploadEventPhotosAsync(eventId, files);
+            var result = await _photoService.UploadEventPhotosAsync(eventId, files, descriptions);
             return result.Execute();
         }
 
