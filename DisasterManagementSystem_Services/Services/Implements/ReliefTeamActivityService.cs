@@ -3,6 +3,7 @@ using DisasterManagementSystem_Data.Repositories.Interfaces;
 using DisasterManagementSystem_Services.Models;
 using DisasterManagementSystem_Services.Models.ReliefTeamActivityDtos;
 using DisasterManagementSystem_Services.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,19 +16,25 @@ namespace DisasterManagementSystem_Services.Services.Implements
     {
         private readonly IReliefTeamActivityRepository _activityRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IReliefTeamRepository _reliefTeamRepository;
+        private readonly IReliefTeamRepository _reliefTeamRepository; // Ensure this exists
         private readonly IReportPhotoService _photoService;
+        private readonly AppDbContext _context;
+        private readonly ILogger<ReliefTeamActivityService> _logger;
 
         public ReliefTeamActivityService(
             IReliefTeamActivityRepository activityRepository,
             IUserRepository userRepository,
-            IReliefTeamRepository reliefTeamRepository,
-            IReportPhotoService photoService)
+            IReliefTeamRepository reliefTeamRepository, // Must be included
+            IReportPhotoService photoService,
+            AppDbContext context,
+            ILogger<ReliefTeamActivityService> logger)
         {
-            _activityRepository = activityRepository;
-            _userRepository = userRepository;
-            _reliefTeamRepository = reliefTeamRepository;
-            _photoService = photoService;
+            _activityRepository = activityRepository ?? throw new ArgumentNullException(nameof(activityRepository));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _reliefTeamRepository = reliefTeamRepository ?? throw new ArgumentNullException(nameof(reliefTeamRepository)); // Critical fix
+            _photoService = photoService ?? throw new ArgumentNullException(nameof(photoService));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<Result<ReliefTeamActivityDTO>> CreateAsync(CreateReliefTeamActivityDTO dto, Guid currentUserId)
@@ -110,6 +117,8 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     PeopleHelped = createdActivity.PeopleHelped,
                     ItemsDistributed = createdActivity.ItemsDistributed,
                     ExpenseAmount = createdActivity.ExpenseAmount,
+                    ReliefTeamName = activity.ReliefTeam?.Name ?? "Unknown Team",
+                    PostedByUserName = activity.PostedByNavigation?.Name ?? "Unknown User",
 
                     Media = mediaResults
                 };
@@ -129,10 +138,10 @@ namespace DisasterManagementSystem_Services.Services.Implements
 
         public async Task<Result<bool>> DeleteAsync(int id, Guid currentUserId)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // INCLUDE MEDIA when fetching
-                var activity = await _activityRepository.GetByIdAsync(id, includeMedia: true,includeRelated:true);
+                var activity = await _activityRepository.GetByIdAsync(id, includeMedia: true, includeRelated: true);
                 if (activity == null)
                     return Result<bool>.NotFoundError("Activity not found");
 
@@ -141,23 +150,38 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 if (currentUser?.Role != "Admin" && activity.PostedBy != currentUserId)
                     return Result<bool>.ValidationError("Unauthorized");
 
-                // Delete all associated media
-                if (activity.ReportPhotos != null)
+                // Collect file paths BEFORE deletion
+                var filePaths = activity.ReportPhotos?
+                    .Select(p => p.FilePath)
+                    .ToList() ?? new List<string>();
+
+                // Delete activity (will cascade to photos via EF)
+                _context.ReliefTeamActivities.Remove(activity);
+                var saveResult = await _context.SaveChangesAsync() > 0;
+
+                if (!saveResult)
+                    return Result<bool>.Failure("Activity deletion failed");
+
+                await transaction.CommitAsync();
+
+                // Delete from Cloudinary AFTER successful DB commit
+                foreach (var path in filePaths)
                 {
-                    foreach (var media in activity.ReportPhotos)
+                    try
                     {
-                        await _photoService.DeletePhotoAsync(media.Id);
+                        await _photoService.DeleteCloudinaryFile(path);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Failed to delete Cloudinary file: {path}");
                     }
                 }
 
-                // Delete activity
-                var success = await _activityRepository.DeleteAsync(activity);
-                return success
-                    ? Result<bool>.Success(true, "Activity deleted")
-                    : Result<bool>.Failure("Deletion failed");
+                return Result<bool>.Success(true, "Activity deleted");
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 return Result<bool>.Failure($"Deletion error: {ex.Message}");
             }
         }

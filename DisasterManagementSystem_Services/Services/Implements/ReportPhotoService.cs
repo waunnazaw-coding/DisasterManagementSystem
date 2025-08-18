@@ -233,6 +233,18 @@ namespace DisasterManagementSystem_Services.Services.Implements
             }
         }
 
+        public async Task DeleteCloudinaryFile(string url)
+        {
+            if (string.IsNullOrEmpty(url)) return;
+
+            var publicId = GetPublicIdFromUrl(url);
+            if (!string.IsNullOrEmpty(publicId))
+            {
+                var deleteParams = new DeletionParams(publicId);
+                await _cloudinary.DestroyAsync(deleteParams);
+            }
+        }
+
         public async Task<Result<UploadPhotoResultDTO>> GetPhotoByIdAsync(int photoId)
         {
             try
@@ -375,11 +387,8 @@ namespace DisasterManagementSystem_Services.Services.Implements
             try
             {
                 var uri = new Uri(url);
-                var segments = uri.Segments;
-                if (segments.Length < 3) return null;
-
-                var publicIdWithExtension = segments[^1];
-                return publicIdWithExtension.Split('.')[0];
+                var lastSegment = uri.Segments.Last();
+                return Path.GetFileNameWithoutExtension(lastSegment);
             }
             catch
             {

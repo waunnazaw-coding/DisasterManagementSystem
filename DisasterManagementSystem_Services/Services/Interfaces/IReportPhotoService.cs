@@ -20,6 +20,7 @@ namespace DisasterManagementSystem_Services.Services.Interfaces
         Task<Result<bool>> DeletePhotoAsync(int photoId);
         Task<Result<List<UploadPhotoResultDTO>>> UploadActivityPhotosAsync(int activityId, IFormFile[] files);
         Task<Result<List<UploadPhotoResultDTO>>> GetPhotosByActivityIdAsync(int activityId);
+        Task DeleteCloudinaryFile(string url);
 
     }
 }
