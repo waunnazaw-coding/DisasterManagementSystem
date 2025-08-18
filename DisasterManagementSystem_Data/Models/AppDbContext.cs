@@ -375,6 +375,13 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.DisasterReportId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__ReportPho__Disas__5FB337D6");
+
+            // Add this new relationship
+            entity.HasOne(d => d.ReliefTeamActivity)
+                .WithMany(p => p.ReportPhotos)
+                .HasForeignKey(d => d.ReliefTeamActivityId)
+                .OnDelete(DeleteBehavior.Cascade) // ADD THIS LINE
+                .HasConstraintName("FK_ReportPhoto_ReliefTeamActivity");
         });
 
         modelBuilder.Entity<RequestAssignment>(entity =>

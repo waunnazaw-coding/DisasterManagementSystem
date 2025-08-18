@@ -15,5 +15,7 @@ namespace DisasterManagementSystem_Data.Repositories.Interfaces
         Task<List<ReportPhoto>> GetByEventIdAsync(int eventId);
         Task<ReportPhoto?> GetByIdAsync(int photoId);
         Task<bool> DeleteAsync(int photoId);
+        Task<List<ReportPhoto>> GetByActivityIdAsync(int activityId);
+
     }
 }
