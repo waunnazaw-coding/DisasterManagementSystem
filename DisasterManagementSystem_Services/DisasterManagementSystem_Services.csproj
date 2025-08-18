@@ -24,5 +24,13 @@
 	<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.7" />
 
 		<PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="4.0.0" />
+
+		<PackageReference Include="OxyPlot.Core" Version="2.2.0" />
+
+		<PackageReference Include="QuestPDF" Version="2025.7.0" />
+
+		<PackageReference Include="ScottPlot" Version="5.0.55" />
+
+		<PackageReference Include="System.ServiceModel.Syndication" Version="9.0.8" />
 	</ItemGroup>
 </Project>

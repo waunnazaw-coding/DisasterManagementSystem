@@ -67,4 +67,9 @@ namespace DisasterManagementSystem_Services.Hubs
             }
         }
     }
+
+    public class DisasterNotificationHub : Hub
+    {
+        // Methods can be added to communicate with clients if needed
+    }
 }
