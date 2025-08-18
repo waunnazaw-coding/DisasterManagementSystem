@@ -20,5 +20,7 @@ namespace DisasterManagementSystem_Services.Services.Interfaces
         //Task<Result<DonationDistribution>> DistributeDonationAsync(DonationDistributionDto distributionDto, Guid distributedBy);
 
         Task<Result<List<DonationDto>>> GetRecentDonationsAsync();
+        Task<int> GetTotalPeopleByPhoneAsync();
+        Task<decimal?> GetTotalAmountLastYearAsync();
     }
 }

@@ -60,7 +60,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
             var user = await _userRepository.GetByEmailAsync(model.Email);
 
             if (user == null || string.IsNullOrEmpty(user.PasswordHash) || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
-                return Result<AuthResponseDto>.Failure("Invalid credentials.");
+                return Result<AuthResponseDto>.NotFoundError("Invalid credentials.");
 
             var tokens = await _jwtService.GenerateTokensAsync(user);
             return Result<AuthResponseDto>.Success(MapToAuthResponseDto(tokens));

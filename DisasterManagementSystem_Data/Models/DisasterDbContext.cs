@@ -180,7 +180,7 @@ public partial class DisasterDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.Description).HasMaxLength(255);
-            entity.Property(e => e.DonorPhoneNumber).HasMaxLength(20);
+            entity.Property(e => e.Phone).HasMaxLength(20);
             entity.Property(e => e.Name).HasMaxLength(50);
             entity.Property(e => e.PaymentMethod).HasMaxLength(50);
             entity.Property(e => e.Quantity).HasColumnType("decimal(18, 2)");
@@ -188,7 +188,6 @@ public partial class DisasterDbContext : DbContext
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasDefaultValue("Pending");
-            entity.Property(e => e.Type).HasMaxLength(50);
             entity.Property(e => e.Unit).HasMaxLength(20);
 
             entity.HasOne(d => d.DonorUser).WithMany(p => p.Donations)

@@ -16,5 +16,9 @@ namespace DisasterManagementSystem_Data.Repositories.Interfaces
         Task UpdateAsync(Donation donation);
         Task<bool> DeleteAsync(int id);
         Task<List<Donation>> GetRecentAsync();
+        Task<int> GetTotalPeopleByPhoneAsync();
+        Task<decimal?> GetTotalAmountLastYearAsync();
+        Task<decimal?> GetTotalAmountNowYearAsync();
+        Task<decimal?> GetTotalAmount();
     }
 }

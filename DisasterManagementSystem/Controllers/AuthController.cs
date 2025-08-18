@@ -41,6 +41,23 @@ namespace DisasterManagementSystem_Api.Controllers
         }
 
 
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IResult> Logout()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                return Results.Unauthorized();
+            }
+            var result = await _authService.LogoutAsync(userId);
+            if (!result.IsSuccess)
+                return Results.BadRequest(new { message = result.Message });
+            return Results.Ok(new { message = "Logout successful" });
+        }
+
+
+
         [HttpPost("refresh-token")]
         public async Task<IResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
         {
