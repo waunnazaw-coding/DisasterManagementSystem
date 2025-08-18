@@ -11,7 +11,10 @@ namespace DisasterManagementSystem_Data.Repositories
         {
             _context = context;
         }
-
+        public async Task<bool> ExistsAsync(int id)
+        {
+            return await _context.DisasterReports.AnyAsync(r => r.Id == id);
+        }
         public async Task<DisasterEvent?> GetByIdAsync(int id) =>
             await _context.DisasterEvents
                 .Include(e => e.DisasterType)
