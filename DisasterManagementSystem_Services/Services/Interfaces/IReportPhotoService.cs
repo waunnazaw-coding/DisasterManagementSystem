@@ -18,5 +18,8 @@ namespace DisasterManagementSystem_Services.Services.Interfaces
         Task<Result<List<UploadPhotoResultDTO>>> GetPhotosByEventIdAsync(int eventId);
         Task<Result<UploadPhotoResultDTO>> GetPhotoByIdAsync(int photoId);
         Task<Result<bool>> DeletePhotoAsync(int photoId);
+        Task<Result<List<UploadPhotoResultDTO>>> UploadActivityPhotosAsync(int activityId, IFormFile[] files);
+        Task<Result<List<UploadPhotoResultDTO>>> GetPhotosByActivityIdAsync(int activityId);
+
     }
 }

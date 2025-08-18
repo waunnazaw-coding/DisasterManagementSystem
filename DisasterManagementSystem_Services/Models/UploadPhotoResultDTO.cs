@@ -13,5 +13,6 @@ namespace DisasterManagementSystem_Services.Models
         public string FileType { get; set; } = null!;
         public long? FileSize { get; set; }
         public DateTime? UploadedAt { get; set; }
+        public bool IsVideo { get; set; }  // New computed property
     }
 }

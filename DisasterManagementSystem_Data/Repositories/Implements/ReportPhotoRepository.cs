@@ -64,5 +64,11 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
             _context.ReportPhotos.Remove(photo);
             return await _context.SaveChangesAsync() > 0;
         }
+        public async Task<List<ReportPhoto>> GetByActivityIdAsync(int activityId)
+        {
+            return await _context.ReportPhotos
+                .Where(p => p.ReliefTeamActivityId == activityId)
+                .ToListAsync();
+        }
     }
 }

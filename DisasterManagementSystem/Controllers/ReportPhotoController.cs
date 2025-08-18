@@ -104,5 +104,22 @@ namespace DisasterManagementSystem_Api.Controllers
             var result = await _photoService.DeletePhotoAsync(photoId);
             return result.Execute();
         }
+
+        [HttpPost("upload/activity")]
+        public async Task<IResult> UploadActivityPhotos([FromQuery] int activityId, [FromForm] IFormFile[] files)
+        {
+            if (files == null || files.Length == 0)
+                return Results.BadRequest("Please select at least one file.");
+
+            var result = await _photoService.UploadActivityPhotosAsync(activityId, files);
+            return result.Execute();
+        }
+
+        [HttpGet("activity/{activityId}")]
+        public async Task<IResult> GetPhotosByActivityId(int activityId)
+        {
+            var result = await _photoService.GetPhotosByActivityIdAsync(activityId);
+            return result.Execute();
+        }
     }
 }

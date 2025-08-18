@@ -170,5 +170,22 @@ namespace DisasterManagementSystem_Data.Repositories
                 .AsNoTracking()
                 .ToListAsync();
         }
+
+
+        // AssistanceRequestRepository.cs
+        public async Task<AssistanceRequest> GetByIdWithAssignmentsAsync(int id)
+        {
+            return await _context.AssistanceRequests
+                .Include(r => r.DisasterEvent)
+                .Include(r => r.User)
+                .Include(r => r.Location)
+                .Include(r => r.DisasterReport)
+                .Include(r => r.RequestAssignments)
+                    .ThenInclude(a => a.AssignedByNavigation)
+                .Include(r => r.RequestAssignments)
+                    .ThenInclude(a => a.ReliefTeam)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.Id == id);
+        }
     }
 }

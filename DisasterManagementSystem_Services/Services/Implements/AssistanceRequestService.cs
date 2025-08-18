@@ -191,27 +191,43 @@ namespace DisasterManagementSystem_Services.Services.Implements
             }
         }
 
-        public async Task<Result<AssistanceRequestDto>> GetRequestByIdAsync(int id)
+        // AssistanceRequestService.cs
+        // AssistanceRequestService.cs
+        public async Task<Result<AssistanceRequestDto>> GetRequestByIdAsync(int id, bool includeAssignments = false)
         {
             try
             {
-                var request = await _requestRepository.GetByIdAsync(id);
+                AssistanceRequest request;
+
+                if (includeAssignments)
+                {
+                    // Use the method to get request with assignments
+                    request = await _requestRepository.GetByIdWithAssignmentsAsync(id);
+                }
+                else
+                {
+                    // Get regular request
+                    request = await _requestRepository.GetByIdAsync(id);
+                }
+
                 if (request == null)
                     return Result<AssistanceRequestDto>.NotFoundError("Request not found");
 
-                var user = request.UserId.HasValue ? await _userRepository.GetByIdAsync(request.UserId.Value) : null;
-                var requestDto = MapToDto(request, user);
+                var user = request.UserId.HasValue ?
+                    await _userRepository.GetByIdAsync(request.UserId.Value) : null;
 
+                var requestDto = MapToDto(request, user);
                 return Result<AssistanceRequestDto>.Success(requestDto);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error retrieving request");
                 return Result<AssistanceRequestDto>.Failure($"Error retrieving request: {ex.Message}");
             }
         }
 
-     
-     public async Task<Result<AssistanceRequestDto>> UpdateRequestAsync(
+
+        public async Task<Result<AssistanceRequestDto>> UpdateRequestAsync(
     int id,
     UpdateAssistanceRequestDto updateDto,
     Guid userId)
@@ -535,7 +551,25 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 DetailedAddress = request.DetailedAddress,
                 CreatedAt = request.CreatedAt,
                 UpdatedAt = request.UpdatedAt,
-                FulfilledAt = request.FulfilledAt
+                FulfilledAt = request.FulfilledAt,
+ // ... other properties ...
+        Assignments = request.RequestAssignments?.Select(a => new RequestAssignmentDto
+        {
+            Id = a.Id,
+            AssistanceRequestId = a.AssistanceRequestId,
+            ReliefTeamId = a.ReliefTeamId,
+            ReliefTeamName = a.ReliefTeam?.Name,
+            AssignedById = a.AssignedBy,
+            AssignedByName = a.AssignedByNavigation?.Name,
+            AssignedAt = a.AssignedAt,
+            Status = a.Status,
+            Priority = a.Priority,
+            Notes = a.Notes,
+            CompletedAt = a.CompletedAt,
+            LastUpdatedById = a.LastUpdatedBy,
+            UpdatedAt = a.UpdatedAt
+        }).ToList() ?? new List<RequestAssignmentDto>()
+
             };
         }
     }

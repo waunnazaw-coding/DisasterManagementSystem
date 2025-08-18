@@ -1,6 +1,4 @@
 ﻿using DisasterManagementSystem_Data.Repositories;
-using DisasterManagementSystem_Data.Repositories.Implements;
-using DisasterManagementSystem_Data.Repositories.Interfaces;
 using DisasterManagementSystem_Services.Services.Implements;
 using DisasterManagementSystem_Services.Services.Implements.DisasterManagementSystem_Services.Services.Implements;
 using DisasterManagementSystem_Services.Services.Interfaces;
@@ -16,7 +14,9 @@ namespace DisasterManagementSystem_Services.Services
         {
             builder.Services.AddScoped<IlocationService, LocationService>();
             builder.Services.AddScoped<IDisasterReportService, DisasterReportService>();
+            builder.Services.AddScoped<IDisasterEventService, DisasterEventService>();
             builder.Services.AddScoped<IDisasterTypeService, DisasterTypeService>();
+            builder.Services.AddScoped<IImpactService, ImpactService>();
 
             builder.Services.AddHttpClient<INominatimGeocodingService, NominatimGeocodingService>();
             builder.Services.AddScoped<IJwtService, JwtService>();
@@ -28,6 +28,10 @@ namespace DisasterManagementSystem_Services.Services
             builder.Services.AddScoped<IDisasterEventService, DisasterEventService>();
             builder.Services.AddScoped<IReliefTeamService, ReliefTeamService>();
             builder.Services.AddScoped<IRequestAssignmentService, RequestAssignmentService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+
+            builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
+            builder.Services.AddScoped<IReliefTeamsService, ReliefTeamsService>();
         }
     }
 }
