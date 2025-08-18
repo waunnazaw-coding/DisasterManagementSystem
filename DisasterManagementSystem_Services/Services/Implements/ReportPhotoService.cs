@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace DisasterManagementSystem_Services.Services.Implements
 {
@@ -169,6 +170,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     Id = photoId,
                     DisasterReportId = existingPhoto.DisasterReportId,
                     DisasterEventId = existingPhoto.DisasterEventId,
+                    ReliefTeamActivityId = existingPhoto.ReliefTeamActivityId,  // Preserve activity ID
                     FilePath = uploadResult.SecureUrl.AbsoluteUri,
                     FileType = file.ContentType,
                     FileSize = file.Length,
@@ -266,6 +268,18 @@ namespace DisasterManagementSystem_Services.Services.Implements
             }
         }
 
+        public async Task DeleteCloudinaryFile(string url)
+        {
+            if (string.IsNullOrEmpty(url)) return;
+
+            var publicId = GetPublicIdFromUrl(url);
+            if (!string.IsNullOrEmpty(publicId))
+            {
+                var deleteParams = new DeletionParams(publicId);
+                await _cloudinary.DestroyAsync(deleteParams);
+            }
+        }
+
         public async Task<Result<UploadPhotoResultDTO>> GetPhotoByIdAsync(int photoId)
         {
             try
@@ -313,35 +327,83 @@ namespace DisasterManagementSystem_Services.Services.Implements
             }
         }
 
-        private async Task<ImageUploadResult> UploadToCloudinary(IFormFile file)
+        //private async Task<ImageUploadResult> UploadToCloudinary(IFormFile file)
+        //{
+        //    await using var stream = file.OpenReadStream();
+        //    var uploadParams = new ImageUploadParams
+        //    {
+        //        File = new FileDescription(file.FileName, stream),
+        //        UseFilename = true,
+        //        UniqueFilename = true, // Make sure it does not overwrite another file
+        //        Overwrite = false,
+        //        Folder = "disaster_photos", // OPTIONAL: keep files organized
+        //        Transformation = new Transformation().Quality("auto").FetchFormat("auto")
+        //    };
+
+        //    var result = await _cloudinary.UploadAsync(uploadParams);
+
+        //    Console.WriteLine($"Cloudinary Upload:");
+        //    Console.WriteLine($"  StatusCode: {result.StatusCode}");
+        //    Console.WriteLine($"  SecureUrl: {result.SecureUrl}");
+        //    Console.WriteLine($"  Url: {result.Url}");
+        //    Console.WriteLine($"  PublicId: {result.PublicId}");
+        //    Console.WriteLine($"  Error: {result.Error?.Message}");
+
+        //    if (result.StatusCode != System.Net.HttpStatusCode.OK || result.SecureUrl == null)
+        //    {
+        //        throw new Exception($"Cloudinary upload failed: {result.Error?.Message ?? "Unknown error"}");
+        //    }
+
+        //    return result;
+        //}
+
+
+        // Add this method to handle both images and videos
+        private async Task<UploadResult> UploadToCloudinary(IFormFile file)
         {
             await using var stream = file.OpenReadStream();
-            var uploadParams = new ImageUploadParams
+            UploadResult result;
+
+            if (file.ContentType.StartsWith("image/"))
             {
-                File = new FileDescription(file.FileName, stream),
-                UseFilename = true,
-                UniqueFilename = true, // Make sure it does not overwrite another file
-                Overwrite = false,
-                Folder = "disaster_photos", // OPTIONAL: keep files organized
-                Transformation = new Transformation().Quality("auto").FetchFormat("auto")
-            };
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(file.FileName, stream),
+                    UseFilename = true,
+                    UniqueFilename = true,
+                    Overwrite = false,
+                    Folder = "disaster_photos",
+                    Transformation = new Transformation().Quality("auto").FetchFormat("auto")
+                };
+                result = await _cloudinary.UploadAsync(uploadParams);
+            }
+            else if (file.ContentType.StartsWith("video/"))
+            {
+                // ResourceType is auto-set to Video - DO NOT add it explicitly
+                var uploadParams = new VideoUploadParams
+                {
+                    File = new FileDescription(file.FileName, stream),
+                    UseFilename = true,
+                    UniqueFilename = true,
+                    Overwrite = false,
+                    Folder = "disaster_videos" // Removed ResourceType assignment
+                };
+                result = await _cloudinary.UploadAsync(uploadParams);
+            }
+            else
+            {
+                throw new Exception("Unsupported file type");
+            }
 
-            var result = await _cloudinary.UploadAsync(uploadParams);
-
-            Console.WriteLine($"Cloudinary Upload:");
-            Console.WriteLine($"  StatusCode: {result.StatusCode}");
-            Console.WriteLine($"  SecureUrl: {result.SecureUrl}");
-            Console.WriteLine($"  Url: {result.Url}");
-            Console.WriteLine($"  PublicId: {result.PublicId}");
-            Console.WriteLine($"  Error: {result.Error?.Message}");
-
+            // Universal error handling
             if (result.StatusCode != System.Net.HttpStatusCode.OK || result.SecureUrl == null)
             {
-                throw new Exception($"Cloudinary upload failed: {result.Error?.Message ?? "Unknown error"}");
+                throw new Exception($"Upload failed: {result.Error?.Message ?? "Unknown error"}");
             }
 
             return result;
         }
+
 
 
         private async Task DeleteFromCloudinary(string fileUrl)
@@ -361,16 +423,118 @@ namespace DisasterManagementSystem_Services.Services.Implements
             try
             {
                 var uri = new Uri(url);
-                var segments = uri.Segments;
-                if (segments.Length < 3) return null;
-
-                var publicIdWithExtension = segments[^1];
-                return publicIdWithExtension.Split('.')[0];
+                var lastSegment = uri.Segments.Last();
+                return Path.GetFileNameWithoutExtension(lastSegment);
             }
             catch
             {
                 return null;
             }
+        }
+
+public async Task<Result<List<UploadPhotoResultDTO>>> UploadActivityPhotosAsync(int activityId, IFormFile[] files)
+        {
+            try
+            {
+                if (files == null || files.Length == 0)
+                    return Result<List<UploadPhotoResultDTO>>.ValidationError("No files provided");
+
+                var uploadedPhotos = new List<UploadPhotoResultDTO>();
+
+                foreach (var file in files)
+                {
+                    if (file.Length == 0) continue;
+
+                    // Skip unsupported types
+                    if (!file.ContentType.StartsWith("image/") &&
+                        !file.ContentType.StartsWith("video/"))
+                        continue;
+
+                    var uploadResult = await UploadToCloudinary(file);
+
+                    // Determine file type
+                    var fileType = file.ContentType.StartsWith("video/") ?
+                        "video" : "image";
+
+                    var photo = new ReportPhoto
+                    {
+                        ReliefTeamActivityId = activityId,
+                        FilePath = uploadResult.SecureUrl.AbsoluteUri,
+                        FileType = fileType,
+                        FileSize = file.Length,
+                        UploadedAt = DateTime.UtcNow
+                    };
+
+                    var savedPhoto = await _photoRepository.AddAsync(photo);
+
+                    uploadedPhotos.Add(new UploadPhotoResultDTO
+                    {
+                        Id = savedPhoto.Id,
+                        FilePath = savedPhoto.FilePath,
+                        FileType = savedPhoto.FileType,
+                        FileSize = savedPhoto.FileSize,
+                        UploadedAt = savedPhoto.UploadedAt,
+                        IsVideo = savedPhoto.FileType == "video"
+                    });
+                }
+
+                return Result<List<UploadPhotoResultDTO>>.Success(uploadedPhotos);
+            }
+            catch (Exception ex)
+            {
+                return Result<List<UploadPhotoResultDTO>>.Failure($"Error uploading media: {ex.Message}");
+            }
+        }
+
+        public async Task<Result<List<UploadPhotoResultDTO>>> GetPhotosByActivityIdAsync(int activityId)
+        {
+            try
+            {
+                var photos = await _photoRepository.GetByActivityIdAsync(activityId);
+                var result = photos.Select(MapToDTO).ToList();
+                return Result<List<UploadPhotoResultDTO>>.Success(result);
+            }
+            catch (Exception ex)
+            {
+                return Result<List<UploadPhotoResultDTO>>.Failure($"Error retrieving photos: {ex.Message}");
+            }
+        }
+        public async Task<Result<UploadPhotoResultDTO>> UpdateActivityPhotoAsync(int photoId, IFormFile file)
+        {
+            try
+            {
+                var existingPhoto = await _photoRepository.GetByIdAsync(photoId);
+                if (existingPhoto == null)
+                    return Result<UploadPhotoResultDTO>.NotFoundError("Photo not found");
+
+                // Upload new file
+                var uploadResult = await UploadToCloudinary(file);
+
+                // Update photo entity
+                existingPhoto.FilePath = uploadResult.SecureUrl.AbsoluteUri;
+                existingPhoto.FileType = file.ContentType.StartsWith("video/") ? "video" : "image";
+                existingPhoto.FileSize = file.Length;
+                existingPhoto.UploadedAt = DateTime.UtcNow;
+
+                var updatedPhoto = await _photoRepository.UpdateAsync(existingPhoto);
+                return Result<UploadPhotoResultDTO>.Success(MapToDTO(updatedPhoto));
+            }
+            catch (Exception ex)
+            {
+                return Result<UploadPhotoResultDTO>.Failure($"Update failed: {ex.Message}");
+            }
+        }
+        private UploadPhotoResultDTO MapToDTO(ReportPhoto photo)
+        {
+            return new UploadPhotoResultDTO
+            {
+                Id = photo.Id,
+                FilePath = photo.FilePath,
+                FileType = photo.FileType,
+                FileSize = photo.FileSize,
+                UploadedAt = photo.UploadedAt,
+                IsVideo = photo.FileType?.StartsWith("video/") ?? false
+            };
         }
     }
 }

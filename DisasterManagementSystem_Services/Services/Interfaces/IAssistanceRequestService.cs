@@ -14,7 +14,7 @@ namespace DisasterManagementSystem_Services.Services.Interfaces
         Task<Result<AssistanceRequestDto>> CreateRequestAsync(CreateAssistanceRequestDto requestDto, Guid userId);
         Task<Result<List<AssistanceRequestDto>>> GetAllRequestsAsync();
         Task<Result<List<AssistanceRequestDto>>> GetUserRequestsAsync(Guid userId);
-        Task<Result<AssistanceRequestDto>> GetRequestByIdAsync(int id);
+        Task<Result<AssistanceRequestDto>> GetRequestByIdAsync(int id, bool includeAssignments = false);
         Task<Result<AssistanceRequestDto>> UpdateRequestAsync(int id, UpdateAssistanceRequestDto requestDto, Guid userId);
         Task<Result<bool>> DeleteRequestAsync(int id, Guid userId);
         Task<Result<AssistanceRequestDto>> UpdateRequestStatusAsync(int id, UpdateRequestStatusDto statusDto, Guid adminId);

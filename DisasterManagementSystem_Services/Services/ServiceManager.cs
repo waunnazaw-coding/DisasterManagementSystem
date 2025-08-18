@@ -22,6 +22,16 @@ namespace DisasterManagementSystem_Services.Services
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IReportPhotoService, ReportPhotoService>();
             builder.Services.AddScoped<IDonationService,DonationService>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<IAssistanceRequestService, AssistanceRequestService>();
+            builder.Services.AddScoped<IDisasterEventService, DisasterEventService>();
+            builder.Services.AddScoped<IReliefTeamService, ReliefTeamService>();
+            builder.Services.AddScoped<IRequestAssignmentService, RequestAssignmentService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+
+            builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
+            builder.Services.AddScoped<IReliefTeamsService, ReliefTeamsService>();
+            builder.Services.AddScoped<IReliefTeamActivityService, ReliefTeamActivityService>();
         }
     }
 }

@@ -338,24 +338,28 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.ActivityDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+
             entity.Property(e => e.DetailedAddress).HasMaxLength(500);
             entity.Property(e => e.Title).HasMaxLength(255);
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
 
-            entity.HasOne(d => d.ReliefTeam).WithMany(p => p.ReliefTeamActivities)
+            // REMOVED: UpdatedAt configuration
+
+            // Updated relationships:
+            entity.HasOne(d => d.ReliefTeam)
+                .WithMany(p => p.ReliefTeamActivities)
                 .HasForeignKey(d => d.ReliefTeamId)
                 .HasConstraintName("FK__ReliefTea__Relie__17036CC0");
 
-            entity.HasOne(d => d.User).WithMany(p => p.ReliefTeamActivities)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__ReliefTea__UserI__17F790F9");
+            // New relationship for PostedBy
+            entity.HasOne(d => d.PostedByNavigation)  // Changed to PostedByUser
+                .WithMany()  // Or specify navigation if exists
+                .HasForeignKey(d => d.PostedBy)  // Changed to PostedBy
+                .HasConstraintName("FK_ReliefTeamActivity_User_PostedBy");  // New constraint name
         });
-
         modelBuilder.Entity<ReportPhoto>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__ReportPh__3214EC07EC09733F");
@@ -377,6 +381,12 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.DisasterReportId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__ReportPho__Disas__5FB337D6");
+
+            entity.HasOne(d => d.ReliefTeamActivity)
+           .WithMany(p => p.ReportPhotos)
+           .HasForeignKey(d => d.ReliefTeamActivityId)
+           .OnDelete(DeleteBehavior.Cascade) // ADD THIS LINE
+           .HasConstraintName("FK_ReportPhoto_ReliefTeamActivity");
         });
 
         modelBuilder.Entity<RequestAssignment>(entity =>
@@ -444,7 +454,15 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(255);
 
             entity.Property(e => e.RefreshTokenExpiryTime);
-            
+
+         
+    entity.HasMany(u => u.ReliefTeamActivities)
+        .WithOne(a => a.PostedByNavigation)  // Must match navigation property name
+        .HasForeignKey(a => a.PostedBy)      // Foreign key property name
+        .OnDelete(DeleteBehavior.Restrict)
+        .HasConstraintName("FK_User_PostedActivities");
+
+
         });
         
         modelBuilder.Entity<UserReliefTeam>(entity =>
@@ -464,6 +482,7 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK__UserRelie__UserI__40058253");
         });
 
+       
         OnModelCreatingPartial(modelBuilder);
     }
 

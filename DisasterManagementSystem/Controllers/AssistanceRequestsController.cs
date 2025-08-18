@@ -56,11 +56,11 @@ namespace DisasterManagementSystem_Api.Controllers
             var result = await _requestService.GetUserRequestsAsync(userId);
             return result.Execute();
         }
-
         [HttpGet("{id}")]
         public async Task<IResult> GetRequestById(int id)
         {
-            var result = await _requestService.GetRequestByIdAsync(id);
+            // Always include assignments for the details view
+            var result = await _requestService.GetRequestByIdAsync(id, true);
             return result.Execute();
         }
 
