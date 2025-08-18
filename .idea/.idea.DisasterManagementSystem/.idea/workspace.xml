@@ -11,31 +11,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="373ff947-e936-4a3b-91b4-d8bb06058b3d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem/Controllers/FinancialAllocationController.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/AllocationType.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/DisasterKnowledge.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/FinancialAllocation.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/Resource.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Repositories/Implements/DisasterKnowledgeRespository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Repositories/Implements/FinancialAllocationRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Repositories/Implements/ResourceRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Repositories/Interfaces/IDisasterKnowledgeRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Repositories/Interfaces/IFinancialAllocationRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Repositories/Interfaces/IResourceRepository.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Models/DisasterKnowledgeDtos/DisasterKnowledgeRequestDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Models/DisasterKnowledgeDtos/DisasterKnowledgeResponseDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Models/FinancialAllocationDtos/FinancialAllocationRequestDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Models/FinancialAllocationDtos/FinancialAllocationResponseDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Services/Implements/DisasterKnowledgeService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Services/Implements/FinancialAllocationService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Services/Interfaces/IDisasterKnowledgeService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Services/Interfaces/IFinancialAllocationService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.DisasterManagementSystem/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DisasterManagementSystem/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/AppDbContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/AppDbContext.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/DisasterDbContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/DisasterDbContext.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/Donation.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/Donation.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Services/DisasterManagementSystem_Services.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/DisasterManagementSystem_Services.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Services/Services/Implements/DonationService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Services/Implements/DonationService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/ReliefTeamActivity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/ReliefTeamActivity.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,32 +62,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;.NET Launch Settings Profile.DisasterManagementSystem_Api: IIS Express.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ChatTagsLlmMigration&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ClientConfigCleanupMigration&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.CodyAccountHistoryMigration&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.CodyAccountsIdsRefresh&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.CodyAssignOrphanedChatsToActiveAccount&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.CodyConvertUrlToCodebaseName&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.CodyHistoryLlmMigration&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.CodyMigrateChatHistory-v2&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.CodyProjectSettingsMigration&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.DeprecatedChatLlmMigration&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ToggleCodyToolWindowAfterMigration&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;develop&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    ".NET Launch Settings Profile.DisasterManagementSystem_Api: IIS Express.executor": "Run",
+    "RunOnceActivity.ChatTagsLlmMigration": "true",
+    "RunOnceActivity.ClientConfigCleanupMigration": "true",
+    "RunOnceActivity.CodyAccountHistoryMigration": "true",
+    "RunOnceActivity.CodyAccountsIdsRefresh": "true",
+    "RunOnceActivity.CodyAssignOrphanedChatsToActiveAccount": "true",
+    "RunOnceActivity.CodyConvertUrlToCodebaseName": "true",
+    "RunOnceActivity.CodyHistoryLlmMigration": "true",
+    "RunOnceActivity.CodyMigrateChatHistory-v2": "true",
+    "RunOnceActivity.CodyProjectSettingsMigration": "true",
+    "RunOnceActivity.DeprecatedChatLlmMigration": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.ToggleCodyToolWindowAfterMigration": "true",
+    "git-widget-placeholder": "develop",
+    "ignore.virus.scanning.warn.message": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected=".NET Launch Settings Profile.DisasterManagementSystem_Api: IIS Express">
     <configuration name="DisasterManagementSystem_Api: IIS Express" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
       <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/DisasterManagementSystem/DisasterManagementSystem_Api.csproj" />
@@ -192,6 +169,7 @@
       <workItem from="1754814413147" duration="148000" />
       <workItem from="1754814622364" duration="3129000" />
       <workItem from="1755358621645" duration="2000" />
+      <workItem from="1755508369891" duration="467000" />
     </task>
     <servers />
   </component>

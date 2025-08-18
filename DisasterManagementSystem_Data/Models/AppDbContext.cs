@@ -244,6 +244,7 @@ public partial class AppDbContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.Severity).HasMaxLength(20);
             entity.Property(e => e.Source).HasMaxLength(100);
+            entity.Property(e => e.Source).HasMaxLength(100);
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasDefaultValue("Pending");
@@ -348,6 +349,7 @@ public partial class AppDbContext : DbContext
             entity.ToTable("Impact");
 
             entity.Property(e => e.ObjectName).HasMaxLength(255);
+            entity.Property(e => e.Status).HasMaxLength(50);
             entity.Property(e => e.Type).HasMaxLength(50);
             entity.Property(e => e.Value).HasMaxLength(100);
 
@@ -424,35 +426,31 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ReliefTeamActivity>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ReliefTe__3214EC07DBFE4CE8");
+            entity.HasKey(e => e.Id).HasName("PK__ReliefTe__3214EC07B02C2A73");
 
             entity.ToTable("ReliefTeamActivity");
 
-            entity.Property(e => e.ActivityDate)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-
+            entity.Property(e => e.ActivityDate).HasColumnType("datetime");
+            entity.Property(e => e.ActivityType).HasMaxLength(100);
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
-
             entity.Property(e => e.DetailedAddress).HasMaxLength(500);
+            entity.Property(e => e.ExpenseAmount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ItemsDistributed).HasMaxLength(500);
             entity.Property(e => e.Title).HasMaxLength(255);
 
-            // REMOVED: UpdatedAt configuration
+            entity.HasOne(d => d.PostedByNavigation).WithMany(p => p.ReliefTeamActivities)
+                .HasForeignKey(d => d.PostedBy)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ReliefTeamActivity_User");
 
-            // Updated relationships:
-            entity.HasOne(d => d.ReliefTeam)
-                .WithMany(p => p.ReliefTeamActivities)
+            entity.HasOne(d => d.ReliefTeam).WithMany(p => p.ReliefTeamActivities)
                 .HasForeignKey(d => d.ReliefTeamId)
-                .HasConstraintName("FK__ReliefTea__Relie__17036CC0");
-
-            // New relationship for PostedBy
-            entity.HasOne(d => d.PostedByNavigation)  // Changed to PostedByUser
-                .WithMany()  // Or specify navigation if exists
-                .HasForeignKey(d => d.PostedBy)  // Changed to PostedBy
-                .HasConstraintName("FK_ReliefTeamActivity_User_PostedBy");  // New constraint name
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ReliefTeamActivity_ReliefTeam");
         });
+
         modelBuilder.Entity<ReportPhoto>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__ReportPh__3214EC07EC09733F");
