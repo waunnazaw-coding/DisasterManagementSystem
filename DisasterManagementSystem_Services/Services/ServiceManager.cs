@@ -4,6 +4,7 @@ using DisasterManagementSystem_Services.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using DisasterManagementSystem_Services.Service;
+using DisasterManagementSystem_Services.Services.Implements.DisasterManagementSystem_Services.Services.Implements;
 
 namespace DisasterManagementSystem_Services.Services
 {
