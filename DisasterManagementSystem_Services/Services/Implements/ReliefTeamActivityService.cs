@@ -16,7 +16,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
     {
         private readonly IReliefTeamActivityRepository _activityRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IReliefTeamRepository _reliefTeamRepository; // Ensure this exists
+        private readonly IReliefTeamRepository _reliefTeamRepository;
         private readonly IReportPhotoService _photoService;
         private readonly AppDbContext _context;
         private readonly ILogger<ReliefTeamActivityService> _logger;

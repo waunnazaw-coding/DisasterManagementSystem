@@ -106,5 +106,14 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
             return await _context.ReliefTeams
                 .FirstOrDefaultAsync(rt => rt.UserId == userId);
         }
+
+        public async Task<List<ReliefTeam>> GetTeamsByUserIdAsync(Guid userId)
+        {
+            return await _context.ReliefTeams
+                .Where(rt => rt.UserId == userId)
+                .ToListAsync();
+        }
+
+
     }
 }

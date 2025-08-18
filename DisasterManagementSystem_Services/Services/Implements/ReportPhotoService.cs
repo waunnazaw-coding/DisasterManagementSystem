@@ -417,6 +417,17 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 await _cloudinary.DestroyAsync(deleteParams);
             }
         }
+        public async Task DeleteCloudinaryFile(string url)
+        {
+            if (string.IsNullOrEmpty(url)) return;
+
+            var publicId = GetPublicIdFromUrl(url);
+            if (!string.IsNullOrEmpty(publicId))
+            {
+                var deleteParams = new DeletionParams(publicId);
+                await _cloudinary.DestroyAsync(deleteParams);
+            }
+        }
 
         private string? GetPublicIdFromUrl(string url)
         {
