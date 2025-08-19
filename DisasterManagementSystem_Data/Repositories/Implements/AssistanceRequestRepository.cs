@@ -51,10 +51,10 @@ namespace DisasterManagementSystem_Data.Repositories
         public async Task<IEnumerable<AssistanceRequest>> GetAllAsync()
         {
             return await _context.AssistanceRequests
-                .Include(r => r.DisasterEvent)
+               .Include(r => r.DisasterEvent)
                 .Include(r => r.User)
                 .Include(r => r.Location)
-                .Include(r => r.DisasterReport)
+                //.Include(r => r.DisasterReport)
                 .AsNoTracking()
                 .ToListAsync();
         }

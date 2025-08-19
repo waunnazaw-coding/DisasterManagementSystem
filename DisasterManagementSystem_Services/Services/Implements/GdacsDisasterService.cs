@@ -97,6 +97,27 @@ namespace DisasterManagementSystem_Services.Services.Implements
             await _repository.UpsertAsync(disasterEvent);
         }
 
+        public async Task<IEnumerable<GdacsdisasterEvent>> GetAllEventsAsync()
+        {
+            return await _repository.GetAllAsync();
+        }
+
+        public async Task<List<GdacsdisasterEvent>> GetTodaysEventsAsync()
+        {
+            var today = DateTime.Today;
+            return await _repository.GetEventsByDateAsync(today);
+        }
+
+        public async Task<List<GdacsdisasterEvent>> GetEventsForCurrentWeekAsync()
+        {
+            DateTime today = DateTime.Today;
+            int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+            DateTime startOfWeek = today.AddDays(-1 * diff).Date;     // Monday
+            DateTime endOfWeek = startOfWeek.AddDays(6).Date;         // Sunday
+
+            return await _repository.GetEventsByDateRangeAsync(startOfWeek, endOfWeek);
+        }
+
         private double? ParseDouble(string? value)
         {
             if (!string.IsNullOrWhiteSpace(value) && double.TryParse(value, out var result))
@@ -105,6 +126,8 @@ namespace DisasterManagementSystem_Services.Services.Implements
             }
             return null;
         }
+
+        
     }
 
 }

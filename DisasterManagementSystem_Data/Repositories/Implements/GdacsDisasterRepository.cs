@@ -48,7 +48,21 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
 
         public async Task<IEnumerable<GdacsdisasterEvent>> GetAllAsync()
         {
-            return await _context.GdacsdisasterEvents.ToListAsync();
+            return await _context.Set<GdacsdisasterEvent>().ToListAsync();
+        }
+
+        public async Task<List<GdacsdisasterEvent>> GetEventsByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _context.Set<GdacsdisasterEvent>()
+                .Where(e => e.EventDate.HasValue && e.EventDate.Value.Date >= startDate.Date && e.EventDate.Value.Date <= endDate.Date)
+                .ToListAsync();
+        }
+
+        public async Task<List<GdacsdisasterEvent>> GetEventsByDateAsync(DateTime date)
+        {
+            return await _context.Set<GdacsdisasterEvent>()
+                .Where(e => e.EventDate.HasValue && e.EventDate.Value.Date == date.Date)
+                .ToListAsync();
         }
     }
 }
