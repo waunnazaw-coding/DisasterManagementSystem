@@ -10,6 +10,7 @@ namespace DisasterManagementSystem_Services.Service
         Task<Result<DisasterEventDetailsDto>> GetByIdWithLocationAsync(int eventId);
         Task<Result<IEnumerable<DisasterEventListDto>>> GetAllAsync();
         Task<Result<IEnumerable<DisasterEventListDto>>> GetAllActiveAsync();
+        Task<Result<IEnumerable<DisasterEventListDto>>> GetAllForMapViewAsync();
         Task<Result<int>> GetActiveCountAsync();
         Task<List<DisasterEventListDto>> GetAllWithAffectedPeopleAsync();
         Task<IEnumerable<DisasterEventListDto>> SearchByNameAsync(string name);

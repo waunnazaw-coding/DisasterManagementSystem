@@ -12,5 +12,6 @@ namespace DisasterManagementSystem_Data.Repositories
         Task AddAsync(DisasterEvent disasterEvent);
         Task UpdateAsync(DisasterEvent disasterEvent);
         Task DeleteAsync(int id);
+        Task<bool> ExistsAsync(int id);
     }
 }

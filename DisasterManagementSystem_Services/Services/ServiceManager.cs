@@ -11,6 +11,8 @@ namespace DisasterManagementSystem_Services.Services
     {
         public static void AddDomain(this WebApplicationBuilder builder)
         {
+            builder.Services.AddHttpContextAccessor();
+
             builder.Services.AddScoped<IlocationService, LocationService>();
             builder.Services.AddScoped<IDisasterReportService, DisasterReportService>();
             builder.Services.AddScoped<IDisasterEventService, DisasterEventService>();
@@ -21,7 +23,10 @@ namespace DisasterManagementSystem_Services.Services
             builder.Services.AddScoped<IJwtService, JwtService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IReportPhotoService, ReportPhotoService>();
-            builder.Services.AddScoped<IDonationService,DonationService>();
+            builder.Services.AddScoped<IDonationService, DonationService>();
+
+            builder.Services.AddScoped<INotificationService, NotificationService>(); // <-- added
         }
+
     }
 }

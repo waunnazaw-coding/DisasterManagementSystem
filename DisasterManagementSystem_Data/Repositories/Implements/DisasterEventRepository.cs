@@ -26,6 +26,7 @@ namespace DisasterManagementSystem_Data.Repositories
             await _context.DisasterEvents
                 .Include(e => e.DisasterType) // Include DisasterType
                 .Include(e => e.Location)     // Include Location
+                .Include(e => e.CreatedUser)
                 .ToListAsync();
 
         public async Task<int> CountVerifiedAsync()
@@ -76,5 +77,11 @@ namespace DisasterManagementSystem_Data.Repositories
                 throw new KeyNotFoundException($"DisasterEvent with ID {id} not found.");
             }
         }
+
+        public async Task<bool> ExistsAsync(int id)
+        {
+            return await _context.DisasterEvents.AnyAsync(r => r.Id == id);
+        }
+
     }
 }

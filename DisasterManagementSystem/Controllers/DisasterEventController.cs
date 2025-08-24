@@ -1,10 +1,7 @@
-using System.Security.Claims;
-using DisasterManagementSystem_Data.Models;
-using DisasterManagementSystem_Data.Service;
+
 using DisasterManagementSystem_Services.Models;
-using DisasterManagementSystem_Services.Models.LocationDtos;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using DisasterManagementSystem_Services.Service;
 
 namespace DisasterManagementSystem_API.Controllers
 {
@@ -31,6 +28,14 @@ namespace DisasterManagementSystem_API.Controllers
         public async Task<IActionResult> GetAllActive()
         {
             var result = await _eventService.GetAllActiveAsync();
+            if (result.IsSuccess)
+                return Ok(new { isSuccess = true, data = result.Data });
+            return BadRequest(result.Message);
+        }
+        [HttpGet("all-map-view")]
+        public async Task<IActionResult> GetAllForMapView()
+        {
+            var result = await _eventService.GetAllForMapViewAsync();
             if (result.IsSuccess)
                 return Ok(new { isSuccess = true, data = result.Data });
             return BadRequest(result.Message);

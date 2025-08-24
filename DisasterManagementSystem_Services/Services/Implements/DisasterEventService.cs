@@ -299,6 +299,35 @@ namespace DisasterManagementSystem_Services.Service
                     ? _geoJsonWriter.Write(FixPolygonOrientation(e.Location.Geography))
                     : null
             }).ToList();
+            return Result<IEnumerable<DisasterEventListDto>>.Success(eventDtos);
+        }
+        public async Task<Result<IEnumerable<DisasterEventListDto>>> GetAllForMapViewAsync()
+        {
+            var events = await _disasterEventRepository.GetAllAsync();
+
+            var eventDtos = events.Select(e => new DisasterEventListDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+                DisasterTypeName = e.DisasterType?.Name ?? "Unknown",
+                StartDate = e.StartDate,
+                LocationName = e.Location?.Name ?? "Unknown",
+                Region = e.Location?.Region,
+                Country = e.Location?.Country,
+                Address = e.Location?.Address,
+                Severity = e.Severity,
+                Status = e.Status,
+                Description = e.Description,
+                Source = e.Source,
+                CreatedUserId = e.CreatedUserId,
+                CreatedUserName = e.CreatedUser?.Name ?? "Unknown",
+                CreatedAt = e.CreatedAt,
+                UpdatedUserId = e.UpdatedUserId,
+                UpdatedAt = e.UpdatedAt,
+                LocationGeoJson = e.Location?.Geography != null
+                    ? _geoJsonWriter.Write(FixPolygonOrientation(e.Location.Geography))
+                    : null
+            }).ToList();
 
 
             return Result<IEnumerable<DisasterEventListDto>>.Success(eventDtos);
@@ -515,6 +544,8 @@ namespace DisasterManagementSystem_Services.Service
                 disasterEvent.StartDate = dto.StartDate ?? disasterEvent.StartDate;
                 disasterEvent.Severity = dto.Severity;
                 disasterEvent.Source = dto.Source;
+                disasterEvent.Status = dto.Status ?? "Active";
+
                 disasterEvent.Description = dto.Description;
                 disasterEvent.UpdatedUserId = Guid.Parse(currentUserId);
                 disasterEvent.UpdatedAt = DateTime.UtcNow;
@@ -672,7 +703,7 @@ namespace DisasterManagementSystem_Services.Service
         // You may need to implement this method if not already present:
         private static object FixPolygonOrientation(object geography)
         {
-             if (geography == null) return null;
+            if (geography == null) return null;
             // Implement polygon orientation fix logic here if needed.
             return geography;
         }

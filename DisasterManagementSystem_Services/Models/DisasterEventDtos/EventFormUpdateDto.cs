@@ -12,6 +12,7 @@ public class EventFormUpdateDto
     // ---------- Event Info ----------
     public string Name { get; set; } = string.Empty;
     public int DisasterTypeId { get; set; }
+    public string? Status { get; set; }
     public DateOnly? StartDate { get; set; }
     public string? Severity { get; set; }
     public string? Description { get; set; }
