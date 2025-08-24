@@ -81,10 +81,5 @@ namespace DisasterManagementSystem_Data.Repositories
             }
         }
 
-        public async Task<bool> ExistsAsync(int id)
-        {
-            return await _context.DisasterEvents.AnyAsync(r => r.Id == id);
-        }
-
     }
 }
