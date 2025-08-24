@@ -34,45 +34,45 @@ namespace DisasterManagementSystem_Services.Services.Implements
             try
             {
                 // Validate donation type
-                if (donationDto.Type != "Money" && donationDto.Type != "Item")
-                    return Result<DonationDto>.ValidationError("Donation type must be either 'Money' or 'Item'.");
+                //if (donationDto.Type != "Money" && donationDto.Type != "Item")
+                //    return Result<DonationDto>.ValidationError("Donation type must be either 'Money' or 'Item'.");
 
-                // Validate money donation
-                if (donationDto.Type == "Money")
-                {
-                    if (!donationDto.Amount.HasValue || donationDto.Amount <= 0)
-                        return Result<DonationDto>.ValidationError("Amount is required for money donations and must be greater than 0.");
+                //// Validate money donation
+                //if (donationDto.Type == "Money")
+                //{
+                //    if (!donationDto.Amount.HasValue || donationDto.Amount <= 0)
+                //        return Result<DonationDto>.ValidationError("Amount is required for money donations and must be greater than 0.");
 
-                    if (string.IsNullOrEmpty(donationDto.Currency))
-                        return Result<DonationDto>.ValidationError("Currency is required for money donations.");
+                //    if (string.IsNullOrEmpty(donationDto.Currency))
+                //        return Result<DonationDto>.ValidationError("Currency is required for money donations.");
 
-                    if (string.IsNullOrEmpty(donationDto.PaymentMethod))
-                        return Result<DonationDto>.ValidationError("Payment method is required for money donations.");
+                //    if (string.IsNullOrEmpty(donationDto.PaymentMethod))
+                //        return Result<DonationDto>.ValidationError("Payment method is required for money donations.");
 
-                    // Validate payment method
-                    var validPaymentMethods = new[] { "KPay", "WavePay", "BankTransfer" };
-                    if (!validPaymentMethods.Contains(donationDto.PaymentMethod))
-                        return Result<DonationDto>.ValidationError("Invalid payment method. Must be KPay, WavePay, or BankTransfer.");
+                //    // Validate payment method
+                //    var validPaymentMethods = new[] { "KPay", "WavePay", "BankTransfer" };
+                //    if (!validPaymentMethods.Contains(donationDto.PaymentMethod))
+                //        return Result<DonationDto>.ValidationError("Invalid payment method. Must be KPay, WavePay, or BankTransfer.");
 
-                    // Reset quantity fields for money donations
-                    donationDto.Quantity = null;
-                    donationDto.Unit = null;
-                }
+                //    // Reset quantity fields for money donations
+                //    donationDto.Quantity = null;
+                //    donationDto.Unit = null;
+                //}
 
                 // Validate item donation
-                if (donationDto.Type == "Item")
-                {
-                    if (!donationDto.Quantity.HasValue || donationDto.Quantity <= 0)
-                        return Result<DonationDto>.ValidationError("Quantity is required for item donations and must be greater than 0.");
+                //if (donationDto.Type == "Item")
+                //{
+                //    //if (!donationDto.Quantity.HasValue || donationDto.Quantity <= 0)
+                //    //    return Result<DonationDto>.ValidationError("Quantity is required for item donations and must be greater than 0.");
 
-                    if (string.IsNullOrEmpty(donationDto.Unit))
-                        return Result<DonationDto>.ValidationError("Unit is required for item donations.");
+                //    //if (string.IsNullOrEmpty(donationDto.Unit))
+                //    //    return Result<DonationDto>.ValidationError("Unit is required for item donations.");
 
-                    // Reset amount fields for item donations
-                    donationDto.Amount = null;
-                    donationDto.Currency = null;
-                    donationDto.PaymentMethod = null;
-                }
+                //    // Reset amount fields for item donations
+                //    donationDto.Amount = null;
+                //    donationDto.Currency = null;
+                //    donationDto.PaymentMethod = null;
+                //}
 
                 // Validate source type
                 var validSourceTypes = new[] { "Personal", "Organization", "NGO", "Anonymous", "Company" };
@@ -89,14 +89,15 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 {
                     DonorUserId = userId,
                     Name = donationDto.Name,
-                    Type = donationDto.Type,
+                    //Type = donationDto.Type,
                     Description = donationDto.Description,
-                    Quantity = donationDto.Quantity,
-                    Unit = donationDto.Unit,
+                    //Quantity = donationDto.Quantity,
+                    //Unit = donationDto.Unit,
                     Amount = donationDto.Amount,
+                    Category = donationDto.Category,
                     Currency = donationDto.Currency,
                     PaymentMethod = donationDto.PaymentMethod,
-                    DonorPhoneNumber = donationDto.DonorPhoneNumber,
+                    Phone = donationDto.DonorPhoneNumber,
                     DateReceived = DateTime.UtcNow,
                     SourceType = donationDto.SourceType,
                     Status = "Pending"
@@ -113,7 +114,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     Id = createdDonation.Id,
                     DonorUserId = createdDonation.DonorUserId,
                     DonorName = user.Name,
-                    Type = createdDonation.Type,
+                    //Type = createdDonation.Type,
                     Name = createdDonation.Name,
                     Description = createdDonation.Description,
                     Quantity = createdDonation.Quantity,
@@ -121,7 +122,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     Amount = createdDonation.Amount,
                     Currency = createdDonation.Currency,
                     PaymentMethod = createdDonation.PaymentMethod,
-                    DonorPhoneNumber = createdDonation.DonorPhoneNumber,
+                    DonorPhoneNumber = createdDonation.Phone,
                     DateReceived = createdDonation.DateReceived,
                     SourceType = createdDonation.SourceType,
                     Status = createdDonation.Status
@@ -145,15 +146,17 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     Id = d.Id,
                     DonorUserId = d.DonorUserId,
                     DonorName = d.DonorUser?.Name,
-                    Type = d.Type,
+                    //Type = d.Type,
+                    Category = d.Category,
                     Name = d.Name,
                     Description = d.Description,
                     Quantity = d.Quantity,
                     Unit = d.Unit,
                     Amount = d.Amount,
+                    
                     Currency = d.Currency,
                     PaymentMethod = d.PaymentMethod,
-                    DonorPhoneNumber = d.DonorPhoneNumber,
+                    DonorPhoneNumber = d.Phone,
                     DateReceived = d.DateReceived,
                     SourceType = d.SourceType,
                     Status = d.Status
@@ -181,15 +184,16 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     Id = d.Id,
                     DonorUserId = d.DonorUserId,
                     DonorName = user.Name,
-                    Type = d.Type,
+                    //Type = d.Type,
                     Name = d.Name,
+                    Category = d.Category,
                     Description = d.Description,
                     Quantity = d.Quantity,
                     Unit = d.Unit,
                     Amount = d.Amount,
                     Currency = d.Currency,
                     PaymentMethod = d.PaymentMethod,
-                    DonorPhoneNumber = d.DonorPhoneNumber,
+                    DonorPhoneNumber = d.Phone,
                     DateReceived = d.DateReceived,
                     SourceType = d.SourceType,
                     Status = d.Status
@@ -216,15 +220,16 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     Id = donation.Id,
                     DonorUserId = donation.DonorUserId,
                     DonorName = donation.DonorUser?.Name,
-                    Type = donation.Type,
+                    //Type = donation.Type,
                     Name = donation.Name,
+                    Category = donation.Category,
                     Description = donation.Description,
                     Quantity = donation.Quantity,
                     Unit = donation.Unit,
                     Amount = donation.Amount,
                     Currency = donation.Currency,
                     PaymentMethod = donation.PaymentMethod,
-                    DonorPhoneNumber = donation.DonorPhoneNumber,
+                    DonorPhoneNumber = donation.Phone,
                     DateReceived = donation.DateReceived,
                     SourceType = donation.SourceType,
                     Status = donation.Status
@@ -275,7 +280,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     Id = donation.Id,
                     DonorUserId = donation.DonorUserId,
                     DonorName = donation.DonorUser?.Name,
-                    Type = donation.Type,
+                    //Type = donation.Type,
                     Name = donation.Name,
                     Description = donation.Description,
                     Quantity = donation.Quantity,
@@ -283,7 +288,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     Amount = donation.Amount,
                     Currency = donation.Currency,
                     PaymentMethod = donation.PaymentMethod,
-                    DonorPhoneNumber = donation.DonorPhoneNumber,
+                    DonorPhoneNumber = donation.Phone,
                     DateReceived = donation.DateReceived,
                     SourceType = donation.SourceType,
                     Status = donation.Status
@@ -356,10 +361,10 @@ namespace DisasterManagementSystem_Services.Services.Implements
 
                 // Update donation fields
                 donation.Name = donationDto.Name;
-                donation.Type = donationDto.Type;
+               // donation.Type = donationDto.Type;
                 donation.Description = donationDto.Description;
                 donation.SourceType = donationDto.SourceType;
-                donation.DonorPhoneNumber = donationDto.DonorPhoneNumber;
+                donation.Phone = donationDto.DonorPhoneNumber;
 
                 if (donationDto.Type == "Money")
                 {
@@ -390,7 +395,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     Id = donation.Id,
                     DonorUserId = donation.DonorUserId,
                     DonorName = user?.Name,
-                    Type = donation.Type,
+                    //Type = donation.Type,
                     Name = donation.Name,
                     Description = donation.Description,
                     Quantity = donation.Quantity,
@@ -398,7 +403,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     Amount = donation.Amount,
                     Currency = donation.Currency,
                     PaymentMethod = donation.PaymentMethod,
-                    DonorPhoneNumber = donation.DonorPhoneNumber,
+                    DonorPhoneNumber = donation.Phone,
                     DateReceived = donation.DateReceived,
                     SourceType = donation.SourceType,
                     Status = donation.Status
@@ -450,7 +455,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     Id = d.Id,
                     DonorUserId = d.DonorUserId,
                     DonorName = d.DonorUser?.Name,
-                    Type = d.Type,
+                    //Type = d.Type,
                     Name = d.Name,
                     Description = d.Description,
                     Quantity = d.Quantity,
@@ -458,7 +463,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     Amount = d.Amount,
                     Currency = d.Currency,
                     PaymentMethod = d.PaymentMethod,
-                    DonorPhoneNumber = d.DonorPhoneNumber,
+                    DonorPhoneNumber = d.Phone,
                     DateReceived = d.DateReceived,
                     SourceType = d.SourceType,
                     Status = d.Status
@@ -470,6 +475,16 @@ namespace DisasterManagementSystem_Services.Services.Implements
             {
                 return Result<List<DonationDto>>.Failure($"Error retrieving recent donations: {ex.Message}");
             }
+        }
+
+        public async Task<int> GetTotalPeopleByPhoneAsync()
+        {
+            return await _donationRepository.GetTotalPeopleByPhoneAsync();
+        }
+
+        public async Task<decimal?> GetTotalAmountLastYearAsync()
+        {
+            return await _donationRepository.GetTotalAmountLastYearAsync();
         }
     }
 }

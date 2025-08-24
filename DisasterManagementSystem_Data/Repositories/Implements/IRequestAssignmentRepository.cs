@@ -56,10 +56,12 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
             return await _context.RequestAssignments
                 .Where(ra => ra.ReliefTeamId == reliefTeamId)
                 .Include(ra => ra.AssistanceRequest)
-                .Include(ra => ra.AssignedByNavigation) // ✅ fixed
+                .Include(ra => ra.AssignedByNavigation)
+                .OrderByDescending(ra => ra.AssignedAt) // 👈 Sort by latest date
                 .AsNoTracking()
                 .ToListAsync();
         }
+
 
         public async Task<RequestAssignment> CreateAsync(RequestAssignment assignment)
         {

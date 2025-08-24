@@ -21,7 +21,11 @@ public partial class ReportPhoto
 
     public DateTime? UploadedAt { get; set; }
 
+    public int? ReliefTeamActivityId { get; set; }
+
     public virtual DisasterEvent? DisasterEvent { get; set; }
 
     public virtual DisasterReport? DisasterReport { get; set; }
+
+    public virtual ReliefTeamActivity? ReliefTeamActivity { get; set; }
 }

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using DisasterManagementSystem_Services.Services.Interfaces;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/reliefteams")]
 public class ReliefTeamController : ControllerBase
 {
     private readonly IReliefTeamsService _reliefTeamService;

@@ -9,8 +9,8 @@ namespace DisasterManagementSystem_Services.Models
 {
     public class CreateDonationDto
     {
-        [Required(ErrorMessage = "Donation type is required")]
-        public string Type { get; set; } = null!; // "Money" or "Item"
+        //[Required(ErrorMessage = "Donation type is required")]
+        //public string Type { get; set; } = null!; // "Money" or "Item"
 
         [StringLength(200, ErrorMessage = "Name cannot exceed 200 characters")]
         public string? Name { get; set; }
@@ -18,11 +18,13 @@ namespace DisasterManagementSystem_Services.Models
         [StringLength(1000, ErrorMessage = "Description cannot exceed 1000 characters")]
         public string? Description { get; set; }
 
-        [Range(0.01, double.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
-        public decimal? Quantity { get; set; } // For item donations
+        public string? Category {  get; set; }
 
-        [StringLength(50, ErrorMessage = "Unit cannot exceed 50 characters")]
-        public string? Unit { get; set; } // For item donations
+        //[Range(0.01, double.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
+        //public decimal? Quantity { get; set; } // For item donations
+
+        //[StringLength(50, ErrorMessage = "Unit cannot exceed 50 characters")]
+        //public string? Unit { get; set; } // For item donations
 
         [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]
         public decimal? Amount { get; set; } // For money donations
@@ -51,6 +53,7 @@ namespace DisasterManagementSystem_Services.Models
         public string? Name { get; set; }
         public string? Description { get; set; }
         public decimal? Quantity { get; set; }
+        public string ? Category { get; set; }
         public string? Unit { get; set; }
         public decimal? Amount { get; set; }
         public string? Currency { get; set; }

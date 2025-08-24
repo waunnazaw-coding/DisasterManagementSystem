@@ -4,22 +4,15 @@
     <projectFile profileName="IIS Express">DisasterManagementSystem/DisasterManagementSystem_Api.csproj</projectFile>
     <projectFile profileName="http">DisasterManagementSystem/DisasterManagementSystem_Api.csproj</projectFile>
     <projectFile profileName="https">DisasterManagementSystem/DisasterManagementSystem_Api.csproj</projectFile>
+    <projectFile pubXmlPath="DisasterManagementSystem/Properties/PublishProfiles/FolderProfile.pubxml">DisasterManagementSystem/DisasterManagementSystem_Api.csproj</projectFile>
   </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="373ff947-e936-4a3b-91b4-d8bb06058b3d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Models/OperationResponseDto.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Models/ReliefTeamDtos/UpdateReliefTeamRequestDto.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.DisasterManagementSystem/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DisasterManagementSystem/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem/Controllers/ReliefTeamController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem/Controllers/ReliefTeamController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem/appsettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem/appsettings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Data/Repositories/Implements/ReliefTeamRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Repositories/Implements/ReliefTeamRepository.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Data/Repositories/Interfaces/IReliefTeamRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Repositories/Interfaces/IReliefTeamRepository.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Services/Models/EmailSettings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Models/EmailSettings.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Services/Services/Implements/ReliefTeamService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Services/Implements/ReliefTeamService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Services/Services/Interfaces/IReliefTeamService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Services/Services/Interfaces/IReliefTeamService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/AppDbContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/AppDbContext.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/ReliefTeamActivity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/ReliefTeamActivity.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,7 +77,7 @@
     "RunOnceActivity.DeprecatedChatLlmMigration": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.ToggleCodyToolWindowAfterMigration": "true",
-    "git-widget-placeholder": "wnz__relief-team-and-admin",
+    "git-widget-placeholder": "develop",
     "ignore.virus.scanning.warn.message": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -171,6 +164,12 @@
       <workItem from="1753407454776" duration="943000" />
       <workItem from="1753419123670" duration="1869000" />
       <workItem from="1753585338513" duration="3836000" />
+      <workItem from="1754558699436" duration="2298000" />
+      <workItem from="1754798728151" duration="3853000" />
+      <workItem from="1754814413147" duration="148000" />
+      <workItem from="1754814622364" duration="3129000" />
+      <workItem from="1755358621645" duration="2000" />
+      <workItem from="1755508369891" duration="467000" />
     </task>
     <servers />
   </component>

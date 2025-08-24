@@ -91,7 +91,7 @@ public class ReliefTeamsService : IReliefTeamsService
 
             // Generate reset/set password token (valid 24h)
             var token = _jwtService.GenerateToken(user.Id, user.Role, TimeSpan.FromHours(24));
-            var resetUrl = $"http://localhost:5173/reset-password?token={token}";
+            var resetUrl = $"http://localhost:5173/reset-password?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(user.Email)}";
 
             var subject = "Relief Team Invitation - Set Your Password";
             var body = $@"

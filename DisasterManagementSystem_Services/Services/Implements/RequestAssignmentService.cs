@@ -285,6 +285,47 @@ namespace DisasterManagementSystem_Services.Services.Implements
             }
         }
 
+        public async Task<Result<List<RequestAssignmentDto>>> GetAssignmentsByUserAsync(Guid userId)
+        {
+            try
+            {
+                // Get all teams where user is the creator
+                var userTeams = await _reliefTeamRepository.GetTeamsByUserIdAsync(userId);
+                if (!userTeams.Any())
+                {
+                    return Result<List<RequestAssignmentDto>>.Success(new List<RequestAssignmentDto>());
+                }
+
+                // Get all assignments for user's teams
+                var assignments = new List<RequestAssignment>();
+                foreach (var team in userTeams)
+                {
+                    var teamAssignments = await _assignmentRepository.GetByReliefTeamIdAsync(team.Id);
+                    assignments.AddRange(teamAssignments);
+                }
+
+                // Map to DTOs
+                var dtos = new List<RequestAssignmentDto>();
+                foreach (var assignment in assignments)
+                {
+                    var request = await _requestRepository.GetByIdAsync(assignment.AssistanceRequestId);
+                    var reliefTeam = userTeams.FirstOrDefault(rt => rt.Id == assignment.ReliefTeamId);
+                    var assignedBy = assignment.AssignedBy.HasValue
+                        ? await _userRepository.GetByIdAsync(assignment.AssignedBy.Value)
+                        : null;
+
+                    dtos.Add(MapToDto(assignment, request, reliefTeam, assignedBy));
+                }
+
+                return Result<List<RequestAssignmentDto>>.Success(dtos);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting assignments by user");
+                return Result<List<RequestAssignmentDto>>.Failure("Error getting assignments by user");
+            }
+        }
+
         private bool IsValidStatusTransition(string currentStatus, string newStatus)
         {
             var validTransitions = new Dictionary<string, List<string>>

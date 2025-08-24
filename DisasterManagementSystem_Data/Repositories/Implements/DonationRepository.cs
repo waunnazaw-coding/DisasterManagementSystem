@@ -71,5 +71,44 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
                 .Take(3) // Get last 5 donations
                 .ToListAsync();
         }
+
+        public async Task<int> GetTotalPeopleByPhoneAsync()
+        {
+            return await _context.Donations
+                .Where(d => d.Phone != null)
+                .Select(d => d.Phone)
+                .Distinct()
+                .CountAsync();
+        }
+
+        public async Task<decimal?> GetTotalAmountNowYearAsync()
+        {
+
+            var currentYear = DateTime.Now.Year; // or DateTime.UtcNow.Year if needed
+
+            return await _context.Donations
+                .Where(d => d.DateReceived != null && d.DateReceived.Year == currentYear)
+                .SumAsync(d => (decimal?)d.Amount);
+        }
+
+
+        public async Task<decimal?> GetTotalAmount()
+        {
+            return await _context.Donations
+                .Where(d => d.DateReceived != null)
+                .SumAsync(d => (decimal?)d.Amount);
+        }
+
+
+        public async Task<decimal?> GetTotalAmountLastYearAsync()
+        {
+            var lastYear = DateTime.Now.Year - 1; // or DateTime.UtcNow.Year - 1 for UTC
+
+            return await _context.Donations
+                .Where(d => d.DateReceived != null && d.DateReceived.Year == lastYear)
+                .SumAsync(d => (decimal?)d.Amount);
+        }
+
+
     }
-    }
+}

@@ -51,10 +51,10 @@ namespace DisasterManagementSystem_Data.Repositories
         public async Task<IEnumerable<AssistanceRequest>> GetAllAsync()
         {
             return await _context.AssistanceRequests
-                .Include(r => r.DisasterEvent)
+               .Include(r => r.DisasterEvent)
                 .Include(r => r.User)
                 .Include(r => r.Location)
-                .Include(r => r.DisasterReport)
+                //.Include(r => r.DisasterReport)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -169,6 +169,23 @@ namespace DisasterManagementSystem_Data.Repositories
                     .ThenInclude(a => a.ReliefTeam)
                 .AsNoTracking()
                 .ToListAsync();
+        }
+
+
+        // AssistanceRequestRepository.cs
+        public async Task<AssistanceRequest> GetByIdWithAssignmentsAsync(int id)
+        {
+            return await _context.AssistanceRequests
+                .Include(r => r.DisasterEvent)
+                .Include(r => r.User)
+                .Include(r => r.Location)
+                .Include(r => r.DisasterReport)
+                .Include(r => r.RequestAssignments)
+                    .ThenInclude(a => a.AssignedByNavigation)
+                .Include(r => r.RequestAssignments)
+                    .ThenInclude(a => a.ReliefTeam)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.Id == id);
         }
     }
 }

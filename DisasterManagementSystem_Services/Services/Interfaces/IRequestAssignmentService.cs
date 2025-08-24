@@ -16,5 +16,8 @@ namespace DisasterManagementSystem_Services.Services.Interfaces
         Task<Result<RequestAssignmentDto>> GetAssignmentByIdAsync(int id);
 
         Task<Result<List<RequestAssignmentDto>>> GetAllAssignmentsAsync();
+
+        // Add to IRequestAssignmentService.cs
+        Task<Result<List<RequestAssignmentDto>>> GetAssignmentsByUserAsync(Guid userId);
     }
 }

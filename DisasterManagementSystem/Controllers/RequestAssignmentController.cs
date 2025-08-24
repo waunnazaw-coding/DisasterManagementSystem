@@ -75,5 +75,12 @@ namespace DisasterManagementSystem_Api.Controllers
             var result = await _assignmentService.GetAllAssignmentsAsync();
             return result.Execute();
         }
+
+        [HttpGet("user/{userId}")]
+    public async Task<IResult> GetAssignmentsByUser(Guid userId)
+    {
+        var result = await _assignmentService.GetAssignmentsByUserAsync(userId);
+        return result.Execute();
+    }
     }
 }
