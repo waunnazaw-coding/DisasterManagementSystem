@@ -32,6 +32,28 @@ namespace DisasterManagementSystem_API.Controllers
             return result.Execute();
         }
 
+        [HttpPost("survey")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Create([FromForm] ReportImpactCreateDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(Result<string>.Failure("Invalid form data"));
+
+            // Extract UserId from token claims
+            var userIdClaim = User.FindFirst("sub") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized(Result<string>.Failure("User ID not found in token"));
+
+            dto.UserId = userId;
+
+            var result = await _reportService.CreateAsync(dto);
+
+            if (!result.IsSuccess)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
+
         [HttpPost("submit-form")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> SubmitForm([FromForm] FormCreateDto dto)
@@ -55,6 +77,30 @@ namespace DisasterManagementSystem_API.Controllers
 
             return Ok(result);
         }
+
+        //[HttpPost("survey")]
+        //[Consumes("multipart/form-data")]
+        //public async Task<IActionResult> Create([FromForm] ReportImpactCreateDto dto)
+        //{
+        //    if (!ModelState.IsValid)
+        //        return BadRequest(Result<string>.Failure("Invalid form data"));
+
+        //    // Get UserId from claims
+        //    var userIdClaim = User.FindFirst("sub") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+        //    if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+        //    {
+        //        return Unauthorized(Result<string>.Failure("User ID not found in token"));
+        //    }
+
+        //    dto.UserId = userId;
+
+        //    var result = await _reportService.CreateAsync(dto);
+
+        //    if (!result.IsSuccess)
+        //        return BadRequest(result);
+
+        //    return Ok(result);
+        //}
 
         [HttpPut("update-form/{id}")]
         [Consumes("multipart/form-data")]

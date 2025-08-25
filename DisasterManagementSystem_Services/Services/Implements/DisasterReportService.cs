@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
+using System.Text.Json;
 using AppLocation = DisasterManagementSystem_Data.Models.Location;
 
 public class DisasterReportService : IDisasterReportService
@@ -198,6 +199,92 @@ public class DisasterReportService : IDisasterReportService
         {
             await transaction.RollbackAsync();
             return Result<FormCreateDto>.Failure($"Error submitting form: {ex.Message}");
+        }
+    }
+
+
+    public async Task<Result<ReportImpactCreateDto>> CreateAsync(ReportImpactCreateDto dto)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        var impacts = JsonSerializer.Deserialize<List<ImpactCreateDto>>(dto.ImpactsJson);
+
+        try
+        {
+            // Call LocationService to create location
+            var locationResult = await _locationService.AddAsync(new LocationCreateDto
+            {
+                Name = dto.LocationName,
+                Address = dto.Address,
+                Region = dto.Region,
+                Country = dto.Country,
+                GeoJson = dto.GeoJson,
+            });
+
+            if (!locationResult.IsSuccess)
+                return Result<ReportImpactCreateDto>.Failure(locationResult.Message);
+
+            var locationId = locationResult.Data.Id;
+
+            // Create DisasterReport
+            var report = new DisasterReport
+            {
+                UserId = dto.UserId,
+                LocationId = locationId,
+                AddressDetail = dto.AddressDetail,
+                Type = dto.Type,
+                Title = dto.Title,
+                Description = dto.Description,
+                Severity = dto.Severity,
+                Source = dto.Source,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Status = "Pending"
+            };
+            await _disasterReportRepository.AddAsync(report);
+
+            // Save Impacts linked to this DisasterReport
+            if (impacts != null && impacts.Any())
+            {
+                foreach (var impactDto in impacts)
+                {
+                    var impact = new Impact
+                    {
+                        DisasterReportId = report.Id,
+                        Type = impactDto.Type,
+                        Value = impactDto.Value,
+                        ObjectName = impactDto.ObjectName,
+                        Status = "Pending"
+                    };
+                    await _context.Impacts.AddAsync(impact);
+                }
+                await _context.SaveChangesAsync();
+            }
+
+            // Create ReportPhoto
+            if (dto.ReportPhotos != null && dto.ReportPhotos.Length > 0)
+            {
+                var descriptions = dto.NewPhotoDescription ?? new List<string>();
+                var uploadResult = await _reportPhotoService.UploadEventPhotosAsync
+                (
+                    report.Id,
+                    dto.ReportPhotos,
+                    descriptions
+                );
+                if (!uploadResult.IsSuccess)
+                {
+                    await transaction.RollbackAsync();
+                    return Result<ReportImpactCreateDto>.Failure(uploadResult.Message);
+                }
+            }
+
+            await transaction.CommitAsync();
+            return Result<ReportImpactCreateDto>.Success(dto, "Form submitted successfully.");
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            return Result<ReportImpactCreateDto>.Failure($"Error submitting form: {ex.Message}");
         }
     }
 

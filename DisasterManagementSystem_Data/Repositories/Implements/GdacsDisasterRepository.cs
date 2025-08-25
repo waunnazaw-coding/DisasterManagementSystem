@@ -46,6 +46,8 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
             await _context.SaveChangesAsync();
         }
 
+
+
         public async Task<IEnumerable<GdacsdisasterEvent>> GetAllAsync()
         {
             return await _context.Set<GdacsdisasterEvent>().ToListAsync();

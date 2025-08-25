@@ -2,6 +2,7 @@ using DisasterManagementSystem_Data;
 using DisasterManagementSystem_Data.Models;
 using Microsoft.EntityFrameworkCore;
 
+
 public class ImpactRepository : IImpactRepository
 {
     private readonly AppDbContext _context;

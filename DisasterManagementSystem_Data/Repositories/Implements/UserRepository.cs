@@ -137,13 +137,13 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
         }
 
         // UserRepository.cs
-     public async Task<IEnumerable<User>> GetPaginatedAsync(
-    int skip,
-    int take,
-    string search = null,
-    string role = null,
-    string status = null)
-        {
+         public async Task<IEnumerable<User>> GetPaginatedAsync(
+            int skip,
+            int take,
+            string search = null,
+            string role = null,
+            string status = null)
+         {
             var query = _context.Users.AsQueryable();
 
             // Apply filters
@@ -168,6 +168,17 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
                 .OrderBy(u => u.Name)
                 .Skip(skip)
                 .Take(take)
+                .ToListAsync();
+         }
+
+
+        // Fetch emails of all admin users
+        public async Task<List<string>> GetAdminEmailsAsync()
+        {
+            return await _context.Users
+                .Where(user => user.Role == "Admin")    
+                .Select(user => user.Email)
+                .Where(email => !string.IsNullOrEmpty(email))
                 .ToListAsync();
         }
     }

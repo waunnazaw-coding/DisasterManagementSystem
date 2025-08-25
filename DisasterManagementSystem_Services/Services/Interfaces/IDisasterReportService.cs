@@ -10,4 +10,5 @@ public interface IDisasterReportService
     Task<Result<bool>> DeleteAsync(int id);
     Task<Result<bool>> ApproveAsync(int reportId);
     Task<Result<bool>> DisapproveAsync(int id);
+    Task<Result<ReportImpactCreateDto>> CreateAsync(ReportImpactCreateDto dto);
 }
