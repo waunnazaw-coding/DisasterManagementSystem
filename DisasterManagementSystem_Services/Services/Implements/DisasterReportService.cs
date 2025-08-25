@@ -13,7 +13,7 @@ using AppLocation = DisasterManagementSystem_Data.Models.Location;
 
 public class DisasterReportService : IDisasterReportService
 {
-  private readonly AppDbContext _context;
+    private readonly AppDbContext _context;
     private readonly IDisasterReportRepository _disasterReportRepository;
     private readonly IlocationService _locationService;
     private readonly IReportPhotoService _reportPhotoService;
@@ -395,6 +395,73 @@ public class DisasterReportService : IDisasterReportService
         }
     }
 
+    public async Task<Result<bool>> UnrejectReportAsync(int reportId)
+    {
+        var report = await _context.DisasterReports.FindAsync(reportId);
+        if (report == null)
+        {
+            return Result<bool>.Failure("Report not found");
+        }
+
+        if (report.Status != "Rejected")
+        {
+            return Result<bool>.Failure("Only rejected reports can be un-rejected");
+        }
+
+        report.Status = "Pending";
+        report.UpdatedAt = DateTime.UtcNow;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+            return Result<bool>.Success(true, "Report status changed to Pending successfully.");
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Failure($"Failed to update report: {ex.Message}");
+        }
+    }
+
+
+    public async Task<Result<bool>> MarkAsCheckedAsync(int reportId)
+    {
+        var report = await _disasterReportRepository.GetByIdAsync(reportId);
+        if (report == null)
+            return Result<bool>.NotFoundError($"Disaster report with ID {reportId} not found.");
+
+        try
+        {
+            report.Status = "Checked";
+            report.UpdatedAt = DateTime.UtcNow;
+            await _disasterReportRepository.UpdateAsync(report);
+
+            return Result<bool>.Success(true, "Disaster report marked as Checked.");
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Failure($"Error marking as Checked: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<bool>> MarkAsFakeAsync(int reportId)
+    {
+        var report = await _disasterReportRepository.GetByIdAsync(reportId);
+        if (report == null)
+            return Result<bool>.NotFoundError($"Disaster report with ID {reportId} not found.");
+
+        try
+        {
+            report.Status = "Fake";
+            report.UpdatedAt = DateTime.UtcNow;
+            await _disasterReportRepository.UpdateAsync(report);
+
+            return Result<bool>.Success(true, "Disaster report marked as Fake.");
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Failure($"Error marking as Fake: {ex.Message}");
+        }
+    }
 
     public async Task<Result<bool>> DeleteAsync(int id)
     {

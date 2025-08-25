@@ -72,7 +72,7 @@ namespace DisasterManagementSystem_Services.Service
                 Country = disasterEvent.Location?.Country,
                 Severity = disasterEvent.Severity,
                 Status = disasterEvent.Status,
-               // Source = disasterEvent.Source,
+                Source = disasterEvent.Source,
                 Description = disasterEvent.Description,
                 CreatedUserId = disasterEvent.CreatedUserId,
                 CreatedAt = disasterEvent.CreatedAt,
@@ -167,7 +167,7 @@ namespace DisasterManagementSystem_Services.Service
                 Country = location?.Country,
                 Severity = disasterEvent.Severity,
                 Status = disasterEvent.Status,
-                //Source = disasterEvent.Source,
+                Source = disasterEvent.Source,
                 Description = disasterEvent.Description,
                 LocationGeoJson = locationDto?.GeoJson,
                 ImpactSummaries = impactSummaries,
@@ -235,7 +235,7 @@ namespace DisasterManagementSystem_Services.Service
                 Name = disasterEvent.Name,
                 DisasterTypeId = disasterEvent.DisasterTypeId,
                 StartDate = disasterEvent.StartDate,
-                //Source = disasterEvent.Source,
+                Source = disasterEvent.Source,
                 Severity = disasterEvent.Severity,
                 Description = disasterEvent.Description,
                 LocationName = location?.Name,
@@ -263,7 +263,7 @@ namespace DisasterManagementSystem_Services.Service
                 Severity = e.Severity,
                 Status = e.Status,
                 Description = e.Description,
-                //Source = e.Source,
+                Source = e.Source,
                 CreatedUserId = e.CreatedUserId,
                 CreatedAt = e.CreatedAt,
                 UpdatedUserId = e.UpdatedUserId,
@@ -290,7 +290,7 @@ namespace DisasterManagementSystem_Services.Service
                 Severity = e.Severity,
                 Status = e.Status,
                 Description = e.Description,
-               // Source = e.Source,
+                Source = e.Source,
                 CreatedUserId = e.CreatedUserId,
                 CreatedAt = e.CreatedAt,
                 UpdatedUserId = e.UpdatedUserId,
@@ -408,7 +408,7 @@ namespace DisasterManagementSystem_Services.Service
                     AffectedInfrastructures = affectedInfrastructures,
                     CurrencyChanges = currencyChanges,
                     FirstImageUrl = firstPhotoUrl,
-                    //Source = de.Source
+                    Source = de.Source
                 };
             }).ToList();
         }
@@ -426,7 +426,7 @@ namespace DisasterManagementSystem_Services.Service
                 LocationName = e.Location?.Name ?? "Unknown",
                 Severity = e.Severity,
                 Status = e.Status,
-                //Source = e.Source,
+                Source = e.Source,
                 Address = e.Location?.Address,
                 Description = e.Description,
                 CreatedUserId = e.CreatedUserId,
@@ -479,7 +479,7 @@ namespace DisasterManagementSystem_Services.Service
                     CreatedAt = DateTime.UtcNow,
                     UpdatedUserId = null,
                     UpdatedAt = null,
-                    //Source = dto.Source
+                    Source = dto.Source
                 };
 
                 await _disasterEventRepository.AddAsync(disasterEvent);
@@ -545,8 +545,6 @@ namespace DisasterManagementSystem_Services.Service
                 disasterEvent.Severity = dto.Severity;
                 disasterEvent.Source = dto.Source;
                 disasterEvent.Status = dto.Status ?? "Active";
-
-                //disasterEvent.Source = dto.Source;
                 disasterEvent.Description = dto.Description;
                 disasterEvent.UpdatedUserId = Guid.Parse(currentUserId);
                 disasterEvent.UpdatedAt = DateTime.UtcNow;
@@ -664,7 +662,7 @@ namespace DisasterManagementSystem_Services.Service
                     LocationId = dto.LocationId, // reuse existing location
                     Severity = dto.Severity,
                     Description = dto.Description,
-                    //Source = dto.Source,
+                    Source = dto.Source,
                     CreatedUserId = dto.CreatedUserId,
                     CreatedAt = dto.CreatedAt,
                     UpdatedUserId = dto.UpdatedUserId,

@@ -61,7 +61,7 @@ builder.Services
 QuestPDF.Settings.License = LicenseType.Community;
 
 // Register your custom IEmailSender implementation that uses FluentEmail
-builder.Services.AddTransient<IEmailSenderService , EmailSenderService>();
+builder.Services.AddTransient<IEmailSenderService, EmailSenderService>();
 
 // Add CORS policy
 builder.Services.AddCors(options =>
@@ -80,7 +80,12 @@ builder.Services.AddCors(options =>
 
 // Add SignalR
 builder.Services.AddSignalR();
-builder.Services.AddHttpClient();
+// Register ReverseGeocodingService with custom HttpClient config
+builder.Services.AddHttpClient<IReverseGeocodingService, ReverseGeocodingService>(client =>
+{
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("DisasterManagementSystem/1.0"); // required by Nominatim
+});
+
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 
@@ -128,7 +133,7 @@ builder.Services.AddScoped<IAssistanceRequestRepository, AssistanceRequestReposi
 builder.Services.AddScoped<IlocationRepository, LocationRepository>();
 builder.Services.AddScoped<IDisasterEventRepository, DisasterEventRepository>();
 builder.Services.AddScoped<IReliefTeamRepository, ReliefTeamRepository>();
-builder.Services.AddScoped<IRequestAssignmentRepository, RequestAssignmentRepository>();    
+builder.Services.AddScoped<IRequestAssignmentRepository, RequestAssignmentRepository>();
 
 builder.Services.AddScoped<IUserReliefTeamRepository, UserReliefTeamRepository>();
 builder.Services.AddScoped<IReliefTeamsRepository, ReliefTeamsRepository>();

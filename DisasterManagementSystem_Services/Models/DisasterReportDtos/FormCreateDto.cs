@@ -11,7 +11,7 @@ namespace DisasterManagementSystem_Services.Models
         public string GeoJson { get; set; } = null!;
 
         // ---------- DisasterReport ----------
-        public Guid UserId { get; set; }                  // required
+        public Guid? UserId { get; set; }                  // required
         public int? DisasterEventId { get; set; }         // optional
         public string? AddressDetail { get; set; }
         public string Type { get; set; } = null!;         // required

@@ -14,11 +14,11 @@ namespace DisasterManagementSystem_Services.Services.Implements
         private readonly HttpClient _httpClient;
         private readonly ConcurrentDictionary<string, string?> _cache = new();
 
-        public ReverseGeocodingService(IHttpClientFactory httpClientFactory)
+        public ReverseGeocodingService(HttpClient httpClient)
         {
-            _httpClient = httpClientFactory.CreateClient();
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("DisasterManagementSystem/1.0"); // Required by Nominatim
+            _httpClient = httpClient;
         }
+
 
         public async Task<string?> GetAddressAsync(double latitude, double longitude)
         {

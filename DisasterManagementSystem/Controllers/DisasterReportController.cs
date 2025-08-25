@@ -39,14 +39,6 @@ namespace DisasterManagementSystem_API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(Result<string>.Failure("Invalid form data"));
 
-            // Get UserId from claims
-            var userIdClaim = User.FindFirst("sub") ?? User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
-            {
-                return Unauthorized(Result<string>.Failure("User ID not found in token"));
-            }
-
-            dto.UserId = userId;
 
             var result = await _reportService.AddFormAsync(dto);
 
@@ -108,6 +100,42 @@ namespace DisasterManagementSystem_API.Controllers
         public async Task<IActionResult> Disapprove(int id)
         {
             var result = await _reportService.DisapproveAsync(id);
+
+            if (!result.IsSuccess)
+                return BadRequest(new { message = result.Message });
+
+            return Ok(new { message = result.Message });
+        }
+
+        // --------------- UnDisapprove --------------------
+        [HttpPost("unreject/{reportId}")]
+        public async Task<IActionResult> UnrejectReport(int reportId)
+        {
+            var result = await _reportService.UnrejectReportAsync(reportId);
+            if (result.IsSuccess)
+                return Ok(result);
+
+            return BadRequest(result);
+        }
+
+
+        // ---------------- Mark as Checked ----------------
+        [HttpPost("checked/{id}")]
+        public async Task<IActionResult> MarkAsChecked(int id)
+        {
+            var result = await _reportService.MarkAsCheckedAsync(id);
+
+            if (!result.IsSuccess)
+                return BadRequest(new { message = result.Message });
+
+            return Ok(new { message = result.Message });
+        }
+
+        // ---------------- Mark as Fake ----------------
+        [HttpPost("fake/{id}")]
+        public async Task<IActionResult> MarkAsFake(int id)
+        {
+            var result = await _reportService.MarkAsFakeAsync(id);
 
             if (!result.IsSuccess)
                 return BadRequest(new { message = result.Message });
