@@ -13,4 +13,5 @@ public interface IDisasterReportService
     Task<Result<bool>> UnrejectReportAsync(int reportId);
     Task<Result<bool>> MarkAsCheckedAsync(int reportId);
     Task<Result<bool>> MarkAsFakeAsync(int reportId);
+    Task<Result<ReportImpactCreateDto>> CreateAsync(ReportImpactCreateDto dto);
 }

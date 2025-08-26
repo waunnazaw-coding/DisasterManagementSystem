@@ -43,17 +43,15 @@ namespace DisasterManagementSystem_Services.Services.Implements
             var feed = SyndicationFeed.Load(reader);
             var parsedEvents = new List<GdacsdisasterEvent>();
 
-            foreach (var item in feed.Items)
+            var tasks = feed.Items.Select(async item =>
             {
                 var eventId = item.ElementExtensions.ReadElementExtensions<string>("eventid", "http://www.gdacs.org").FirstOrDefault();
                 if (string.IsNullOrEmpty(eventId))
-                    continue;
+                    return null;
 
-                // Get GeoRSS point element text e.g. "45.1234 12.3456"
                 var pointStr = item.ElementExtensions.ReadElementExtensions<string>("point", "http://www.georss.org/georss").FirstOrDefault();
                 double? latitude = null;
                 double? longitude = null;
-
                 if (!string.IsNullOrEmpty(pointStr))
                 {
                     var parts = pointStr.Split(' ');
@@ -63,34 +61,32 @@ namespace DisasterManagementSystem_Services.Services.Implements
                         longitude = ParseDouble(parts[1]);
                     }
                 }
-
-                // Status might be under element "status" in gdacs namespace or missing
                 var status = item.ElementExtensions.ReadElementExtensions<string>("status", "http://www.gdacs.org").FirstOrDefault();
+                //string? locationAddress = null;
+                //if (latitude.HasValue && longitude.HasValue)
+                //{
+                //    locationAddress = await _reverseGeocodingService.GetAddressAsync(latitude.Value, longitude.Value);
+                //}
 
-                string? locationAddress = null;
-                if (latitude.HasValue && longitude.HasValue)
-                {
-                    // Resolve location address using reverse geocoding service
-                    locationAddress = await _reverseGeocodingService.GetAddressAsync(latitude.Value, longitude.Value);
-                }
-
-                var disasterEvent = new GdacsdisasterEvent
+                return new GdacsdisasterEvent
                 {
                     EventId = eventId,
                     EventType = item.ElementExtensions.ReadElementExtensions<string>("eventtype", "http://www.gdacs.org").FirstOrDefault(),
                     Severity = item.ElementExtensions.ReadElementExtensions<string>("alertlevel", "http://www.gdacs.org").FirstOrDefault(),
-                    EventDate = item.PublishDate.DateTime,
+                    EventDate = item.PublishDate.UtcDateTime,
                     Latitude = latitude,
                     Longitude = longitude,
-                    LocationAddress = locationAddress,
+                   // LocationAddress = locationAddress,
                     Impact = item.Summary?.Text,
                     Status = status
                 };
+            });
 
-                parsedEvents.Add(disasterEvent);
-            }
+            var eventResults = await Task.WhenAll(tasks);
+            parsedEvents.AddRange(eventResults.Where(e => e != null));
             return parsedEvents;
         }
+
 
         public async Task UpsertAsync(GdacsdisasterEvent disasterEvent)
         {

@@ -26,5 +26,7 @@ namespace DisasterManagementSystem_Data.Repositories.Interfaces
 
         // IUserRepository.cs
         Task<IEnumerable<User>> GetPaginatedAsync(int skip, int take, string search = null, string role = null, string status = null);
+
+        Task<List<string>> GetAdminEmailsAsync();
     }
 }

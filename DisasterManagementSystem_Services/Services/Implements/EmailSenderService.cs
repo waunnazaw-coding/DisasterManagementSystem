@@ -31,4 +31,23 @@ public class EmailSenderService : IEmailSenderService
             throw new Exception($"Failed to send email: {string.Join(", ", response.ErrorMessages)}");
         }
     }
+
+    public async Task SendEmailAsync(IEnumerable<string> emails, string subject, string htmlMessage)
+    {
+        var emailMessage = _emailFactory.Create()
+            .Subject(subject)
+            .Body(htmlMessage, true)
+            .SetFrom(_emailSettings.SenderEmail, _emailSettings.SenderName);
+
+        foreach (var email in emails)
+        {
+            emailMessage = emailMessage.To(email);
+        }
+
+        var response = await emailMessage.SendAsync();
+        if (!response.Successful)
+        {
+            throw new Exception($"Failed to send email: {string.Join(", ", response.ErrorMessages)}");
+        }
+    }
 }

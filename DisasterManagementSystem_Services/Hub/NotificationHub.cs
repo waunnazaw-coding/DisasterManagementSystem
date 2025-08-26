@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -70,6 +71,33 @@ namespace DisasterManagementSystem_Services.Hubs
 
     public class DisasterNotificationHub : Hub
     {
-        // Methods can be added to communicate with clients if needed
+        // Use a thread-safe static dictionary to track which connections correspond to admins
+        private static readonly ConcurrentDictionary<string, bool> AdminConnections = new();
+
+        // Call this method from client after connection to register role
+        public Task RegisterRole(string role)
+        {
+            if (string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                AdminConnections[Context.ConnectionId] = true;
+            }
+            else
+            {
+                AdminConnections[Context.ConnectionId] = false;
+            }
+            return Task.CompletedTask;
+        }
+
+        public override Task OnDisconnectedAsync(Exception? exception)
+        {
+            AdminConnections.TryRemove(Context.ConnectionId, out _);
+            return base.OnDisconnectedAsync(exception);
+        }
+
+        // Helper method to get all admin connection IDs
+        public static IReadOnlyList<string> GetAdminConnectionIds()
+        {
+            return AdminConnections.Where(kvp => kvp.Value).Select(kvp => kvp.Key).ToList();
+        }
     }
 }
