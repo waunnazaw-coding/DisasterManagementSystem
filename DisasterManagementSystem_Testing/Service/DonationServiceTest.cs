@@ -31,7 +31,7 @@ namespace DisasterManagementSystem_Testing.Service
             var user = new User { Id = userId, Name = "Test User", Role = "Donor", Status = "Active" };
             var donationDto = new CreateDonationDto
             {
-                Type = "Money",
+               
                 Amount = 100,
                 Currency = "USD",
                 SourceType = "Personal"
@@ -58,7 +58,7 @@ namespace DisasterManagementSystem_Testing.Service
             // Arrange
             var donationDto = new CreateDonationDto
             {
-                Type = "Money",
+                //Type = "Money",
                 Amount = -10, // Invalid amount
                 SourceType = "Personal"
             };
@@ -78,8 +78,7 @@ namespace DisasterManagementSystem_Testing.Service
             var userId = Guid.NewGuid();
             var donations = new List<Donation>
             {
-                new Donation { Id = 1, Type = "Money", DonorUserId = userId, DonorUser = new User { Name = "User1" } },
-                new Donation { Id = 2, Type = "Item", DonorUserId = userId, DonorUser = new User { Name = "User1" } }
+                new Donation { Id = 1,  DonorUserId = userId, DonorUser = new User { Name = "User1" } }
             };
 
             _donationRepoMock.Setup(x => x.GetAllAsync()).ReturnsAsync(donations);
@@ -99,8 +98,7 @@ namespace DisasterManagementSystem_Testing.Service
             var user = new User { Id = userId, Name = "Test User" };
             var donations = new List<Donation>
             {
-                new Donation { Id = 1, Type = "Money", DonorUserId = userId },
-                new Donation { Id = 2, Type = "Item", DonorUserId = userId }
+                new Donation { Id = 1, DonorUserId = userId }
             };
 
             _userRepoMock.Setup(x => x.GetByIdAsync(userId)).ReturnsAsync(user);
@@ -122,7 +120,7 @@ namespace DisasterManagementSystem_Testing.Service
             var donation = new Donation
             {
                 Id = 1,
-                Type = "Money",
+              //  Type = "Money",
                 DonorUserId = Guid.NewGuid(),
                 DonorUser = new User { Name = "Test User" }
             };

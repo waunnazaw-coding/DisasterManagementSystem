@@ -86,8 +86,8 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
             var currentYear = DateTime.Now.Year;
 
             return await _context.Donations
-                .Where(d => d.DateReceived.HasValue && d.DateReceived.Value.Year == currentYear)
-                .SumAsync(d => (decimal?)d.Amount);
+         .Where(d => d.DateReceived.Year == currentYear)
+         .SumAsync(d => (decimal?)d.Amount);
         }
 
 
@@ -104,8 +104,8 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
             var lastYear = DateTime.Now.Year - 1;
 
             return await _context.Donations
-                .Where(d => d.DateReceived.HasValue && d.DateReceived.Value.Year == lastYear)
-                .SumAsync(d => (decimal?)d.Amount);
+        .Where(d => d.DateReceived.Year == lastYear)
+        .SumAsync(d => (decimal?)d.Amount);
         }
 
 

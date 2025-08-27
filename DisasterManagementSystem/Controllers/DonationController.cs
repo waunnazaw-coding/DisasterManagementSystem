@@ -44,7 +44,7 @@ namespace DisasterManagementSystem_Api.Controllers
             return result.Execute();
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IResult> GetAllDonations()
         {
