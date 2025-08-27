@@ -55,6 +55,9 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<AllocationType> AllocationTypes { get; set; }
 
     public virtual DbSet<GdacsdisasterEvent> GdacsdisasterEvents { get; set; }
+    public virtual DbSet<Partner> Partners { get; set; }
+
+    public virtual DbSet<Contact> Contacts { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -76,14 +79,25 @@ public partial class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<AllocationType>(entity =>
+        modelBuilder.Entity<Partner>(entity =>
         {
-            entity.HasKey(e => e.AllocationTypeId).HasName("PK__Allocati__D797DE4307F78B1D");
+            entity.ToTable("Partner");
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.ContactName).HasMaxLength(150);
+            entity.Property(e => e.Email).HasMaxLength(150);
+            entity.Property(e => e.Phone).HasMaxLength(50);
+            entity.Property(e => e.Address).HasMaxLength(500);
+            entity.Property(e => e.Website).HasMaxLength(250);
+            entity.Property(e => e.Status).HasMaxLength(20);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
+            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("GETDATE()");
 
-            entity.Property(e => e.Description).HasMaxLength(255);
-            entity.Property(e => e.Name).HasMaxLength(100);
+            // Remove the relationship configuration with ReportPhoto
+            entity.Property(e => e.LogoUrl).HasMaxLength(500);
+            entity.Property(e => e.LogoPublicId).HasMaxLength(255);
+            entity.Property(e => e.LogoFileType).HasMaxLength(20);
         });
-        
+
         modelBuilder.Entity<AssistanceRequest>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Assistan__3214EC077EEE1782");
@@ -462,16 +476,21 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.UploadedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+        
+            entity.HasOne(rp => rp.DisasterEvent)
+                .WithMany(de => de.ReportPhotos)
+                .HasForeignKey(rp => rp.DisasterEventId)
+                .OnDelete(DeleteBehavior.SetNull);
 
-            entity.HasOne(d => d.DisasterEvent).WithMany(p => p.ReportPhotos)
-                .HasForeignKey(d => d.DisasterEventId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ReportPho__Disas__5EBF139D");
+            entity.HasOne(rp => rp.DisasterReport)
+                .WithMany(dr => dr.ReportPhotos)
+                .HasForeignKey(rp => rp.DisasterReportId)
+                .OnDelete(DeleteBehavior.SetNull);
 
-            entity.HasOne(d => d.DisasterReport).WithMany(p => p.ReportPhotos)
-                .HasForeignKey(d => d.DisasterReportId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ReportPho__Disas__5FB337D6");
+            entity.HasOne(rp => rp.ReliefTeamActivity)
+                .WithMany(rta => rta.ReportPhotos)
+                .HasForeignKey(rp => rp.ReliefTeamActivityId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<RequestAssignment>(entity =>
@@ -567,7 +586,21 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK__UserRelie__UserI__40058253");
         });
 
-       
+        modelBuilder.Entity<Contact>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Contact__3214EC07776EFDBB");
+
+            entity.ToTable("Contact");
+
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.Name).HasMaxLength(100);
+            entity.Property(e => e.Phone).HasMaxLength(20);
+            entity.Property(e => e.SubmissionDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+        });
+
+
         OnModelCreatingPartial(modelBuilder);
     }
 

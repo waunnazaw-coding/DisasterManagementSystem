@@ -145,6 +145,8 @@ builder.Services.AddScoped<IImpactRepository, ImpactRepository>();
 
 builder.Services.AddScoped<IRequestAssignmentRepository, RequestAssignmentRepository>();
 builder.Services.AddScoped<IReliefTeamActivityRepository, ReliefTeamActivityRepository>();
+builder.Services.AddScoped<IPartnerRepository, PartnerRepository>();
+builder.Services.AddScoped<IContactRepository, ContactRepository>();
 builder.AddDomain();
 
 // Configure Swagger

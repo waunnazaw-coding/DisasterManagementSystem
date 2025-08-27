@@ -75,8 +75,7 @@ namespace DisasterManagementSystem_Api.Controllers
             return result.Execute();
         }
 
-        // New endpoint for updating donation by user
-        [Authorize(Roles = "Admin")]
+        
         [HttpPut("{id}")]
         public async Task<IResult> UpdateDonation(int id, [FromBody] UpdateDonationDto donationDto)
         {
@@ -91,8 +90,7 @@ namespace DisasterManagementSystem_Api.Controllers
             return result.Execute();
         }
 
-        // New endpoint for deleting donation by user
-        [Authorize(Roles = "Admin")]
+      
         [HttpDelete("{id}")]
         public async Task<IResult> DeleteDonation(int id)
         {

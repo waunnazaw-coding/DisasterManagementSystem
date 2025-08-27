@@ -20,17 +20,16 @@ public partial class DisasterEvent
     public string Status { get; set; } = null!;
 
     public string? Description { get; set; }
-   // public string? Source { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
     public Guid CreatedUserId { get; set; }
-    public User? CreatedUser { get; set; }
 
     public Guid? UpdatedUserId { get; set; }
-    public User? UpdatedUser { get; set; }
+
+    public string? Source { get; set; }
 
     public virtual ICollection<AssistanceRequest> AssistanceRequests { get; set; } = new List<AssistanceRequest>();
 
@@ -39,6 +38,10 @@ public partial class DisasterEvent
     public virtual DisasterType DisasterType { get; set; } = null!;
 
     public virtual ICollection<Impact> Impacts { get; set; } = new List<Impact>();
+    public virtual User CreatedUser { get; set; }=null!;
+
+    public virtual User UpdatedUser { get; set; } = null!;
+
 
     public virtual Location Location { get; set; } = null!;
 
