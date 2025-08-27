@@ -11,6 +11,8 @@ namespace DisasterManagementSystem_Services.Services.Interfaces
         Task<Result<AuthResponseDto>> LoginAsync(LoginDto model);
         Task<ResetPasswordResponseDto> ResetPasswordAsync(ResetPasswordRequestDto dto);
         Task<Result<AdminInviteResponseDto>> SendAdminInviteAsync(AdminInviteRequestDto inviteDto);
+        Task<Result<AdminInviteResponseDto>> SendDisasterManagementAdminInviteAsync(AdminInviteRequestDto inviteDto);
+        Task<Result<AdminInviteResponseDto>> SendFinancialAdminInviteAsync(AdminInviteRequestDto inviteDto);
         Task<Result<AcceptAdminInviteResponseDto>> AcceptAdminInviteAsync(AcceptAdminInviteRequestDto acceptDto);
         Task<Result<OperationResponseDto>> LogoutAsync(Guid userId);
         Task<Result<UserResponseDto>> GetMeAsync(Guid userId);

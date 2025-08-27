@@ -86,6 +86,39 @@ namespace DisasterManagementSystem_Api.Controllers
             return result.Execute();
         }
 
+        [HttpPost("disaster-management-admin")]
+        //[Authorize(Roles = "Admin,SysAdmin")]
+        public async Task<IResult> SendDisasterManagementAdminInvite([FromBody] AdminInviteRequestDto inviteDto)
+        {
+            if (!ModelState.IsValid)
+                return Results.BadRequest(ModelState);
+
+
+            var result = await _authService.SendAdminInviteAsync(inviteDto);
+
+            if (!result.IsSuccess)
+                return Results.BadRequest(new { message = result.Message });
+
+            return result.Execute();
+        }
+
+
+        [HttpPost("financial-admin")]
+        //[Authorize(Roles = "Admin,SysAdmin")]
+        public async Task<IResult> SendFinancialAdminInvite([FromBody] AdminInviteRequestDto inviteDto)
+        {
+            if (!ModelState.IsValid)
+                return Results.BadRequest(ModelState);
+
+
+            var result = await _authService.SendAdminInviteAsync(inviteDto);
+
+            if (!result.IsSuccess)
+                return Results.BadRequest(new { message = result.Message });
+
+            return result.Execute();
+        }
+
         // Accept invite & reset password endpoint - PATCH since partial update
         [HttpPatch("accept-admin-invite")]
         [AllowAnonymous]
