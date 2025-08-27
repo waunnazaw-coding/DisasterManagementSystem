@@ -106,6 +106,7 @@ namespace DisasterManagementSystem_Services.Models
 
         [Phone]
         public string? DonorPhoneNumber { get; set; }
+        public string? Category { get; set; }
     }
 
 

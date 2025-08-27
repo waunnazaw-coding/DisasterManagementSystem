@@ -83,11 +83,10 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
 
         public async Task<decimal?> GetTotalAmountNowYearAsync()
         {
-
-            var currentYear = DateTime.Now.Year; // or DateTime.UtcNow.Year if needed
+            var currentYear = DateTime.Now.Year;
 
             return await _context.Donations
-                .Where(d => d.DateReceived != null && d.DateReceived.Year == currentYear)
+                .Where(d => d.DateReceived.HasValue && d.DateReceived.Value.Year == currentYear)
                 .SumAsync(d => (decimal?)d.Amount);
         }
 
@@ -102,10 +101,10 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
 
         public async Task<decimal?> GetTotalAmountLastYearAsync()
         {
-            var lastYear = DateTime.Now.Year - 1; // or DateTime.UtcNow.Year - 1 for UTC
+            var lastYear = DateTime.Now.Year - 1;
 
             return await _context.Donations
-                .Where(d => d.DateReceived != null && d.DateReceived.Year == lastYear)
+                .Where(d => d.DateReceived.HasValue && d.DateReceived.Value.Year == lastYear)
                 .SumAsync(d => (decimal?)d.Amount);
         }
 
