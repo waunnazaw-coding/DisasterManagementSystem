@@ -63,11 +63,32 @@ namespace DisasterManagementSystem_Services.Services.Implements
 
             return MapToDto(created);
         }
+
+        public async Task DebugAdminNotificationSetup()
+        {
+            var admins = await _userRepo.GetUsersByRoleAsync("SysAdmin,DisasterManagementAdmin");
+            _logger.LogInformation("Admin users in database:");
+
+            foreach (var admin in admins)
+            {
+                _logger.LogInformation("- {Name} ({Email}): {Role}", admin.Name, admin.Email, admin.Role);
+            }
+
+            var sysAdmins = await _userRepo.GetUsersByRoleAsync("SysAdmin");
+            var disasterAdmins = await _userRepo.GetUsersByRoleAsync("DisasterManagementAdmin");
+
+            _logger.LogInformation("SysAdmin count: {Count}", sysAdmins.Count);
+            _logger.LogInformation("DisasterManagementAdmin count: {Count}", disasterAdmins.Count);
+        }
+
+
         public async Task NotifyAdminsForNewDonation(Donation donation)
         {
             try
             {
-                var admins = await _userRepo.GetUsersByRoleAsync("Admin");
+                // Pass all three roles as comma-separated string
+                var admins = await _userRepo.GetUsersByRoleAsync("SysAdmin,FinancialAdmin");
+
                 var donorName = donation.DonorUser?.Name ?? "Anonymous";
                 var message = $"New donation received from {donorName}";
 
@@ -85,7 +106,8 @@ namespace DisasterManagementSystem_Services.Services.Implements
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error notifying admins about new donation");
+                // Handle exceptions if needed
+                Console.WriteLine($"Error notifying admins: {ex.Message}");
             }
         }
         public async Task NotifyDonorAboutStatusChange(Donation donation)
@@ -113,7 +135,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
 
         public async Task NotifyAdminsForNewReport(Guid userId, int reportId, string reportTitle)
         {
-            var admins = await _userRepo.GetUsersByRoleAsync("Admin");
+            var admins = await _userRepo.GetUsersByRoleAsync("SysAdmin,DisasterManagementAdmin");
             var message = $"New disaster report submitted: {reportTitle}";
 
             foreach (var admin in admins)
@@ -143,16 +165,90 @@ namespace DisasterManagementSystem_Services.Services.Implements
             });
         }
 
+        //public async Task NotifyAdminsForNewRequest(Guid userId, int requestId, string requestType)
+        //{
+        //    try
+        //    {
+        //        _logger.LogInformation("Notifying admins for new request {RequestId}", requestId);
+
+        //        // Get all admin users
+        //        var admins = await _userRepo.GetUsersByRoleAsync("SysAdmin,DisasterManagementAdmin");
+        //        _logger.LogInformation("Found {AdminCount} admins to notify", admins.Count);
+
+        //        if (!admins.Any())
+        //        {
+        //            _logger.LogWarning("No admins found for roles: SysAdmin, DisasterManagementAdmin");
+        //            return;
+        //        }
+
+        //        var user = await _userRepo.GetByIdAsync(userId);
+        //        var userDisplayName = user?.Name ?? "Unknown User";
+        //        var message = $"New assistance request for {requestType} from {userDisplayName}";
+
+        //        foreach (var admin in admins)
+        //        {
+        //            _logger.LogInformation("Notifying admin {AdminName} ({AdminRole})", admin.Name, admin.Role);
+
+        //            try
+        //            {
+        //                // Create database notification
+        //                var notification = await CreateNotificationAsync(new CreateNotificationDto
+        //                {
+        //                    UserId = admin.Id,
+        //                    Message = message,
+        //                    Type = "Request",
+        //                    RelatedEntityId = requestId,
+        //                    Status = "Pending"
+        //                });
+
+        //                // Send real-time notification to specific admin
+        //                await _hubContext.Clients.User(admin.Id.ToString())
+        //                    .SendAsync("ReceiveNotification", notification);
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                _logger.LogError(ex, "Error notifying admin {AdminId}", admin.Id);
+        //            }
+        //        }
+
+        //        // Also broadcast to all admins in the admin group
+        //        await _hubContext.Clients.Group("Admins")
+        //            .SendAsync("ReceiveAdminNotification", new
+        //            {
+        //                Message = message,
+        //                RequestId = requestId,
+        //                RequestType = requestType,
+        //                UserId = userId,
+        //                UserName = userDisplayName,
+        //                Timestamp = DateTime.UtcNow
+        //            });
+
+        //        _logger.LogInformation("Successfully notified all admins about request {RequestId}", requestId);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error notifying admins for new request {RequestId}", requestId);
+        //    }
+        //}
+
         public async Task NotifyAdminsForNewRequest(Guid userId, int requestId, string requestType)
         {
             try
             {
-                var admins = await _userRepo.GetUsersByRoleAsync("Admin");
+                // Step 4a: Get all admins using fixed method
+                var admins = await _userRepo.GetUsersByRoleAsync("SysAdmin,DisasterManagementAdmin");
+                Console.WriteLine("Admin count: " + admins.Count); // should print 6
+
+                // Step 4b: Get the requesting user
                 var user = await _userRepo.GetByIdAsync(userId);
+
+                // Step 4c: Prepare message
                 var message = $"New assistance request for {requestType} from {user?.Name}";
 
+                // Step 4d: Send individual notifications
                 foreach (var admin in admins)
                 {
+                    Console.WriteLine($"{admin.Name} - {admin.Role.Length} chars");
                     var notification = await CreateNotificationAsync(new CreateNotificationDto
                     {
                         UserId = admin.Id,
@@ -162,16 +258,26 @@ namespace DisasterManagementSystem_Services.Services.Implements
                         Status = "Pending"
                     });
 
-                    // Send real-time notification to admin group
-                    await _hubContext.Clients.Group("Admins")
-                        .SendAsync("ReceiveAdminNotification", notification);
+                    await _hubContext.Clients.User(admin.Id.ToString())
+                        .SendAsync("ReceiveNotification", notification);
                 }
+
+                // Step 4e: Send notification to Admins group
+                await _hubContext.Clients.Group("Admins")
+                    .SendAsync("ReceiveAdminNotification", new
+                    {
+                        Message = message,
+                        RequestId = requestId,
+                        RequestType = requestType,
+                        UserName = user?.Name
+                    });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error notifying admins for new request");
             }
         }
+
 
         public async Task NotifyUserForRequestUpdate(Guid userId, int requestId, string requestType, string status)
         {

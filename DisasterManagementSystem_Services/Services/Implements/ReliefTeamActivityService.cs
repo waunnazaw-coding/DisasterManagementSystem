@@ -147,8 +147,12 @@ namespace DisasterManagementSystem_Services.Services.Implements
 
                 // Authorization
                 var currentUser = await _userRepository.GetByIdAsync(currentUserId);
-                if (currentUser?.Role != "Admin" && activity.PostedBy != currentUserId)
+                if (currentUser == null ||
+      !(currentUser.Role?.Trim() == "SysAdmin" || currentUser.Role?.Trim() == "DisasterManagemeAdmin" || currentUser.Role?.Trim() == "FinancialAdmin") &&
+      activity.PostedBy != currentUserId)
+                {
                     return Result<bool>.ValidationError("Unauthorized");
+                }
 
                 // Collect file paths BEFORE deletion
                 var filePaths = activity.ReportPhotos?
@@ -240,8 +244,15 @@ namespace DisasterManagementSystem_Services.Services.Implements
 
                 // Authorization
                 var currentUser = await _userRepository.GetByIdAsync(currentUserId);
-                if (currentUser?.Role != "Admin" && activity.PostedBy != currentUserId)
+
+                if (currentUser == null ||
+                    !(string.Equals(currentUser.Role?.Trim(), "SysAdmin", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(currentUser.Role?.Trim(), "DisasterManagementAdmin", StringComparison.OrdinalIgnoreCase) || string.Equals(currentUser.Role?.Trim(), "FinancialAdmin", StringComparison.OrdinalIgnoreCase)) &&
+                    activity.PostedBy != currentUserId)
+                {
                     return Result<ReliefTeamActivityDTO>.ValidationError("Unauthorized");
+                }
+
 
                 // Update properties
                 activity.ReliefTeamId = dto.ReliefTeamId;

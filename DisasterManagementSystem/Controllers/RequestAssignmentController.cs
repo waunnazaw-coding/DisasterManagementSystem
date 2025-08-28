@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace DisasterManagementSystem_Api.Controllers
 {
-    [Authorize(Roles = "Admin,ReliefTeam")]
+    [Authorize(Roles = "Admin,ReliefTeam,SysAdmin,DisasterManagementAdmin")]
     [Route("api/[controller]")]
     [ApiController]
     public class RequestAssignmentsController : ControllerBase
@@ -20,7 +20,7 @@ namespace DisasterManagementSystem_Api.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,SysAdmin,DisasterManagementAdmin")]
         public async Task<IResult> CreateAssignment([FromBody] CreateRequestAssignmentDto dto)
         {
             if (!ModelState.IsValid)

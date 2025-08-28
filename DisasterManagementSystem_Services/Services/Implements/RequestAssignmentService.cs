@@ -91,10 +91,13 @@ namespace DisasterManagementSystem_Services.Services.Implements
 
                 // Validate admin exists
                 var admin = await _userRepository.GetByIdAsync(adminId);
-                if (admin == null || admin.Role != "Admin")
+
+                // Check if user is neither SysAdmin nor DisasterManagementAdmin
+                if (admin == null || (admin.Role != "SysAdmin" && admin.Role != "DisasterManagementAdmin"))
                 {
                     return Result<RequestAssignmentDto>.ValidationError("Only admins can create assignments");
                 }
+
 
                 // Check if request is already assigned
                 var existingAssignments = await _assignmentRepository.GetByRequestIdAsync(dto.AssistanceRequestId);

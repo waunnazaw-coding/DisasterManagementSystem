@@ -44,7 +44,7 @@ namespace DisasterManagementSystem_Api.Controllers
             return result.Execute();
         }
 
-        //[Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "SysAdmin,FinancialAdmin")]
         [HttpGet]
         public async Task<IResult> GetAllDonations()
         {
@@ -60,7 +60,7 @@ namespace DisasterManagementSystem_Api.Controllers
         }
 
         // New endpoint for updating donation status
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "SysAdmin.FinancialAdmin")]
         [HttpPut("{id}/status")]
         public async Task<IResult> UpdateDonationStatus(int id, [FromBody] UpdateStatusDto statusDto)
         {

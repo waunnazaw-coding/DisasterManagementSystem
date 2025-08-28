@@ -324,7 +324,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 if (user == null)
                     return Result<DonationDto>.NotFoundError("User not found.");
 
-                bool isAdmin = user.Role == "Admin";
+                bool isAdmin = user.Role == "SysAdmin,FinancialAdmin,DisasterManagementAdmin";
 
                 if (donation.DonorUserId != userId && !isAdmin)
                     return Result<DonationDto>.ValidationError("You can only edit your own donations.");

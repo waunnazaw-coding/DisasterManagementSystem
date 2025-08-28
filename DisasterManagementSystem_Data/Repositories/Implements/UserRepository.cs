@@ -90,16 +90,24 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
             return await _context.Users.SingleOrDefaultAsync(u =>
                 u.ExternalId == externalId && u.AuthProvider == authProvider);
         }
-
-
-        public async Task<List<User>> GetUsersByRoleAsync(string role)
+        public async Task<List<User>> GetUsersByRoleAsync(string roles)
         {
-            return await _context.Users
-                .Where(u => u.Role == role)
+            if (string.IsNullOrEmpty(roles))
+                return new List<User>();
+
+            var roleList = roles.Split(',').Select(r => r.Trim().ToLower()).ToList();
+
+            var users = await _context.Users
+                .Where(u => u.Role != null &&
+                            roleList.Any(role => EF.Functions.Like(u.Role, role + "%")))
                 .ToListAsync();
+
+            return users;
         }
 
-        
+
+
+
         public async Task DeleteAsync(User user)
         {
             _context.Users.Remove(user);
