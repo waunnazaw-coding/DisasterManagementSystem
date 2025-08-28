@@ -18,5 +18,6 @@ namespace DisasterManagementSystem_Services.Services.Interfaces
         Task<Result<UserResponseDto>> GetMeAsync(Guid userId);
         Task<Result<AuthResponseDto>> RefreshTokenAsync(string accessToken, string refreshToken);
         Task<Result<AuthResponseDto>> GoogleLoginAsync(GoogleLoginDto model);
+        Task<Result<AcceptAdminInviteResponseDto>> AcceptDisasterAdminInviteAsync(AcceptAdminInviteRequestDto acceptDto);
     }
 }

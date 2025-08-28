@@ -94,7 +94,7 @@ namespace DisasterManagementSystem_Api.Controllers
                 return Results.BadRequest(ModelState);
 
 
-            var result = await _authService.SendAdminInviteAsync(inviteDto);
+            var result = await _authService.SendDisasterManagementAdminInviteAsync(inviteDto);
 
             if (!result.IsSuccess)
                 return Results.BadRequest(new { message = result.Message });
@@ -111,7 +111,7 @@ namespace DisasterManagementSystem_Api.Controllers
                 return Results.BadRequest(ModelState);
 
 
-            var result = await _authService.SendAdminInviteAsync(inviteDto);
+            var result = await _authService.SendFinancialAdminInviteAsync(inviteDto);
 
             if (!result.IsSuccess)
                 return Results.BadRequest(new { message = result.Message });
@@ -120,7 +120,7 @@ namespace DisasterManagementSystem_Api.Controllers
         }
 
         // Accept invite & reset password endpoint - PATCH since partial update
-        [HttpPatch("accept-admin-invite")]
+        [HttpPatch("accept-financial-admin-invite")]
         [AllowAnonymous]
         public async Task<IResult> AcceptAdminInvite([FromBody] AcceptAdminInviteRequestDto acceptDto)
         {
@@ -134,8 +134,24 @@ namespace DisasterManagementSystem_Api.Controllers
 
             return result.Execute();
         }
-        
-        
+
+        // Accept invite & reset password endpoint - PATCH since partial update
+        [HttpPatch("accept-disaster-admin-invite")]
+        [AllowAnonymous]
+        public async Task<IResult> AcceptDisasterAdminInvite([FromBody] AcceptAdminInviteRequestDto acceptDto)
+        {
+            if (!ModelState.IsValid)
+                return Results.BadRequest(ModelState);
+
+            var result = await _authService.AcceptDisasterAdminInviteAsync(acceptDto);
+
+            if (!result.IsSuccess)
+                return Results.BadRequest(new { message = result.Message });
+
+            return result.Execute();
+        }
+
+
         [HttpPatch("reset-password")]
         [AllowAnonymous]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto dto)

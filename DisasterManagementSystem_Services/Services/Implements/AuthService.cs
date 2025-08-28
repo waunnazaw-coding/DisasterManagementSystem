@@ -210,7 +210,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 }
                 var inviteToken = _jwtService.GenerateAdminInviteToken(user.Id, TimeSpan.FromHours(24));
                 var frontendBaseUrl = _configuration["Frontend:BaseUrl"] ?? "http://localhost:5173";
-                var inviteUrl = $"{frontendBaseUrl.TrimEnd('/')}/accept-invite?token={Uri.EscapeDataString(inviteToken)}&email={Uri.EscapeDataString(user.Email)}";
+                var inviteUrl = $"{frontendBaseUrl.TrimEnd('/')}/accept-disaster-admin-invite?token={Uri.EscapeDataString(inviteToken)}&email={Uri.EscapeDataString(user.Email)}";
 
                 var subject = "You are invited to become a Disaster Management Admin";
                 var htmlMessage = $@"
@@ -264,7 +264,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 }
                 var inviteToken = _jwtService.GenerateAdminInviteToken(user.Id, TimeSpan.FromHours(24));
                 var frontendBaseUrl = _configuration["Frontend:BaseUrl"] ?? "http://localhost:5173";
-                var inviteUrl = $"{frontendBaseUrl.TrimEnd('/')}/accept-invite?token={Uri.EscapeDataString(inviteToken)}&email={Uri.EscapeDataString(user.Email)}";
+                var inviteUrl = $"{frontendBaseUrl.TrimEnd('/')}/accept-financial-admin-invite?token={Uri.EscapeDataString(inviteToken)}&email={Uri.EscapeDataString(user.Email)}";
 
                 var subject = "You are invited to become a Financial Admin";
                 var htmlMessage = $@"
@@ -306,26 +306,38 @@ namespace DisasterManagementSystem_Services.Services.Implements
             if (user == null || !string.Equals(user.Email, acceptDto.Email, StringComparison.OrdinalIgnoreCase))
                 return Result<AcceptAdminInviteResponseDto>.Failure("User not found or email mismatch.");
 
-            //var updatedUser = new User
-            //{
-            //    Id = user.Id,
-            //    PasswordHash = BCrypt.Net.BCrypt.HashPassword(acceptDto.NewPassword),
-            //    AuthProvider = null,
-            //    Role = "Admin",
-            //    Status = "Active"
-            //};
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(acceptDto.NewPassword);
+            user.AuthProvider = null;
+            user.Role = "FinancialAdmin";
+            user.Status = "Active";
+            await _userRepository.SaveChangesAsync();
 
-            //_userRepository.Attach(updatedUser);
-            //var entry = _userRepository.Entry(updatedUser);
-            //entry.Property(u => u.PasswordHash).IsModified = true;
-            //entry.Property(u => u.AuthProvider).IsModified = true;
-            //entry.Property(u => u.Role).IsModified = true;
-            //entry.Property(u => u.Status).IsModified = true;
+            var responseDto = new AcceptAdminInviteResponseDto
+            {
+                Email = user.Email,
+                IsAdmin = true,
+            };
 
+            return Result<AcceptAdminInviteResponseDto>.Success(responseDto);
+        }
+
+        public async Task<Result<AcceptAdminInviteResponseDto>> AcceptDisasterAdminInviteAsync(AcceptAdminInviteRequestDto acceptDto)
+        {
+            var principal = _jwtService.GetPrincipalFromExpiredToken(acceptDto.Token);
+            if (principal == null)
+                return Result<AcceptAdminInviteResponseDto>.Failure("Invalid or expired invite token.");
+
+            var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdClaim, out var userId))
+                return Result<AcceptAdminInviteResponseDto>.Failure("Invalid token claims.");
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null || !string.Equals(user.Email, acceptDto.Email, StringComparison.OrdinalIgnoreCase))
+                return Result<AcceptAdminInviteResponseDto>.Failure("User not found or email mismatch.");
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(acceptDto.NewPassword);
             user.AuthProvider = null;
-            user.Role = "Admin";
+            user.Role = "DisasterManagementAdmin";
             user.Status = "Active";
             await _userRepository.SaveChangesAsync();
 
