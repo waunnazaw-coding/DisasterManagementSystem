@@ -114,6 +114,14 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
                 .ToListAsync();
         }
 
+        public async Task<int?> GetReliefTeamIdByUserIdAsync(Guid userId)
+        {
+            return await _context.UserReliefTeams
+                .Where(urt => urt.UserId == userId)
+                .Select(urt => (int?)urt.ReliefTeamId) // Project only ReliefTeamId as nullable int
+                .FirstOrDefaultAsync();
+        }
+
 
     }
 }

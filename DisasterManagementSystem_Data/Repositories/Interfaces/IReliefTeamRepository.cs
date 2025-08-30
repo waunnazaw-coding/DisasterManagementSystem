@@ -21,5 +21,6 @@ namespace DisasterManagementSystem_Data.Repositories.Interfaces
         Task<bool> IsUserInTeam(int reliefTeamId, Guid userId);// IReliefTeamRepository.cs - Add this method
         Task<ReliefTeam> GetByUserIdAsync(Guid userId);
         Task<List<ReliefTeam>> GetTeamsByUserIdAsync(Guid userId);
+        Task<int?> GetReliefTeamIdByUserIdAsync(Guid userId);
     }
 }

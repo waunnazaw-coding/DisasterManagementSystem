@@ -71,7 +71,7 @@ namespace DisasterManagementSystem_Api.Controllers
         [HttpGet("by-user/{userId}")]
         public async Task<IResult> GetTeamByUserId(Guid userId)
         {
-            var result = await _reliefTeamService.GetTeamByUserIdAsync(userId);
+            var result = await _reliefTeamService.GetReliefTeamByUserIdAsync(userId);
             return result.Execute();
         }
 
