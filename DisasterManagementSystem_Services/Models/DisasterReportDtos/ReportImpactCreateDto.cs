@@ -19,6 +19,7 @@ namespace DisasterManagementSystem_Services.Models
         public string? Severity { get; set; }
         public string? Source { get; set; }
         public string? Status { get; set; }
+        public DateOnly StartDate { get; set; }
 
         public IFormFile[] ReportPhotos { get; set; } = Array.Empty<IFormFile>();
         public List<string> NewPhotoDescription { get; set; }

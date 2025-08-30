@@ -26,7 +26,7 @@ public partial class DisasterReport
     public string Status { get; set; } = null!;
 
     public string? Source { get; set; }
-
+    public DateOnly? StartDate { get; set; }
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }

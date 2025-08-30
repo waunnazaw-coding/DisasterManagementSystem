@@ -16,6 +16,13 @@ public class DisasterReportRepository : IDisasterReportRepository
         .Include(d => d.ReportPhotos)
         .FirstOrDefaultAsync(d => d.Id == id);
 
+    public async Task<DisasterReport?> GetByIdWithImpactAsync(int id) =>
+        await _context.DisasterReports
+        .Include(d => d.Location)
+        .Include(e => e.Impacts)
+        .Include(d => d.ReportPhotos)
+        .FirstOrDefaultAsync(d => d.Id == id);
+
     public async Task<IEnumerable<DisasterReport>> GetAllAsync() =>
         await _context.DisasterReports
             .Include(d => d.Location)

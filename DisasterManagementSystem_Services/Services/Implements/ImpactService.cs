@@ -93,6 +93,7 @@ public class ImpactService : IImpactService
         {
             Id = impact.Id,
             DisasterEventId = impact.DisasterEventId,
+            DisasterReportId = impact.DisasterReportId,
             Type = impact.Type,
             Value = impact.Value,
             ObjectName = impact.ObjectName

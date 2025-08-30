@@ -14,6 +14,8 @@ namespace DisasterManagementSystem_Services.Services
         {
             builder.Services.AddHttpContextAccessor();
 
+            builder.Services.AddHostedService<RejectedReportsCleanupService>();
+
             builder.Services.AddScoped<IlocationService, LocationService>();
             builder.Services.AddScoped<IDisasterReportService, DisasterReportService>();
             builder.Services.AddScoped<IDisasterEventService, DisasterEventService>();

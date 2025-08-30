@@ -17,7 +17,7 @@ public class EventFormUpdateDto
     public string? Severity { get; set; }
     public string? Description { get; set; }
     public string? Source { get; set; }
-
+    public Guid UpdatedUserId { get; set; }
     // ---------- Photo Handling ----------
 
     /// <summary>

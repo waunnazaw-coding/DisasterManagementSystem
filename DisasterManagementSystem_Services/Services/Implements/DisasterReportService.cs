@@ -50,7 +50,7 @@ public class DisasterReportService : IDisasterReportService
 
     public async Task<Result<DisasterReportDetailsDto>> GetByIdAsync(int id)
     {
-        var report = await _disasterReportRepository.GetByIdAsync(id);
+        var report = await _disasterReportRepository.GetByIdWithImpactAsync(id);
         if (report == null)
             return Result<DisasterReportDetailsDto>.NotFoundError("Report not found.");
 
@@ -90,6 +90,15 @@ public class DisasterReportService : IDisasterReportService
             Description = photo.Description,
         }).ToList();
 
+        var impactDtos = report.Impacts.Select(impact => new ImpactDto
+        {
+            Id = impact.Id,
+            Type = impact.Type,
+            ObjectName = impact.ObjectName,
+            Value = impact.Value,
+            Status = impact.Status
+        }).ToList();
+
         var dto = new DisasterReportDetailsDto
         {
             Id = report.Id,
@@ -101,11 +110,13 @@ public class DisasterReportService : IDisasterReportService
             Status = report.Status,
             CreatedAt = report.CreatedAt,
             UpdatedAt = report.UpdatedAt,
-            LocationName = locationDto.Address,
+            StartDate = report.StartDate,
+            LocationName = $"{locationDto?.Name}, {locationDto?.Region}, {locationDto?.Country}",
             DisasterEventId = report.DisasterEventId,
             AddressDetail = report.AddressDetail,
             LocationGeoJson = locationDto?.GeoJson,
-            ReportPhotos = photoDtos
+            ReportPhotos = photoDtos,
+            Impacts = impactDtos
         };
         return Result<DisasterReportDetailsDto>.Success(dto);
     }
@@ -129,6 +140,7 @@ public class DisasterReportService : IDisasterReportService
             DisasterEventId = report.DisasterEventId,
             UserId = report.UserId,
             AddressDetail = report.AddressDetail,
+            StartDate = report.StartDate,
             Location = new AppLocation
             {
                 Id = report.Location?.Id ?? 0,
@@ -212,7 +224,7 @@ public class DisasterReportService : IDisasterReportService
         try
         {
             // Call LocationService to create location
-            var locationResult = await _locationService.AddAsync(new LocationCreateDto
+            var locationResult = await _locationService.PureAddAsync(new LocationCreateDto
             {
                 Name = dto.LocationName,
                 Address = dto.Address,
@@ -231,7 +243,7 @@ public class DisasterReportService : IDisasterReportService
             {
                 UserId = dto.UserId,
                 LocationId = locationId,
-                AddressDetail = dto.AddressDetail,
+                AddressDetail = dto.Address,
                 Type = dto.Type,
                 Title = dto.Title,
                 Description = dto.Description,
@@ -239,7 +251,8 @@ public class DisasterReportService : IDisasterReportService
                 Source = dto.Source,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                Status = "Pending"
+                Status = "Pending",
+                StartDate = dto.StartDate
             };
             await _disasterReportRepository.AddAsync(report);
 
@@ -265,7 +278,7 @@ public class DisasterReportService : IDisasterReportService
             if (dto.ReportPhotos != null && dto.ReportPhotos.Length > 0)
             {
                 var descriptions = dto.NewPhotoDescription ?? new List<string>();
-                var uploadResult = await _reportPhotoService.UploadEventPhotosAsync
+                var uploadResult = await _reportPhotoService.UploadReportPhotosAsync
                 (
                     report.Id,
                     dto.ReportPhotos,
@@ -509,7 +522,6 @@ public class DisasterReportService : IDisasterReportService
         }
     }
 
-
     public async Task<Result<bool>> MarkAsCheckedAsync(int reportId)
     {
         var report = await _disasterReportRepository.GetByIdAsync(reportId);
@@ -565,6 +577,26 @@ public class DisasterReportService : IDisasterReportService
         catch (Exception ex)
         {
             return Result<bool>.Failure($"Error deleting disaster report: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<List<DisasterReport>>> GetWillDeleteRemindersAsync()
+    {
+        try
+        {
+            var now = DateTime.UtcNow;
+            var deletionCutoff = now.AddMonths(-1);
+            var reminderDate = deletionCutoff.AddDays(-3); // 3 days before deletion
+
+            var reports = await _context.DisasterReports
+                .Where(r => r.Status == "Rejected" && r.UpdatedAt >= reminderDate && r.UpdatedAt <= deletionCutoff)
+                .ToListAsync();
+
+            return Result<List<DisasterReport>>.Success(reports);
+        }
+        catch (Exception ex)
+        {
+            return Result<List<DisasterReport>>.Failure(ex.Message);
         }
     }
 

@@ -11,7 +11,9 @@ public class DisasterReportDetailsDto
     public string? Severity { get; set; }
     public string? Source { get; set; }
     public string LocationGeoJson { get; set; }
-    public List<ReportPhotoDto> ReportPhotos { get; set; }
+    public List<ReportPhotoDto> ReportPhotos { get; set; } = new();
+    public List<ImpactDto> Impacts { get; set; } = new(); 
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public DateOnly? StartDate { get; set; } 
 }

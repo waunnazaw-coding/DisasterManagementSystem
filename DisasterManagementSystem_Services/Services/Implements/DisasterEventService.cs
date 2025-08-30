@@ -301,6 +301,7 @@ namespace DisasterManagementSystem_Services.Service
             }).ToList();
             return Result<IEnumerable<DisasterEventListDto>>.Success(eventDtos);
         }
+
         public async Task<Result<IEnumerable<DisasterEventListDto>>> GetAllForMapViewAsync()
         {
             var events = await _disasterEventRepository.GetAllAsync();

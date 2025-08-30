@@ -39,10 +39,14 @@ namespace DisasterManagementSystem_API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(Result<string>.Failure("Invalid form data"));
 
-            // Extract UserId from token claims
+            // Try to extract UserId from token claims
             var userIdClaim = User.FindFirst("sub") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+
             if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
-                return Unauthorized(Result<string>.Failure("User ID not found in token"));
+            {
+                // Fallback to UnknownUserId
+                userId = Guid.Empty;
+            }
 
             dto.UserId = userId;
 
@@ -188,5 +192,14 @@ namespace DisasterManagementSystem_API.Controllers
 
             return Ok(new { message = result.Message });
         }
+
+        // ---------------- Get rejected report reminders for Admin dashboard ----------------
+        [HttpGet("will-delete-reminders")]
+        public async Task<IResult> GetWillDeleteReminders()
+        {
+            var result = await _reportService.GetWillDeleteRemindersAsync();
+            return result.Execute();
+        }
+
     }
 }

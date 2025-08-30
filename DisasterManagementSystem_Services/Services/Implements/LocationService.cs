@@ -152,7 +152,65 @@ public class LocationService : IlocationService
         return Result<LocationDto>.Success(createdDto, "Location added successfully.");
     }
 
+    public async Task<Result<LocationDto>> PureAddAsync(LocationCreateDto dto)
+    {
+        Geometry? geom;
+        try
+        {
+            var reader = new GeoJsonReader();
 
+            // Try to parse as raw Geometry
+            geom = reader.Read<Geometry>(dto.GeoJson);
+
+            // If null, try as FeatureCollection
+            if (geom == null)
+            {
+                var featureCollection = reader.Read<NetTopologySuite.Features.FeatureCollection>(dto.GeoJson);
+                geom = featureCollection?.FirstOrDefault()?.Geometry;
+            }
+
+            if (geom == null)
+                return Result<LocationDto>.ValidationError("Invalid GeoJSON: No valid geometry found.");
+        }
+        catch (Exception ex)
+        {
+            return Result<LocationDto>.ValidationError($"Invalid GeoJSON: {ex.Message}");
+        }
+
+        // Ensure polygon orientation is consistent
+        geom = FixPolygonOrientation(geom);
+
+        var centroid = geom.Centroid;
+        if (!IsFinite(centroid.X) || !IsFinite(centroid.Y))
+            return Result<LocationDto>.ValidationError("Geometry centroid has invalid coordinate values.");
+
+        // Use data directly from dto instead of reverse geocoding
+        var location = new AppLocation
+        {
+            Name = dto.Name,
+            Geography = geom,
+            Address = dto.Address,   // ✅ Use provided Address
+            Country = dto.Country,   // ✅ Use provided Country
+            Region = dto.Region      // ✅ Use provided Region
+        };
+
+        await _repository.AddAsync(location);
+        await _repository.SaveChangesAsync();
+
+        var createdDto = new LocationDto
+        {
+            Id = location.Id,
+            Name = location.Name,
+            GeoJson = location.Geography != null
+                ? _geoJsonWriter.Write(FixPolygonOrientation(location.Geography))
+                : null,
+            Address = location.Address,
+            Country = location.Country,
+            Region = location.Region,
+        };
+
+        return Result<LocationDto>.Success(createdDto, "Location added successfully (pure add).");
+    }
 
     public async Task<Result<AppLocation>> UpdateAsync(LocationUpdateDto dto)
     {
