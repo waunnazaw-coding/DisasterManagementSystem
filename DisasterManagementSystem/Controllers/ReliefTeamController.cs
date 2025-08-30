@@ -9,7 +9,7 @@ namespace DisasterManagementSystem_Api.Controllers
 {
   
 
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ReliefTeamController : ControllerBase
