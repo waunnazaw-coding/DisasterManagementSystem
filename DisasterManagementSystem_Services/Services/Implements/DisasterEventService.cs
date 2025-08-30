@@ -344,10 +344,7 @@ namespace DisasterManagementSystem_Services.Service
                 .ToListAsync();
 
             var impacts = await _context.Impacts
-                .Where(i => i.Type == "Casualties"
-                         || i.Type == "Displacement"
-                         || i.Type == "Infrastructure Damage"
-                         || i.Type == "Economic Loss")
+                .Where(i => i.DisasterEventId != null)
                 .ToListAsync();
 
             var photos = await _context.ReportPhotos
@@ -356,36 +353,40 @@ namespace DisasterManagementSystem_Services.Service
 
             return events.Select(de =>
             {
-                var affectedPeople = impacts
-                    .Where(i => i.DisasterEventId == de.Id && (i.Type == "Casualties" || i.Type == "Displacement"))
-                    .Sum(i => int.TryParse(i.Value, out var val) ? val : 0);
+                int ParseImpactValue(string? val)
+                {
+                    if (string.IsNullOrWhiteSpace(val)) return 0;
+                    val = val.Replace(",", ""); // remove commas
+                    return int.TryParse(val, out var result) ? result : 0;
+                }
 
-                var affectedFamilies = impacts
-                    .Where(i => i.DisasterEventId == de.Id && i.Type == "Displacement")
-                    .Sum(i => int.TryParse(i.Value, out var val) ? val : 0);
+                var eventImpacts = impacts.Where(i => i.DisasterEventId == de.Id).ToList();
 
-                var affectedInfrastructures = impacts
-                    .Where(i => i.DisasterEventId == de.Id && i.Type == "Infrastructure Damage")
-                    .Sum(i => int.TryParse(i.Value, out var val) ? val : 0);
+                // Affected people = Casualties + Displacement
+                var affectedPeople = eventImpacts
+                    .Where(i => i.Type == "Casualties" || i.Type == "Displacement")
+                    .Sum(i => ParseImpactValue(i.Value));
 
-                var currencyChanges = impacts
-                    .Where(i => i.DisasterEventId == de.Id && i.Type == "Economic Loss")
-                    .GroupBy(i => i.ObjectName)
-                    .Select(g =>
+                // Infrastructure damage = sum all infrastructure types
+                var affectedInfrastructures = eventImpacts
+                    .Where(i => i.Type == "Infrastructure Damage")
+                    .Sum(i => ParseImpactValue(i.Value));
+
+                // Economic loss = keep original value with currency
+                var currencyChanges = eventImpacts
+                    .Where(i => i.Type == "Economic Loss")
+                    .Select(i =>
                     {
-                        // Sum all values with the same ObjectName
-                        var sumValue = g.Sum(i => int.TryParse(i.Value, out var val) ? val : 0);
-                        var objectName = g.Key ?? "";
-                        return $"{sumValue} {objectName}";
+                        var value = i.Value?.Trim() ?? "0";
+                        var objectName = i.ObjectName ?? "";
+                        return $"{value} {objectName}";
                     })
                     .ToList();
-
 
                 var firstPhotoUrl = photos
                     .Where(p => p.DisasterEventId == de.Id)
                     .Select(p => p.FilePath)
                     .FirstOrDefault();
-
 
                 return new DisasterEventListDto
                 {
@@ -405,7 +406,6 @@ namespace DisasterManagementSystem_Services.Service
                     UpdatedUserName = de.UpdatedUser?.Name ?? "N/A",
                     UpdatedAt = de.UpdatedAt,
                     AffectedPeople = affectedPeople,
-                    AffectedFamilies = affectedFamilies,
                     AffectedInfrastructures = affectedInfrastructures,
                     CurrencyChanges = currencyChanges,
                     FirstImageUrl = firstPhotoUrl,
