@@ -43,7 +43,7 @@ namespace DisasterManagementSystem_Testing.WebAPI
             var userId = Guid.NewGuid();
             var donationDto = new CreateDonationDto
             {
-                Type = "Money",
+                //Type = "Money",
                 Amount = 100,
                 Currency = "USD",
                 SourceType = "Personal"

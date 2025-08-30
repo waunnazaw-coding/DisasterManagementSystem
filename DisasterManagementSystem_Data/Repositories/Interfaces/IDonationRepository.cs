@@ -20,5 +20,8 @@ namespace DisasterManagementSystem_Data.Repositories.Interfaces
         Task<decimal?> GetTotalAmountLastYearAsync();
         Task<decimal?> GetTotalAmountNowYearAsync();
         Task<decimal?> GetTotalAmount();
+        Task<Dictionary<string, decimal>> GetMonthlyDonationsAsync(int year);
+        Task<Dictionary<int, decimal>> GetYearlyDonationsAsync(int startYear, int endYear);
+         Task<Dictionary<string, decimal>> GetDonationsByCategoryAsync();
     }
 }

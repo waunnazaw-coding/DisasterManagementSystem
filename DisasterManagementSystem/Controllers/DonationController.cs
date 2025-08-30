@@ -124,6 +124,13 @@ namespace DisasterManagementSystem_Api.Controllers
             var totalAmount = await _donationService.GetTotalAmountLastYearAsync();
             return Ok(new { TotalAmountLastYear = totalAmount ?? 0 });
         }
+
+        [HttpGet("total-amount-now-year")]
+        public async Task<IActionResult> GetTotalAmountNowYear()
+        {
+            var totalAmount = await _donationService.GetTotalAmountNowYearAsync();
+            return Ok(new { TotalAmountNowYear = totalAmount ?? 0 });
+        }
         //[Authorize(Roles = "Admin")]
         //[HttpPost("distribute")]
         ////public async Task<IResult> DistributeDonation([FromBody] DonationDistributionDto distributionDto)
@@ -138,5 +145,25 @@ namespace DisasterManagementSystem_Api.Controllers
         //    var result = await _donationService.DistributeDonationAsync(distributionDto, userId);
         //    return result.Execute();
         //}
+        [HttpGet("monthly/{year}")]
+        public async Task<IResult> GetMonthlyDonations(int year)
+        {
+            var result = await _donationService.GetMonthlyDonationsAsync(year);
+            return result.Execute();
+        }
+
+        [HttpGet("yearly/{startYear}/{endYear}")]
+        public async Task<IResult> GetYearlyDonations(int startYear, int endYear)
+        {
+            var result = await _donationService.GetYearlyDonationsAsync(startYear, endYear);
+            return result.Execute();
+        }
+        [HttpGet("by-category")]
+        public async Task<IResult> GetDonationsByCategory()
+        {
+            var result = await _donationService.GetDonationsByCategoryAsync();
+            return result.Execute();
+        }
+
     }
 }

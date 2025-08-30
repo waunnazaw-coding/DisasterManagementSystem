@@ -459,5 +459,48 @@ namespace DisasterManagementSystem_Services.Services.Implements
         {
             return await _donationRepository.GetTotalAmountLastYearAsync();
         }
+
+        public async Task<decimal?> GetTotalAmountNowYearAsync()
+        {
+            return await _donationRepository.GetTotalAmountNowYearAsync();
+        }
+
+        public async Task<Result<Dictionary<string, decimal>>> GetMonthlyDonationsAsync(int year)
+        {
+            try
+            {
+                var monthlyData = await _donationRepository.GetMonthlyDonationsAsync(year);
+                return Result<Dictionary<string, decimal>>.Success(monthlyData, "Monthly donations retrieved successfully");
+            }
+            catch (Exception ex)
+            {
+                return Result<Dictionary<string, decimal>>.Failure($"Error retrieving monthly donations: {ex.Message}");
+            }
+        }
+
+        public async Task<Result<Dictionary<int, decimal>>> GetYearlyDonationsAsync(int startYear, int endYear)
+        {
+            try
+            {
+                var yearlyData = await _donationRepository.GetYearlyDonationsAsync(startYear, endYear);
+                return Result<Dictionary<int, decimal>>.Success(yearlyData, "Yearly donations retrieved successfully");
+            }
+            catch (Exception ex)
+            {
+                return Result<Dictionary<int, decimal>>.Failure($"Error retrieving yearly donations: {ex.Message}");
+            }
+        }
+        public async Task<Result<Dictionary<string, decimal>>> GetDonationsByCategoryAsync()
+        {
+            try
+            {
+                var categoryData = await _donationRepository.GetDonationsByCategoryAsync();
+                return Result<Dictionary<string, decimal>>.Success(categoryData, "Category donations retrieved successfully");
+            }
+            catch (Exception ex)
+            {
+                return Result<Dictionary<string, decimal>>.Failure($"Error retrieving category donations: {ex.Message}");
+            }
+        }
     }
 }

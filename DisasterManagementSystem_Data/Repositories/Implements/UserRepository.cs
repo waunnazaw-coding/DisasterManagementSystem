@@ -106,7 +106,16 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
         }
 
 
+        // Add this method implementation
+        public async Task DeleteUserNotificationsAsync(Guid userId)
+        {
+            var notifications = await _context.Notifications
+                .Where(n => n.UserId == userId)
+                .ToListAsync();
 
+            _context.Notifications.RemoveRange(notifications);
+            await _context.SaveChangesAsync();
+        }
 
         public async Task DeleteAsync(User user)
         {
@@ -179,6 +188,40 @@ namespace DisasterManagementSystem_Data.Repositories.Implements
                 .ToListAsync();
          }
 
+        // In UserRepository.cs
+        public async Task DeleteUserRelatedRecordsAsync(Guid userId)
+        {
+            // 1. First delete RequestAssignment records that might reference AssistanceRequests
+            var requestAssignments = await _context.RequestAssignments
+                .Where(ra => _context.AssistanceRequests
+                    .Where(ar => ar.UserId == userId)
+                    .Select(ar => ar.Id)
+                    .Contains(ra.AssistanceRequestId))
+                .ToListAsync();
+            _context.RequestAssignments.RemoveRange(requestAssignments);
+
+            // Delete notifications
+            var notifications = await _context.Notifications
+                .Where(n => n.UserId == userId)
+                .ToListAsync();
+            _context.Notifications.RemoveRange(notifications);
+
+            // Delete donations
+            var donations = await _context.Donations
+                .Where(d => d.DonorUserId == userId)
+                .ToListAsync();
+            _context.Donations.RemoveRange(donations);
+
+            var requests = await _context.AssistanceRequests.
+                Where(r => r.UserId == userId).ToListAsync();
+            _context.AssistanceRequests.RemoveRange(requests);
+
+            var reports = await _context.DisasterReports.Where(report => report.UserId == userId).ToListAsync();
+            
+
+
+            await _context.SaveChangesAsync();
+        }
 
         // Fetch emails of all admin users
         public async Task<List<string>> GetAdminEmailsAsync()
