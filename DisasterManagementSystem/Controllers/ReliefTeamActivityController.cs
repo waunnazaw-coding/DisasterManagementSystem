@@ -99,7 +99,7 @@ namespace DisasterManagementSystem_Api.Controllers
         }
 
         [HttpGet("stats")]
-        [Authorize(Roles = "Admin")]
+      //  [Authorize(Roles = "SysAdmin")]
         public async Task<IResult> GetActivityStats()
   {
             var result = await _activityService.GetActivityStatsAsync();

@@ -28,5 +28,11 @@ namespace DisasterManagementSystem_Data.Repositories.Interfaces
         Task<IEnumerable<User>> GetPaginatedAsync(int skip, int take, string search = null, string role = null, string status = null);
 
         Task<List<string>> GetAdminEmailsAsync();
+
+        // Add this method signature to the interface
+        Task DeleteUserNotificationsAsync(Guid userId);
+
+        // In IUserRepository.cs
+        Task DeleteUserRelatedRecordsAsync(Guid userId);
     }
 }

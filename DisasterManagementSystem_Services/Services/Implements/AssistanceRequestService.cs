@@ -351,11 +351,14 @@ namespace DisasterManagementSystem_Services.Services.Implements
 
                 // Get admin user
                 var admin = await _userRepository.GetByIdAsync(adminId);
-                if (admin == null || admin.Role != "Admin")
+
+                // Check if the user is NOT SysAdmin AND NOT DisasterManagementAdmin
+                if (admin == null || (admin.Role != "SysAdmin" && admin.Role != "DisasterManagementAdmin"))
                 {
                     _logger.LogWarning("Unauthorized status update attempt by user {UserId}", adminId);
                     return Result<AssistanceRequestDto>.ValidationError("Only admins can update request status");
                 }
+
 
                 // Business rules for status transitions
                 if (request.Status == "Fulfilled" && statusDto.Status != "Fulfilled")

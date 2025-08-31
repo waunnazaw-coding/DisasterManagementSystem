@@ -44,7 +44,7 @@ namespace DisasterManagementSystem_Api.Controllers
             return result.Execute();
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "SysAdmin,FinancialAdmin")]
         [HttpGet]
         public async Task<IResult> GetAllDonations()
         {
@@ -60,7 +60,7 @@ namespace DisasterManagementSystem_Api.Controllers
         }
 
         // New endpoint for updating donation status
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "SysAdmin.FinancialAdmin")]
         [HttpPut("{id}/status")]
         public async Task<IResult> UpdateDonationStatus(int id, [FromBody] UpdateStatusDto statusDto)
         {
@@ -75,8 +75,7 @@ namespace DisasterManagementSystem_Api.Controllers
             return result.Execute();
         }
 
-        // New endpoint for updating donation by user
-        [Authorize(Roles = "Admin")]
+        
         [HttpPut("{id}")]
         public async Task<IResult> UpdateDonation(int id, [FromBody] UpdateDonationDto donationDto)
         {
@@ -91,8 +90,7 @@ namespace DisasterManagementSystem_Api.Controllers
             return result.Execute();
         }
 
-        // New endpoint for deleting donation by user
-        [Authorize(Roles = "Admin")]
+      
         [HttpDelete("{id}")]
         public async Task<IResult> DeleteDonation(int id)
         {
@@ -126,6 +124,13 @@ namespace DisasterManagementSystem_Api.Controllers
             var totalAmount = await _donationService.GetTotalAmountLastYearAsync();
             return Ok(new { TotalAmountLastYear = totalAmount ?? 0 });
         }
+
+        [HttpGet("total-amount-now-year")]
+        public async Task<IActionResult> GetTotalAmountNowYear()
+        {
+            var totalAmount = await _donationService.GetTotalAmountNowYearAsync();
+            return Ok(new { TotalAmountNowYear = totalAmount ?? 0 });
+        }
         //[Authorize(Roles = "Admin")]
         //[HttpPost("distribute")]
         ////public async Task<IResult> DistributeDonation([FromBody] DonationDistributionDto distributionDto)
@@ -140,5 +145,25 @@ namespace DisasterManagementSystem_Api.Controllers
         //    var result = await _donationService.DistributeDonationAsync(distributionDto, userId);
         //    return result.Execute();
         //}
+        [HttpGet("monthly/{year}")]
+        public async Task<IResult> GetMonthlyDonations(int year)
+        {
+            var result = await _donationService.GetMonthlyDonationsAsync(year);
+            return result.Execute();
+        }
+
+        [HttpGet("yearly/{startYear}/{endYear}")]
+        public async Task<IResult> GetYearlyDonations(int startYear, int endYear)
+        {
+            var result = await _donationService.GetYearlyDonationsAsync(startYear, endYear);
+            return result.Execute();
+        }
+        [HttpGet("by-category")]
+        public async Task<IResult> GetDonationsByCategory()
+        {
+            var result = await _donationService.GetDonationsByCategoryAsync();
+            return result.Execute();
+        }
+
     }
 }

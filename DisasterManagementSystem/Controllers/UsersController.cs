@@ -10,7 +10,7 @@ namespace DisasterManagementSystem_Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin,SysAdmin")]
+    //[Authorize(Roles = "Admin,SysAdmin")]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -94,6 +94,9 @@ namespace DisasterManagementSystem_Api.Controllers
             var blockedUsers = await _userRepository.CountAsync(status: "Blacklisted");
             var admins = await _userRepository.CountAsync(role: "Admin");
             var sysAdmins = await _userRepository.CountAsync(role: "SysAdmin");
+             var DisasterManagemntAdmin = await _userRepository.CountAsync(role: "DisasterManagementAdmin");
+            var FinancialAdmin = await _userRepository.CountAsync(role: "FinancialAdmin");
+
             var reliefTeams = await _userRepository.CountAsync(role: "ReliefTeam");
 
             var regularUsers = await _userRepository.CountAsync(role: "User");
@@ -105,6 +108,8 @@ namespace DisasterManagementSystem_Api.Controllers
                 BlockedUsers = blockedUsers,
                 Admins = admins,
                 SysAdmins = sysAdmins,
+                DisAdmins= DisasterManagemntAdmin,
+                finalcialadmin= FinancialAdmin,
                 ReliefTeams = reliefTeams,
                 RegularUsers = regularUsers
             };

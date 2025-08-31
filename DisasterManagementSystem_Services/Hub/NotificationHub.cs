@@ -22,7 +22,14 @@ namespace DisasterManagementSystem_Services.Hubs
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, userId);
 
-                if (role == "Admin")
+                // Include all admin roles
+                var adminRoles = new List<string> {
+            "SysAdmin",
+            "DisasterManagementAdmin",
+            "FinancialAdmin"
+        };
+
+                if (!string.IsNullOrEmpty(role) && adminRoles.Contains(role))
                 {
                     await Groups.AddToGroupAsync(Context.ConnectionId, "Admins");
                 }
@@ -31,6 +38,8 @@ namespace DisasterManagementSystem_Services.Hubs
             await base.OnConnectedAsync();
         }
 
+
+        // In NotificationHub.cs
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -40,7 +49,9 @@ namespace DisasterManagementSystem_Services.Hubs
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId);
 
-                if (role == "Admin")
+                // Fix: Check for all admin roles, not just "Admin"
+                var adminRoles = new List<string> { "DisasterManagementAdmin", "FinancialAdmin", "SysAdmin" };
+                if (!string.IsNullOrEmpty(role) && adminRoles.Contains(role))
                 {
                     await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Admins");
                 }

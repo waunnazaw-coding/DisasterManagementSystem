@@ -74,6 +74,11 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 //    donationDto.PaymentMethod = null;
                 //}
 
+
+
+
+                
+
                 // Validate source type
                 var validSourceTypes = new[] { "Personal", "Organization", "NGO", "Anonymous", "Company" };
                 if (!validSourceTypes.Contains(donationDto.SourceType))
@@ -303,7 +308,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
         }
 
 
-      
+
 
         public async Task<Result<DonationDto>> UpdateDonationAsync(int id, UpdateDonationDto donationDto, Guid userId)
         {
@@ -314,99 +319,59 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 if (donation == null)
                     return Result<DonationDto>.NotFoundError("Donation not found.");
 
-                // Check if user owns this donation
-                if (donation.DonorUserId != userId)
+                // Check if user owns this donation or is admin
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user == null)
+                    return Result<DonationDto>.NotFoundError("User not found.");
+
+                bool isAdmin = user.Role == "SysAdmin,FinancialAdmin,DisasterManagementAdmin";
+
+                if (donation.DonorUserId != userId && !isAdmin)
                     return Result<DonationDto>.ValidationError("You can only edit your own donations.");
 
-                // Check if donation is still pending
-                if (donation.Status != "Pending")
+                // Check if donation is still pending (for non-admins)
+                if (!isAdmin && donation.Status != "Pending")
                     return Result<DonationDto>.ValidationError("Only pending donations can be edited.");
-
-                // Validate donation type
-                if (donationDto.Type != "Money" && donationDto.Type != "Item")
-                    return Result<DonationDto>.ValidationError("Donation type must be either 'Money' or 'Item'.");
-
-                // Validate money donation
-                if (donationDto.Type == "Money")
-                {
-                    if (!donationDto.Amount.HasValue || donationDto.Amount <= 0)
-                        return Result<DonationDto>.ValidationError("Amount is required for money donations and must be greater than 0.");
-
-                    if (string.IsNullOrEmpty(donationDto.Currency))
-                        return Result<DonationDto>.ValidationError("Currency is required for money donations.");
-
-                    if (string.IsNullOrEmpty(donationDto.PaymentMethod))
-                        return Result<DonationDto>.ValidationError("Payment method is required for money donations.");
-
-                    // Validate payment method
-                    var validPaymentMethods = new[] { "KPay", "WavePay", "BankTransfer" };
-                    if (!validPaymentMethods.Contains(donationDto.PaymentMethod))
-                        return Result<DonationDto>.ValidationError("Invalid payment method. Must be KPay, WavePay, or BankTransfer.");
-                }
-
-                // Validate item donation
-                if (donationDto.Type == "Item")
-                {
-                    if (!donationDto.Quantity.HasValue || donationDto.Quantity <= 0)
-                        return Result<DonationDto>.ValidationError("Quantity is required for item donations and must be greater than 0.");
-
-                    if (string.IsNullOrEmpty(donationDto.Unit))
-                        return Result<DonationDto>.ValidationError("Unit is required for item donations.");
-                }
 
                 // Validate source type
                 var validSourceTypes = new[] { "Personal", "Organization", "NGO", "Anonymous", "Company" };
                 if (!validSourceTypes.Contains(donationDto.SourceType))
                     return Result<DonationDto>.ValidationError("Invalid source type.");
 
+                // Validate payment method
+                var validPaymentMethods = new[] { "KPay", "WavePay", "BankTransfer" };
+                if (!validPaymentMethods.Contains(donationDto.PaymentMethod))
+                    return Result<DonationDto>.ValidationError("Invalid payment method. Must be KPay, WavePay, or BankTransfer.");
+
                 // Update donation fields
                 donation.Name = donationDto.Name;
-               // donation.Type = donationDto.Type;
                 donation.Description = donationDto.Description;
                 donation.SourceType = donationDto.SourceType;
                 donation.Phone = donationDto.DonorPhoneNumber;
-
-                if (donationDto.Type == "Money")
-                {
-                    donation.Amount = donationDto.Amount;
-                    donation.Currency = donationDto.Currency;
-                    donation.PaymentMethod = donationDto.PaymentMethod;
-                    donation.Quantity = null;
-                    donation.Unit = null;
-                }
-                else
-                {
-                    donation.Quantity = donationDto.Quantity;
-                    donation.Unit = donationDto.Unit;
-                    donation.Amount = null;
-                    donation.Currency = null;
-                    donation.PaymentMethod = null;
-                }
+                donation.Amount = donationDto.Amount;
+                donation.Currency = donationDto.Currency;
+                donation.PaymentMethod = donationDto.PaymentMethod;
+                donation.Category = donationDto.Category;
 
                 // Save changes
                 await _donationRepository.UpdateAsync(donation);
-
-                // Get user info for response
-                var user = await _userRepository.GetByIdAsync(userId);
 
                 // Create response DTO
                 var responseDonationDto = new DonationDto
                 {
                     Id = donation.Id,
                     DonorUserId = donation.DonorUserId,
-                    DonorName = user?.Name,
-                    //Type = donation.Type,
+                    DonorName = user.Name,
                     Name = donation.Name,
                     Description = donation.Description,
-                    Quantity = donation.Quantity,
-                    Unit = donation.Unit,
                     Amount = donation.Amount,
                     Currency = donation.Currency,
                     PaymentMethod = donation.PaymentMethod,
                     DonorPhoneNumber = donation.Phone,
                     DateReceived = donation.DateReceived,
                     SourceType = donation.SourceType,
-                    Status = donation.Status
+                    Status = donation.Status,
+                    Category = donation.Category
                 };
 
                 return Result<DonationDto>.Success(responseDonationDto, "Donation updated successfully.");
@@ -426,16 +391,24 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 if (donation == null)
                     return Result<bool>.NotFoundError("Donation not found.");
 
-                // Check if user owns this donation
-                if (donation.DonorUserId != userId)
+                // Check if user owns this donation or is admin
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user == null)
+                    return Result<bool>.NotFoundError("User not found.");
+
+                bool isAdmin = user.Role == "Admin";
+
+                if (donation.DonorUserId != userId && !isAdmin)
                     return Result<bool>.ValidationError("You can only delete your own donations.");
 
-                // Check if donation is still pending
-                if (donation.Status != "Pending")
+                // Check if donation is still pending (for non-admins)
+                if (!isAdmin && donation.Status != "Pending")
                     return Result<bool>.ValidationError("Only pending donations can be deleted.");
 
                 // Delete donation
-                await _donationRepository.DeleteAsync(id);
+                var result = await _donationRepository.DeleteAsync(id);
+                if (!result)
+                    return Result<bool>.NotFoundError("Donation not found.");
 
                 return Result<bool>.Success(true, "Donation deleted successfully.");
             }
@@ -485,6 +458,49 @@ namespace DisasterManagementSystem_Services.Services.Implements
         public async Task<decimal?> GetTotalAmountLastYearAsync()
         {
             return await _donationRepository.GetTotalAmountLastYearAsync();
+        }
+
+        public async Task<decimal?> GetTotalAmountNowYearAsync()
+        {
+            return await _donationRepository.GetTotalAmountNowYearAsync();
+        }
+
+        public async Task<Result<Dictionary<string, decimal>>> GetMonthlyDonationsAsync(int year)
+        {
+            try
+            {
+                var monthlyData = await _donationRepository.GetMonthlyDonationsAsync(year);
+                return Result<Dictionary<string, decimal>>.Success(monthlyData, "Monthly donations retrieved successfully");
+            }
+            catch (Exception ex)
+            {
+                return Result<Dictionary<string, decimal>>.Failure($"Error retrieving monthly donations: {ex.Message}");
+            }
+        }
+
+        public async Task<Result<Dictionary<int, decimal>>> GetYearlyDonationsAsync(int startYear, int endYear)
+        {
+            try
+            {
+                var yearlyData = await _donationRepository.GetYearlyDonationsAsync(startYear, endYear);
+                return Result<Dictionary<int, decimal>>.Success(yearlyData, "Yearly donations retrieved successfully");
+            }
+            catch (Exception ex)
+            {
+                return Result<Dictionary<int, decimal>>.Failure($"Error retrieving yearly donations: {ex.Message}");
+            }
+        }
+        public async Task<Result<Dictionary<string, decimal>>> GetDonationsByCategoryAsync()
+        {
+            try
+            {
+                var categoryData = await _donationRepository.GetDonationsByCategoryAsync();
+                return Result<Dictionary<string, decimal>>.Success(categoryData, "Category donations retrieved successfully");
+            }
+            catch (Exception ex)
+            {
+                return Result<Dictionary<string, decimal>>.Failure($"Error retrieving category donations: {ex.Message}");
+            }
         }
     }
 }

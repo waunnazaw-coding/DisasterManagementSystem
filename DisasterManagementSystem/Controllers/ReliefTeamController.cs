@@ -9,7 +9,7 @@ namespace DisasterManagementSystem_Api.Controllers
 {
   
 
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ReliefTeamController : ControllerBase
@@ -71,7 +71,7 @@ namespace DisasterManagementSystem_Api.Controllers
         [HttpGet("by-user/{userId}")]
         public async Task<IResult> GetTeamByUserId(Guid userId)
         {
-            var result = await _reliefTeamService.GetTeamByUserIdAsync(userId);
+            var result = await _reliefTeamService.GetReliefTeamByUserIdAsync(userId);
             return result.Execute();
         }
 

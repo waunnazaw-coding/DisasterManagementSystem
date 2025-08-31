@@ -120,15 +120,23 @@ namespace DisasterManagementSystem_Services.Services.Implements
             return Result<UserDto>.Success(MapToDto(user), "User updated successfully");
         }
 
+        // ... existing code ...
+
+        // In UserService.cs
         public async Task<Result<bool>> DeleteAsync(Guid id)
         {
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
                 return Result<bool>.NotFoundError("User not found");
 
+            // First delete all related records
+            await _userRepository.DeleteUserRelatedRecordsAsync(id);
+
+            // Then delete the user
             await _userRepository.DeleteAsync(user);
             return Result<bool>.Success(true, "User deleted successfully");
         }
+        // ... rest of the code ...
 
         private static UserDto MapToDto(User user)
         {

@@ -11,8 +11,6 @@ public partial class Donation
 
     public string? Name { get; set; }
 
-    //public string Type { get; set; } = null!;
-
     public string? Description { get; set; }
 
     public decimal? Quantity { get; set; }

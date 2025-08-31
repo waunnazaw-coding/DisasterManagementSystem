@@ -16,5 +16,6 @@ namespace DisasterManagementSystem_Services.Services.Interfaces
         Task<Result<ReliefTeamDto>> UpdateTeamAsync(int id, UpdateReliefTeamDto dto);
         Task<Result<bool>> DeleteTeamAsync(int id);
         Task<Result<ReliefTeam>> GetTeamByUserIdAsync(Guid userId);
+        Task<Result<int?>> GetReliefTeamByUserIdAsync(Guid userId);
     }
 }

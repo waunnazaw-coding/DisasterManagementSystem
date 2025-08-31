@@ -22,5 +22,11 @@ namespace DisasterManagementSystem_Services.Services.Interfaces
         Task<Result<List<DonationDto>>> GetRecentDonationsAsync();
         Task<int> GetTotalPeopleByPhoneAsync();
         Task<decimal?> GetTotalAmountLastYearAsync();
+
+        Task<decimal?> GetTotalAmountNowYearAsync();
+
+        Task<Result<Dictionary<string, decimal>>> GetMonthlyDonationsAsync(int year);
+        Task<Result<Dictionary<int, decimal>>> GetYearlyDonationsAsync(int startYear, int endYear);
+        Task<Result<Dictionary<string, decimal>>> GetDonationsByCategoryAsync();
     }
 }

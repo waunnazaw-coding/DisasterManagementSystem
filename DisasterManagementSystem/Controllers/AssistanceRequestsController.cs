@@ -37,7 +37,7 @@ namespace DisasterManagementSystem_Api.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,SysAdmin,DisasterManagementAdmin")]
         public async Task<IResult> GetAllRequests([FromQuery] bool includeAssignments = false)
         {
             var result = includeAssignments
@@ -93,7 +93,7 @@ namespace DisasterManagementSystem_Api.Controllers
         }
 
         [HttpPut("{id}/status")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,SysAdmin,DisasterManagementAdmin")]
         public async Task<IResult> UpdateRequestStatus(int id, [FromBody] UpdateRequestStatusDto statusDto)
         {
             if (!ModelState.IsValid)
@@ -122,7 +122,7 @@ namespace DisasterManagementSystem_Api.Controllers
         }
         // In AssistanceRequestsController.cs
         [HttpGet("stats")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,SysAdmin,DisasterManagementAdmin")]
         public async Task<IResult> GetRequestStats()
         {
             var result = await _requestService.GetRequestStatsAsync();

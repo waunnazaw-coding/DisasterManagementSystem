@@ -45,6 +45,8 @@ namespace DisasterManagementSystem_Services.Services
             builder.Services.AddScoped<IUserContextService, UserContextService>();
             builder.Services.AddScoped<IGdacsDisasterService, GdacsDisasterService>();
             builder.Services.AddScoped<IReverseGeocodingService, ReverseGeocodingService>();
+            builder.Services.AddScoped<IPartnerService, PartnerService>();
+            builder.Services.AddScoped<IContactService, ContactService>();
 
         }
 

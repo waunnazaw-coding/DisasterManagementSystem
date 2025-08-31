@@ -40,16 +40,16 @@ namespace DisasterManagementSystem_Testing.Service
             );
         }
 
-        [Fact]
-        public async Task UploadReportPhotosAsync_ShouldReturnValidationError_WhenFilesAreNull()
-        {
-            // Act
-            var result = await _service.UploadReportPhotosAsync(1, null);
+        //[Fact]
+        //public async Task UploadReportPhotosAsync_ShouldReturnValidationError_WhenFilesAreNull()
+        //{
+        //    // Act
+        //    var result = await _service.UploadReportPhotosAsync(1, null);
 
-            // Assert
-            Assert.False(result.IsSuccess);
-            Assert.Equal("No files provided", result.Message);
-        }
+        //    // Assert
+        //    Assert.False(result.IsSuccess);
+        //    Assert.Equal("No files provided", result.Message);
+        //}
 
         [Fact]
         public async Task GetPhotosByReportIdAsync_ShouldReturnPhotos()

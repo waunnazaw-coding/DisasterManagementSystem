@@ -172,6 +172,16 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 return Result<ReliefTeam>.Success(team);
             }
 
+            public async Task<Result<int?>> GetReliefTeamByUserIdAsync(Guid userId)
+            {
+                var teamId = await _teamRepository.GetReliefTeamIdByUserIdAsync(userId);
+                if (teamId == null)
+                {
+                    return Result<int?>.NotFoundError("No relief team found for this user");
+                }
+                return Result<int?>.Success(teamId);
+            }
+
         }
     }
 }

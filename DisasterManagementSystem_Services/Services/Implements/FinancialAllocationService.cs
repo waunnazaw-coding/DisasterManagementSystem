@@ -292,8 +292,17 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     var notes = worksheet.Cells[row, 5].GetValue<string>();
 
                     object dateValue = worksheet.Cells[row, 6].Value;
-                    if (dateValue == null || !DateTime.TryParse(dateValue.ToString(), out var allocationDate))
+                    DateTime allocationDate;
+                    if (dateValue is double oaDateNumber)
+                    {
+                        allocationDate = DateTime.FromOADate(oaDateNumber);
+                    }
+                    else if (!DateTime.TryParse(dateValue.ToString(), out allocationDate))
+                    {
                         throw new ArgumentException($"Invalid AllocationDate at row {row}");
+                    }
+
+
 
                     var dto = new FinancialAllocationRequestDto
                     {

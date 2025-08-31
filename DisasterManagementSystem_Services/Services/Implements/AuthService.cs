@@ -183,6 +183,114 @@ namespace DisasterManagementSystem_Services.Services.Implements
 }
 
 
+        public async Task<Result<AdminInviteResponseDto>> SendDisasterManagementAdminInviteAsync(AdminInviteRequestDto inviteDto)
+        {
+            try
+            {
+                var user = await _userRepository.GetByEmailAsync(inviteDto.Email);
+                if (user == null)
+                {
+                    user = new User
+                    {
+                        Email = inviteDto.Email,
+                        Name = inviteDto.Name ?? "",
+                        Role = "User",        // default role
+                        Status = "Active",
+                        CreatedAt = DateTime.UtcNow,
+                        AuthProvider = null
+                    };
+                    await _userRepository.AddAsync(user);
+                }
+                else
+                {
+                    if (user.Role == "DisasterManagementAdmin")
+                        return Result<AdminInviteResponseDto>.Failure("User is already a Disaster Management Admin.");
+                    user.Status = "Active";
+                    await _userRepository.UpdateAsync(user);
+                }
+                var inviteToken = _jwtService.GenerateAdminInviteToken(user.Id, TimeSpan.FromHours(24));
+                var frontendBaseUrl = _configuration["Frontend:BaseUrl"] ?? "http://localhost:5173";
+                var inviteUrl = $"{frontendBaseUrl.TrimEnd('/')}/accept-disaster-admin-invite?token={Uri.EscapeDataString(inviteToken)}&email={Uri.EscapeDataString(user.Email)}";
+
+                var subject = "You are invited to become a Disaster Management Admin";
+                var htmlMessage = $@"
+            <p>Hello {(!string.IsNullOrEmpty(user.Name) ? user.Name : user.Email)},</p>
+            <p>You have been invited to join as a <strong>Disaster Management Admin</strong> on our system.</p>
+            <p>Please click the link below to set your password and activate your admin account:</p>
+            <p><a href='{inviteUrl}'>Accept Admin Invitation</a></p>
+            <p>This link will expire in 24 hours.</p>
+            <p>If you did not expect this invitation, please ignore this email.</p>
+        ";
+                await _emailSender.SendEmailAsync(user.Email, subject, htmlMessage);
+                var responseDto = new AdminInviteResponseDto
+                {
+                    Email = user.Email,
+                    InviteSentAt = DateTime.UtcNow,
+                    InviteUrl = inviteUrl
+                };
+                return Result<AdminInviteResponseDto>.Success(responseDto);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error in SendDisasterManagementAdminInviteAsync: {ex}");
+                return Result<AdminInviteResponseDto>.Failure("Failed to send Disaster Management Admin invite. Please try again later.");
+            }
+        }
+
+        public async Task<Result<AdminInviteResponseDto>> SendFinancialAdminInviteAsync(AdminInviteRequestDto inviteDto)
+        {
+            try
+            {
+                var user = await _userRepository.GetByEmailAsync(inviteDto.Email);
+                if (user == null)
+                {
+                    user = new User
+                    {
+                        Email = inviteDto.Email,
+                        Name = inviteDto.Name ?? "",
+                        Role = "User",        // default role
+                        Status = "Active",
+                        CreatedAt = DateTime.UtcNow,
+                        AuthProvider = null
+                    };
+                    await _userRepository.AddAsync(user);
+                }
+                else
+                {
+                    if (user.Role == "FinancialAdmin")
+                        return Result<AdminInviteResponseDto>.Failure("User is already a Financial Admin.");
+                    user.Status = "Active";
+                    await _userRepository.UpdateAsync(user);
+                }
+                var inviteToken = _jwtService.GenerateAdminInviteToken(user.Id, TimeSpan.FromHours(24));
+                var frontendBaseUrl = _configuration["Frontend:BaseUrl"] ?? "http://localhost:5173";
+                var inviteUrl = $"{frontendBaseUrl.TrimEnd('/')}/accept-financial-admin-invite?token={Uri.EscapeDataString(inviteToken)}&email={Uri.EscapeDataString(user.Email)}";
+
+                var subject = "You are invited to become a Financial Admin";
+                var htmlMessage = $@"
+            <p>Hello {(!string.IsNullOrEmpty(user.Name) ? user.Name : user.Email)},</p>
+            <p>You have been invited to join as a <strong>Financial Admin</strong> on our system.</p>
+            <p>Please click the link below to set your password and activate your admin account:</p>
+            <p><a href='{inviteUrl}'>Accept Admin Invitation</a></p>
+            <p>This link will expire in 24 hours.</p>
+            <p>If you did not expect this invitation, please ignore this email.</p>
+        ";
+                await _emailSender.SendEmailAsync(user.Email, subject, htmlMessage);
+                var responseDto = new AdminInviteResponseDto
+                {
+                    Email = user.Email,
+                    InviteSentAt = DateTime.UtcNow,
+                    InviteUrl = inviteUrl
+                };
+                return Result<AdminInviteResponseDto>.Success(responseDto);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error in SendFinancialAdminInviteAsync: {ex}");
+                return Result<AdminInviteResponseDto>.Failure("Failed to send Financial Admin invite. Please try again later.");
+            }
+        }
+
 
         public async Task<Result<AcceptAdminInviteResponseDto>> AcceptAdminInviteAsync(AcceptAdminInviteRequestDto acceptDto)
         {
@@ -198,26 +306,38 @@ namespace DisasterManagementSystem_Services.Services.Implements
             if (user == null || !string.Equals(user.Email, acceptDto.Email, StringComparison.OrdinalIgnoreCase))
                 return Result<AcceptAdminInviteResponseDto>.Failure("User not found or email mismatch.");
 
-            //var updatedUser = new User
-            //{
-            //    Id = user.Id,
-            //    PasswordHash = BCrypt.Net.BCrypt.HashPassword(acceptDto.NewPassword),
-            //    AuthProvider = null,
-            //    Role = "Admin",
-            //    Status = "Active"
-            //};
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(acceptDto.NewPassword);
+            user.AuthProvider = null;
+            user.Role = "FinancialAdmin";
+            user.Status = "Active";
+            await _userRepository.SaveChangesAsync();
 
-            //_userRepository.Attach(updatedUser);
-            //var entry = _userRepository.Entry(updatedUser);
-            //entry.Property(u => u.PasswordHash).IsModified = true;
-            //entry.Property(u => u.AuthProvider).IsModified = true;
-            //entry.Property(u => u.Role).IsModified = true;
-            //entry.Property(u => u.Status).IsModified = true;
+            var responseDto = new AcceptAdminInviteResponseDto
+            {
+                Email = user.Email,
+                IsAdmin = true,
+            };
 
+            return Result<AcceptAdminInviteResponseDto>.Success(responseDto);
+        }
+
+        public async Task<Result<AcceptAdminInviteResponseDto>> AcceptDisasterAdminInviteAsync(AcceptAdminInviteRequestDto acceptDto)
+        {
+            var principal = _jwtService.GetPrincipalFromExpiredToken(acceptDto.Token);
+            if (principal == null)
+                return Result<AcceptAdminInviteResponseDto>.Failure("Invalid or expired invite token.");
+
+            var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdClaim, out var userId))
+                return Result<AcceptAdminInviteResponseDto>.Failure("Invalid token claims.");
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null || !string.Equals(user.Email, acceptDto.Email, StringComparison.OrdinalIgnoreCase))
+                return Result<AcceptAdminInviteResponseDto>.Failure("User not found or email mismatch.");
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(acceptDto.NewPassword);
             user.AuthProvider = null;
-            user.Role = "Admin";
+            user.Role = "DisasterManagementAdmin";
             user.Status = "Active";
             await _userRepository.SaveChangesAsync();
 
