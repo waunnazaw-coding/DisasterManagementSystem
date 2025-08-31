@@ -43,15 +43,17 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<RequestAssignment> RequestAssignments { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-    
+
     public virtual DbSet<UserReliefTeam> UserReliefTeams { get; set; }
-    
+
     public virtual DbSet<Resource> Resources { get; set; }
-    
+
+    public virtual DbSet<DeletedReportLog> DeletedReportLogs { get; set; }
+
     public virtual DbSet<DisasterKnowledge> DisasterKnowledges { get; set; }
-    
+
     public virtual DbSet<FinancialAllocation> FinancialAllocations { get; set; }
-    
+
     public virtual DbSet<AllocationType> AllocationTypes { get; set; }
 
     public virtual DbSet<GdacsdisasterEvent> GdacsdisasterEvents { get; set; }
@@ -66,7 +68,7 @@ public partial class AppDbContext : DbContext
                 .Build();
 
             var connectionString = configuration.GetConnectionString("DefaultConnection");
-            optionsBuilder.UseSqlServer(connectionString ,  x => x.UseNetTopologySuite());
+            optionsBuilder.UseSqlServer(connectionString, x => x.UseNetTopologySuite());
         }
     }
 
@@ -76,6 +78,21 @@ public partial class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<DeletedReportLog>(entity =>
+        {
+            entity.ToTable("DeletedReportLog"); // singular
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.ReportName).HasMaxLength(255).IsRequired();
+            entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.DeletedAt)
+                .HasDefaultValueSql("GETUTCDATE()")
+                .HasColumnType("datetime2");
+            entity.Property(e => e.DeletedBy).HasMaxLength(100).HasDefaultValue("System");
+            entity.Property(e => e.ExtraInfo);
+        });
+
+
         modelBuilder.Entity<AllocationType>(entity =>
         {
             entity.HasKey(e => e.AllocationTypeId).HasName("PK__Allocati__D797DE4307F78B1D");
@@ -83,7 +100,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.Name).HasMaxLength(100);
         });
-        
+
         modelBuilder.Entity<AssistanceRequest>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Assistan__3214EC077EEE1782");
@@ -127,7 +144,7 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK__Assistanc__UserI__693CA210");
         });
-        
+
         modelBuilder.Entity<FinancialAllocation>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Financia__3214EC074AFABCBE");
@@ -297,7 +314,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasDefaultValue("Pending");
-           
+
             entity.Property(e => e.Unit).HasMaxLength(20);
 
             entity.HasOne(d => d.DonorUser).WithMany(p => p.Donations)
@@ -540,16 +557,16 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.RefreshTokenExpiryTime);
 
-         
-    entity.HasMany(u => u.ReliefTeamActivities)
-        .WithOne(a => a.PostedByNavigation)  // Must match navigation property name
-        .HasForeignKey(a => a.PostedBy)      // Foreign key property name
-        .OnDelete(DeleteBehavior.Restrict)
-        .HasConstraintName("FK_User_PostedActivities");
+
+            entity.HasMany(u => u.ReliefTeamActivities)
+                .WithOne(a => a.PostedByNavigation)  // Must match navigation property name
+                .HasForeignKey(a => a.PostedBy)      // Foreign key property name
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_User_PostedActivities");
 
 
         });
-        
+
         modelBuilder.Entity<UserReliefTeam>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__UserReli__3214EC07DA567340");
@@ -567,7 +584,7 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK__UserRelie__UserI__40058253");
         });
 
-       
+
         OnModelCreatingPartial(modelBuilder);
     }
 

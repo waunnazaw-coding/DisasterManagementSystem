@@ -151,69 +151,73 @@ public class DisasterReportService : IDisasterReportService
         return Result<IEnumerable<DisasterReport>>.Success(reportDtos);
     }
 
-    public async Task<Result<FormCreateDto>> AddFormAsync(FormCreateDto dto)
+public async Task<Result<FormCreateDto>> AddFormAsync(FormCreateDto dto)
+{
+    using var transaction = await _context.Database.BeginTransactionAsync();
+
+    try
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        // Handle unlogged user
+        var userId = dto.UserId ?? Guid.Empty;
 
-        try
+        // Call LocationService to create location
+        var locationResult = await _locationService.AddAsync(new LocationCreateDto
         {
-            // Call LocationService to create location
-            var locationResult = await _locationService.AddAsync(new LocationCreateDto
+            Name = dto.LocationName,
+            GeoJson = dto.GeoJson,
+        });
+
+        if (!locationResult.IsSuccess)
+            return Result<FormCreateDto>.Failure(locationResult.Message);
+
+        var locationId = locationResult.Data.Id;
+
+        // Create DisasterReport
+        var report = new DisasterReport
+        {
+            DisasterEventId = dto.DisasterEventId,
+            UserId = userId,
+            LocationId = locationId,
+            AddressDetail = dto.AddressDetail,
+            Type = dto.Type,
+            Title = dto.Title,
+            Description = dto.Description,
+            Severity = dto.Severity,
+            Source = dto.Source,
+            StartDate = dto.StartDate,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            Status = dto.Status ?? "Pending"
+        };
+
+        await _disasterReportRepository.AddAsync(report);
+
+        // Handle ReportPhotos
+        if (dto.ReportPhotos != null && dto.ReportPhotos.Length > 0)
+        {
+            var descriptions = dto.NewPhotoDescription ?? new List<string>();
+            var uploadResult = await _reportPhotoService.UploadReportPhotosAsync(
+                report.Id,
+                dto.ReportPhotos,
+                descriptions
+            );
+
+            if (!uploadResult.IsSuccess)
             {
-                Name = dto.LocationName,
-                GeoJson = dto.GeoJson,
-            });
-
-            if (!locationResult.IsSuccess)
-                return Result<FormCreateDto>.Failure(locationResult.Message);
-
-            var locationId = locationResult.Data.Id;
-
-            // Create DisasterReport
-            var report = new DisasterReport
-            {
-                DisasterEventId = dto.DisasterEventId,
-                UserId = dto.UserId,
-                LocationId = locationId,
-                AddressDetail = dto.AddressDetail,
-                Type = dto.Type,
-                Title = dto.Title,
-                Description = dto.Description,
-                Severity = dto.Severity,
-                Source = dto.Source,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                Status = "Pending"
-            };
-            await _disasterReportRepository.AddAsync(report);
-
-            // Create ReportPhoto
-            if (dto.ReportPhotos != null && dto.ReportPhotos.Length > 0)
-            {
-                var descriptions = dto.NewPhotoDescription ?? new List<string>();
-                var uploadResult = await _reportPhotoService.UploadEventPhotosAsync
-                (
-                    report.Id,
-                    dto.ReportPhotos,
-                    descriptions
-                );
-                if (!uploadResult.IsSuccess)
-                {
-                    await transaction.RollbackAsync();
-                    return Result<FormCreateDto>.Failure(uploadResult.Message);
-                }
+                await transaction.RollbackAsync();
+                return Result<FormCreateDto>.Failure(uploadResult.Message);
             }
+        }
 
-            await transaction.CommitAsync();
-            return Result<FormCreateDto>.Success(dto, "Form submitted successfully.");
-        }
-        catch (Exception ex)
-        {
-            await transaction.RollbackAsync();
-            return Result<FormCreateDto>.Failure($"Error submitting form: {ex.Message}");
-        }
+        await transaction.CommitAsync();
+        return Result<FormCreateDto>.Success(dto, "Form submitted successfully.");
     }
-
+    catch (Exception ex)
+    {
+        await transaction.RollbackAsync();
+        return Result<FormCreateDto>.Failure($"Error submitting form: {ex.Message}");
+    }
+}
 
     public async Task<Result<ReportImpactCreateDto>> CreateAsync(ReportImpactCreateDto dto)
     {

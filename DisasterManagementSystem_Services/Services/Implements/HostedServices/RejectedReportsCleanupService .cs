@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using DisasterManagementSystem_Data.Models;
 using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json;
 
 public class RejectedReportsCleanupService : BackgroundService
 {
@@ -19,7 +20,7 @@ public class RejectedReportsCleanupService : BackgroundService
         {
             await CleanupRejectedReports(stoppingToken);
 
-            // Wait 24 hours
+            // Run daily
             await Task.Delay(TimeSpan.FromHours(24), stoppingToken);
         }
     }
@@ -33,9 +34,8 @@ public class RejectedReportsCleanupService : BackgroundService
 
             var cutoffDate = DateTime.UtcNow.AddMonths(-1);
 
-            // Include ReportPhotos to delete them first
             var oldRejectedReports = await context.DisasterReports
-                .Include(r => r.ReportPhotos) // Ensure you have a navigation property ReportPhotos
+                .Include(r => r.ReportPhotos)
                 .Include(r => r.Impacts)
                 .Where(r => r.Status == "Rejected" && r.UpdatedAt <= cutoffDate)
                 .ToListAsync(stoppingToken);
@@ -44,21 +44,38 @@ public class RejectedReportsCleanupService : BackgroundService
             {
                 foreach (var report in oldRejectedReports)
                 {
-                    // Remove related photos first
-                    if (report.ReportPhotos.Any())
+                    // Collect extra info before deletion
+                    var extraInfo = new
                     {
+                        PhotosCount = report.ReportPhotos.Count,
+                        ImpactsCount = report.Impacts.Count
+                    };
+
+                    var deletedLog = new DeletedReportLog
+                    {
+                        ReportId = report.Id,
+                        ReportName = report.Title,
+                        Status = report.Status,
+                        DeletedAt = DateTime.UtcNow,
+                        DeletedBy = "System",
+                        ExtraInfo = JsonSerializer.Serialize(extraInfo)
+                    };
+
+                    await context.DeletedReportLogs.AddAsync(deletedLog, stoppingToken);
+
+                    // Remove related entities
+                    if (report.ReportPhotos.Any())
                         context.ReportPhotos.RemoveRange(report.ReportPhotos);
-                    }
 
                     if (report.Impacts.Any())
                         context.Impacts.RemoveRange(report.Impacts);
+
+                    // Remove the report itself
+                    context.DisasterReports.Remove(report);
                 }
 
-                // Remove the reports
-                context.DisasterReports.RemoveRange(oldRejectedReports);
-
                 await context.SaveChangesAsync(stoppingToken);
-                Console.WriteLine($"Deleted {oldRejectedReports.Count} rejected reports (and their photos) older than {cutoffDate}");
+                Console.WriteLine($"Deleted {oldRejectedReports.Count} rejected reports older than {cutoffDate} and logged them.");
             }
         }
         catch (Exception ex)

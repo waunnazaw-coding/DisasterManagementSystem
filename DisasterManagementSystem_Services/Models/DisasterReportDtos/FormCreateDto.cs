@@ -19,6 +19,7 @@ namespace DisasterManagementSystem_Services.Models
         public string? Description { get; set; }
         public string? Severity { get; set; }
         public string? Source { get; set; }
+        public DateOnly StartDate { get; set; }
         public string? Status { get; set; }
 
         // ---------- ReportPhoto ----------    

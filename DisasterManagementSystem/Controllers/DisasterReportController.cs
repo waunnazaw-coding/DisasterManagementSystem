@@ -58,6 +58,7 @@ namespace DisasterManagementSystem_API.Controllers
             return Ok(result);
         }
 
+
         [HttpPost("submit-form")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> SubmitForm([FromForm] FormCreateDto dto)
@@ -65,6 +66,9 @@ namespace DisasterManagementSystem_API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(Result<string>.Failure("Invalid form data"));
 
+            // Get UserId from claims if logged in
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            dto.UserId = userIdClaim != null ? Guid.Parse(userIdClaim) : Guid.Empty;
 
             var result = await _reportService.AddFormAsync(dto);
 
@@ -73,7 +77,6 @@ namespace DisasterManagementSystem_API.Controllers
 
             return Ok(result);
         }
-
         //[HttpPost("survey")]
         //[Consumes("multipart/form-data")]
         //public async Task<IActionResult> Create([FromForm] ReportImpactCreateDto dto)
