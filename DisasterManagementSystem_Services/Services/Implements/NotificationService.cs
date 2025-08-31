@@ -333,18 +333,13 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 var assignerName = assigner?.Name ?? "System Admin";
 
                 // Get relief team details
-                var reliefTeam = await _reliefTeamRepository.GetByIdAsync(reliefTeamId);
+                var reliefTeam = await _reliefTeamRepository.GetUserIdByReliefTeamIdAsync(reliefTeamId);
                 if (reliefTeam == null)
                 {
                     _logger.LogError("Relief team {ReliefTeamId} not found", reliefTeamId);
                     return;
                 }
 
-                if (!reliefTeam.UserId.HasValue)
-                {
-                    _logger.LogWarning("Relief team {ReliefTeamId} has no associated user", reliefTeamId);
-                    return;
-                }
 
                 var message = $"New request assigned to your team: {request.SupportType} " +
                              $"(Priority: {request.Priority}) by {assignerName}";
@@ -354,7 +349,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
                 {
                     var notification = new Notification
                     {
-                        UserId = reliefTeam.UserId.Value, // Send to relief team's user
+                        UserId = reliefTeam, // Send to relief team's user
                         Message = message,
                         Type = "TeamAssignment",
                         RelatedEntityId = requestId,
@@ -365,7 +360,7 @@ namespace DisasterManagementSystem_Services.Services.Implements
                     await _notificationRepo.AddAsync(notification);
 
                     // Send real-time notification to relief team's user
-                    await _hubContext.Clients.User(reliefTeam.UserId.Value.ToString())
+                    await _hubContext.Clients.User(reliefTeam.ToString())
                         .SendAsync("ReceiveNotification", new
                         {
                             notification.Id,
@@ -375,11 +370,11 @@ namespace DisasterManagementSystem_Services.Services.Implements
                             notification.CreatedAt
                         });
 
-                    _logger.LogInformation("Notification created for relief team user {UserId}", reliefTeam.UserId);
+                    _logger.LogInformation("Notification created for relief team user {UserId}", reliefTeam);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error notifying relief team user {UserId}", reliefTeam.UserId);
+                    _logger.LogError(ex, "Error notifying relief team user {UserId}", reliefTeam);
                 }
 
                 // Optional: Also notify individual team members if needed

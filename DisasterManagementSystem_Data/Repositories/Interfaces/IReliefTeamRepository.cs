@@ -22,5 +22,6 @@ namespace DisasterManagementSystem_Data.Repositories.Interfaces
         Task<ReliefTeam> GetByUserIdAsync(Guid userId);
         Task<List<ReliefTeam>> GetTeamsByUserIdAsync(Guid userId);
         Task<int?> GetReliefTeamIdByUserIdAsync(Guid userId);
+        Task<Guid> GetUserIdByReliefTeamIdAsync(int teamId);
     }
 }
