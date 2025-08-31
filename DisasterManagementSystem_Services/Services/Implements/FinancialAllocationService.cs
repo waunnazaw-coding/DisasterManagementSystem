@@ -538,20 +538,31 @@ namespace DisasterManagementSystem_Services.Services.Implements
                         });
 
                         // Footer
-                        page.Footer().Row(row =>
+                        page.Footer().Column(column =>
                         {
-                            row.RelativeItem().Text(text =>
+                            // First line: generated date + page number
+                            column.Item().Row(row =>
                             {
-                                text.Span("Generated on ");
-                                text.Span(DateTime.Now.ToString("dd MMMM yyyy"));
+                                row.RelativeItem().Text(text =>
+                                {
+                                    text.Span("Generated on ");
+                                    text.Span(DateTime.Now.ToString("dd MMMM yyyy"));
+                                });
+
+                                row.ConstantItem(50).AlignRight().Text(text =>
+                                {
+                                    text.Span("Page ");
+                                    text.CurrentPageNumber();
+                                });
                             });
 
-                            row.ConstantItem(50).AlignRight().Text(text =>
-                            {
-                                text.Span("Page ");
-                                text.CurrentPageNumber();
-                            });
+                            // Second line: copyright centered
+                            column.Item().PaddingTop(8).AlignCenter().Text("© " + DateTime.Now.Year + " Disaster Guard. All rights reserved.")
+                                .FontSize(10)
+                                .FontColor(Colors.Black);
                         });
+
+
                     });
                 }).GeneratePdf();
 
