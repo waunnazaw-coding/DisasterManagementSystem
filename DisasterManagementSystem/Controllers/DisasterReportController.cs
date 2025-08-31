@@ -39,21 +39,10 @@ namespace DisasterManagementSystem_API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(Result<string>.Failure("Invalid form data"));
 
-<<<<<<< HEAD
-            // Try to extract UserId from token claims
-            var userIdClaim = User.FindFirst("sub") ?? User.FindFirst(ClaimTypes.NameIdentifier);
-
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
-            {
-                // Fallback to UnknownUserId
-                userId = Guid.Empty;
-            }
-=======
             // Extract UserId from token claims
             //var userIdClaim = User.FindFirst("sub") ?? User.FindFirst(ClaimTypes.NameIdentifier);
             //if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
             //    return Unauthorized(Result<string>.Failure("User ID not found in token"));
->>>>>>> 47a541500ef2178e9b0c937d624de5a4f4add9ef
 
             //dto.UserId = userId;
 

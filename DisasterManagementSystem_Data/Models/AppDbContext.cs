@@ -81,26 +81,7 @@ public partial class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-<<<<<<< HEAD
-        modelBuilder.Entity<DeletedReportLog>(entity =>
-        {
-            entity.ToTable("DeletedReportLog"); // singular
-            entity.HasKey(e => e.Id);
-
-            entity.Property(e => e.ReportName).HasMaxLength(255).IsRequired();
-            entity.Property(e => e.Status).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.DeletedAt)
-                .HasDefaultValueSql("GETUTCDATE()")
-                .HasColumnType("datetime2");
-            entity.Property(e => e.DeletedBy).HasMaxLength(100).HasDefaultValue("System");
-            entity.Property(e => e.ExtraInfo);
-        });
-
-
-        modelBuilder.Entity<AllocationType>(entity =>
-=======
         modelBuilder.Entity<Partner>(entity =>
->>>>>>> 47a541500ef2178e9b0c937d624de5a4f4add9ef
         {
             entity.ToTable("Partner");
             entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
@@ -607,8 +588,6 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK__UserRelie__UserI__40058253");
         });
 
-<<<<<<< HEAD
-=======
         modelBuilder.Entity<Contact>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Contact__3214EC07776EFDBB");
@@ -623,7 +602,6 @@ public partial class AppDbContext : DbContext
                 .HasColumnType("datetime");
         });
 
->>>>>>> 47a541500ef2178e9b0c937d624de5a4f4add9ef
 
         OnModelCreatingPartial(modelBuilder);
     }

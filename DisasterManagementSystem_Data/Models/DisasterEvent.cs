@@ -20,10 +20,6 @@ public partial class DisasterEvent
     public string Status { get; set; } = null!;
 
     public string? Description { get; set; }
-<<<<<<< HEAD
-    public string? Source { get; set; }
-=======
->>>>>>> 47a541500ef2178e9b0c937d624de5a4f4add9ef
 
     public DateTime? CreatedAt { get; set; }
 
