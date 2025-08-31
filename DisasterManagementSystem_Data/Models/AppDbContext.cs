@@ -81,6 +81,9 @@ public partial class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<DeletedReportLog>()
+               .ToTable("DeletedReportLog");
+
         modelBuilder.Entity<Partner>(entity =>
         {
             entity.ToTable("Partner");
@@ -478,7 +481,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.UploadedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
-        
+
             entity.HasOne(rp => rp.DisasterEvent)
                 .WithMany(de => de.ReportPhotos)
                 .HasForeignKey(rp => rp.DisasterEventId)
