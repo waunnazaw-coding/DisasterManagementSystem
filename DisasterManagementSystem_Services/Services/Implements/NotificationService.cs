@@ -133,21 +133,51 @@ namespace DisasterManagementSystem_Services.Services.Implements
             }
         }
 
-        public async Task NotifyAdminsForNewReport(Guid userId, int reportId, string reportTitle)
+        public async Task NotifyAdminsForNewReport(Guid? userId, int reportId, string reportTitle)
         {
-            var admins = await _userRepo.GetUsersByRoleAsync("SysAdmin,DisasterManagementAdmin");
-            var message = $"New disaster report submitted: {reportTitle}";
-
-            foreach (var admin in admins)
+            try
             {
-                await CreateNotificationAsync(new CreateNotificationDto
+                // Determine user name
+                string userName = "Anonymous User";
+                if (userId.HasValue && userId.Value != Guid.Empty)
                 {
-                    UserId = admin.Id,
-                    Message = message,
-                    Type = "Report",
-                    RelatedEntityId = reportId,
-                    Status = "Pending"
-                });
+                    var user = await _userRepo.GetByIdAsync(userId.Value);
+                    userName = user?.Name ?? "Unknown User";
+                }
+
+                // Get admins
+                var admins = await _userRepo.GetUsersByRoleAsync("SysAdmin,DisasterManagementAdmin");
+
+                if (!admins.Any())
+                {
+                    _logger.LogWarning("No admins found for roles: SysAdmin, DisasterManagementAdmin");
+                    return;
+                }
+
+                var message = $"New disaster report submitted by {userName}: {reportTitle}";
+
+                foreach (var admin in admins)
+                {
+                    try
+                    {
+                        await CreateNotificationAsync(new CreateNotificationDto
+                        {
+                            UserId = admin.Id,
+                            Message = message,
+                            Type = "Report",
+                            RelatedEntityId = reportId,
+                            Status = "Pending"
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to create notification for admin {AdminId}", admin.Id);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in NotifyAdminsForNewReport for report {ReportId}", reportId);
             }
         }
 
