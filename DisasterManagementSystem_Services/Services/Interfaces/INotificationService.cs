@@ -14,7 +14,7 @@ namespace DisasterManagementSystem_Services.Services.Interfaces
         Task<List<NotificationDto>> GetUserNotificationsAsync(Guid userId);
         Task<NotificationDto> MarkAsReadAsync(int notificationId);
         Task<int> GetUnreadCountAsync(Guid userId);
-        Task NotifyAdminsForNewReport(Guid userId, int reportId, string reportTitle);
+        Task NotifyAdminsForNewReport(Guid? userId, int reportId, string reportTitle);
         Task NotifyUserForReportUpdate(Guid userId, int reportId, string reportTitle, string status);
         Task NotifyAdminsForNewRequest(Guid userId, int requestId, string requestType);
         Task NotifyUserForRequestUpdate(Guid userId, int requestId, string requestType, string status);

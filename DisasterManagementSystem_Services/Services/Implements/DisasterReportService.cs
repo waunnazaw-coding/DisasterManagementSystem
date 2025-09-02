@@ -5,6 +5,7 @@ using DisasterManagementSystem_Services.Models;
 using DisasterManagementSystem_Services.Models.LocationDtos;
 using DisasterManagementSystem_Services.Service;
 using DisasterManagementSystem_Services.Services;
+using DisasterManagementSystem_Services.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
@@ -24,6 +25,7 @@ public class DisasterReportService : IDisasterReportService
     private readonly IDisasterTypeRepository _disasterTypeRepository;
     private readonly IDisasterTypeService _disasterTypeService;
     private readonly IReportPhotoRepository _reportPhotoRepository;
+    private readonly INotificationService _notificationService;
 
     public DisasterReportService(
         IDisasterReportRepository disasterReportRepository,
@@ -34,7 +36,8 @@ public class DisasterReportService : IDisasterReportService
         IDisasterTypeRepository disasterTypeRepository,
         IDisasterTypeService disasterTypeService,
         IReportPhotoRepository reportPhotoRepository,
-        IHttpContextAccessor httpContextAccessor
+        IHttpContextAccessor httpContextAccessor,
+        INotificationService notificationService
     )
     {
         _disasterReportRepository = disasterReportRepository;
@@ -46,6 +49,7 @@ public class DisasterReportService : IDisasterReportService
         _disasterTypeService = disasterTypeService;
         _reportPhotoRepository = reportPhotoRepository;
         _httpContextAccessor = httpContextAccessor;
+        _notificationService = notificationService;
     }
 
     public async Task<Result<DisasterReportDetailsDto>> GetByIdAsync(int id)
@@ -294,8 +298,23 @@ public async Task<Result<FormCreateDto>> AddFormAsync(FormCreateDto dto)
                     return Result<ReportImpactCreateDto>.Failure(uploadResult.Message);
                 }
             }
-
             await transaction.CommitAsync();
+
+            // Send notification to admins
+            try
+            {
+                await _notificationService.NotifyAdminsForNewReport(
+                    dto.UserId,
+                    report.Id,
+                    report.Title ?? "Untitled Report"
+                );
+            }
+            catch (Exception ex)
+            {
+                // Log but don't fail the operation if notification fails
+                //_logger.LogError(ex, "Failed to send notification for new report {ReportId}", report.Id);
+            }
+
             return Result<ReportImpactCreateDto>.Success(dto, "Form submitted successfully.");
         }
         catch (Exception ex)
