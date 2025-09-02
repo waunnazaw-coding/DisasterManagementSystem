@@ -1,3 +1,4 @@
+using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -27,7 +28,7 @@ namespace DisasterManagementSystem_Api.Controllers
         }
 
         // GET: api/impact
-        [HttpGet]
+        [HttpGet("all-impacts")]
         public async Task<IActionResult> GetAll()
         {
             var impacts = await _service.GetAllAsync();
@@ -52,6 +53,21 @@ namespace DisasterManagementSystem_Api.Controllers
 
             return Ok(impact);
         }
+
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] ImpactUpdateStatusDto dto)
+        {
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Status))
+                return BadRequest(new { isSuccess = false, message = "Status is required." });
+
+            var result = await _service.UpdateImpactStatusAsync(id, dto.Status);
+
+            if (!result.IsSuccess)
+                return BadRequest(new { isSuccess = false });
+
+            return Ok(new { isSuccess = true, message = $"Impact status updated to {dto.Status}" });
+        }
+
 
     }
 }

@@ -20,20 +20,27 @@ public class ImpactRepository : IImpactRepository
 
     public async Task<IEnumerable<Impact>> GetAllAsync()
     {
-        return await _context.Impacts.AsNoTracking().ToListAsync();
+        return await _context.Impacts
+            .AsNoTracking()
+            .Include(i => i.DisasterEvent)
+            .Include(i => i.DisasterReport)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<Impact>> GetByDisasterEventIdAsync(int disasterEventId)
     {
         return await _context.Impacts
             .AsNoTracking()
+            .Include(i => i.DisasterEvent)
             .Where(i => i.DisasterEventId == disasterEventId)
             .ToListAsync();
     }
 
     public async Task<Impact?> GetByIdAsync(int id)
     {
-        return await _context.Impacts.FindAsync(id);
+        return await _context.Impacts
+            .Include(i => i.DisasterEvent)
+            .FirstOrDefaultAsync(i => i.Id == id);
     }
 
     public async Task UpdateAsync(Impact impact)

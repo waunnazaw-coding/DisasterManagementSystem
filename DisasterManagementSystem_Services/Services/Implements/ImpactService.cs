@@ -56,6 +56,29 @@ public class ImpactService : IImpactService
         }
     }
 
+    public async Task<Result<bool>> UpdateImpactStatusAsync(int id, string status, bool saveImmediately = true)
+    {
+        var existing = await _repository.GetByIdAsync(id);
+        if (existing == null)
+            return Result<bool>.Failure("Impact not found.");
+
+        existing.Status = status;
+
+        try
+        {
+            await _repository.UpdateAsync(existing);
+            if (saveImmediately)
+                await _context.SaveChangesAsync();
+
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Failure($"Error updating impact status: {ex.Message}");
+        }
+    }
+
+
     public async Task<Result<bool>> DeleteImpactAsync(int id, bool saveImmediately = true)
     {
         var impact = await _repository.GetByIdAsync(id);
@@ -92,11 +115,13 @@ public class ImpactService : IImpactService
         return new ImpactDto
         {
             Id = impact.Id,
-            DisasterEventId = impact.DisasterEventId,
             DisasterReportId = impact.DisasterReportId,
             Type = impact.Type,
             Value = impact.Value,
-            ObjectName = impact.ObjectName
+            ObjectName = impact.ObjectName,
+            Status = impact.Status,
+            RelatedEvent = impact.DisasterEvent?.Name,
+            RelatedReport = impact.DisasterReport?.Title,
         };
     }
 }

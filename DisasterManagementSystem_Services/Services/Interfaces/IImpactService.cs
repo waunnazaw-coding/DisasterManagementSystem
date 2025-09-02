@@ -7,5 +7,6 @@ public interface IImpactService
     Task<IEnumerable<ImpactDto>> GetByDisasterEventAsync(int disasterEventId);
     Task<ImpactDto?> GetByIdAsync(int id);
     Task<Result<bool>> UpdateImpactAsync(int id, ImpactUpdateDto dto, bool saveImmediately = true);
+    Task<Result<bool>> UpdateImpactStatusAsync(int id, string status, bool saveImmediately = true);
     Task<Result<bool>> DeleteImpactAsync(int id, bool saveImmediately = true);
 }
