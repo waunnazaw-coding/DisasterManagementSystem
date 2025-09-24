@@ -7,9 +7,11 @@ public partial class ReportPhoto
 {
     public int Id { get; set; }
 
-    public int DisasterEventId { get; set; }
+    public string? Description { get; set; }
 
-    public int DisasterReportId { get; set; }
+    public int? DisasterEventId { get; set; }
+
+    public int? DisasterReportId { get; set; }
 
     public string FilePath { get; set; } = null!;
 
@@ -19,7 +21,11 @@ public partial class ReportPhoto
 
     public DateTime? UploadedAt { get; set; }
 
-    public virtual DisasterEvent DisasterEvent { get; set; } = null!;
+    public int? ReliefTeamActivityId { get; set; }
 
-    public virtual DisasterReport DisasterReport { get; set; } = null!;
+    public virtual DisasterEvent? DisasterEvent { get; set; }
+
+    public virtual DisasterReport? DisasterReport { get; set; }
+
+    public virtual ReliefTeamActivity? ReliefTeamActivity { get; set; }
 }

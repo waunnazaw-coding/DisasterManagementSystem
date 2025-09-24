@@ -13,8 +13,6 @@ public partial class DisasterEvent
 
     public DateOnly StartDate { get; set; }
 
-    public DateOnly? EndDate { get; set; }
-
     public int LocationId { get; set; }
 
     public string? Severity { get; set; }
@@ -27,6 +25,12 @@ public partial class DisasterEvent
 
     public DateTime? UpdatedAt { get; set; }
 
+    public Guid CreatedUserId { get; set; }
+
+    public Guid? UpdatedUserId { get; set; }
+
+    public string? Source { get; set; }
+
     public virtual ICollection<AssistanceRequest> AssistanceRequests { get; set; } = new List<AssistanceRequest>();
 
     public virtual ICollection<DisasterReport> DisasterReports { get; set; } = new List<DisasterReport>();
@@ -34,6 +38,10 @@ public partial class DisasterEvent
     public virtual DisasterType DisasterType { get; set; } = null!;
 
     public virtual ICollection<Impact> Impacts { get; set; } = new List<Impact>();
+    public virtual User CreatedUser { get; set; }=null!;
+
+    public virtual User UpdatedUser { get; set; } = null!;
+
 
     public virtual Location Location { get; set; } = null!;
 

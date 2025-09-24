@@ -20,12 +20,12 @@ public partial class User
     public string Role { get; set; } = null!;
 
     public string Status { get; set; } = null!;
-    
-    public string? RefreshToken { get; set; }
-    
-    public DateTime? RefreshTokenExpiryTime { get; set; }
 
     public DateTime? CreatedAt { get; set; }
+
+    public string? RefreshToken { get; set; }
+
+    public DateTime? RefreshTokenExpiryTime { get; set; }
 
     public virtual ICollection<AssistanceRequest> AssistanceRequests { get; set; } = new List<AssistanceRequest>();
 
@@ -42,4 +42,6 @@ public partial class User
     public virtual ICollection<RequestAssignment> RequestAssignmentAssignedByNavigations { get; set; } = new List<RequestAssignment>();
 
     public virtual ICollection<RequestAssignment> RequestAssignmentLastUpdatedByNavigations { get; set; } = new List<RequestAssignment>();
+    
+    public virtual ICollection<UserReliefTeam> UserReliefTeams { get; set; } = new List<UserReliefTeam>();
 }

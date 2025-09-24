@@ -17,6 +17,8 @@ public partial class Impact
 
     public string? ObjectName { get; set; }
 
+    public string? Status { get; set; }
+
     public virtual DisasterEvent? DisasterEvent { get; set; }
 
     public virtual DisasterReport? DisasterReport { get; set; }

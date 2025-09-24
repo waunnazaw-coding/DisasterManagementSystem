@@ -46,4 +46,6 @@ public partial class ReliefTeam
     public virtual ICollection<ReliefTeamActivity> ReliefTeamActivities { get; set; } = new List<ReliefTeamActivity>();
 
     public virtual ICollection<RequestAssignment> RequestAssignments { get; set; } = new List<RequestAssignment>();
+    
+    public virtual ICollection<UserReliefTeam> UserReliefTeams { get; set; } = new List<UserReliefTeam>();
 }

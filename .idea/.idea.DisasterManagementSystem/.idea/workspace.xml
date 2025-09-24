@@ -4,13 +4,15 @@
     <projectFile profileName="IIS Express">DisasterManagementSystem/DisasterManagementSystem_Api.csproj</projectFile>
     <projectFile profileName="http">DisasterManagementSystem/DisasterManagementSystem_Api.csproj</projectFile>
     <projectFile profileName="https">DisasterManagementSystem/DisasterManagementSystem_Api.csproj</projectFile>
+    <projectFile pubXmlPath="DisasterManagementSystem/Properties/PublishProfiles/FolderProfile.pubxml">DisasterManagementSystem/DisasterManagementSystem_Api.csproj</projectFile>
   </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="373ff947-e936-4a3b-91b4-d8bb06058b3d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.DisasterManagementSystem/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DisasterManagementSystem/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/AppDbContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/AppDbContext.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/ReliefTeamActivity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/DisasterManagementSystem_Data/Models/ReliefTeamActivity.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,6 +23,11 @@
     <option name="autoShow" value="false" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="develop" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -42,6 +49,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/9f23c87e889cf8c85521a222263288275aeda8581951b7f5db9c432f675398/NonCapturingLazyInitializer.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/a0b45f29f34f594814a7b1fbc25fe5ef3c18257956ed4f4fbfa68717db58/DbContext.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/a8f525b34e074d7c1c1ee2f97d75fed82d55ae9102858934b3ef12954923d91/InternalDbSet.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/c092928882a17a51a62a367685d90a0a613eb91fb453b9f50147e19c1f3ff40/NullReferenceException.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/edb0de51b1d42de1f0965b28bdb0a37a43b1d4b158a79125753e6c5e964b24f7/StateManager.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
@@ -54,20 +62,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;.NET Launch Settings Profile.DisasterManagementSystem_Api: IIS Express.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;wnz__auth&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    ".NET Launch Settings Profile.DisasterManagementSystem_Api: IIS Express.executor": "Run",
+    "RunOnceActivity.ChatTagsLlmMigration": "true",
+    "RunOnceActivity.ClientConfigCleanupMigration": "true",
+    "RunOnceActivity.CodyAccountHistoryMigration": "true",
+    "RunOnceActivity.CodyAccountsIdsRefresh": "true",
+    "RunOnceActivity.CodyAssignOrphanedChatsToActiveAccount": "true",
+    "RunOnceActivity.CodyConvertUrlToCodebaseName": "true",
+    "RunOnceActivity.CodyHistoryLlmMigration": "true",
+    "RunOnceActivity.CodyMigrateChatHistory-v2": "true",
+    "RunOnceActivity.CodyProjectSettingsMigration": "true",
+    "RunOnceActivity.DeprecatedChatLlmMigration": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.ToggleCodyToolWindowAfterMigration": "true",
+    "git-widget-placeholder": "develop",
+    "ignore.virus.scanning.warn.message": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected=".NET Launch Settings Profile.DisasterManagementSystem_Api: IIS Express">
     <configuration name="DisasterManagementSystem_Api: IIS Express" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
       <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/DisasterManagementSystem/DisasterManagementSystem_Api.csproj" />
@@ -130,6 +150,26 @@
       <workItem from="1752218631730" duration="461000" />
       <workItem from="1752221578716" duration="4328000" />
       <workItem from="1752256818097" duration="999000" />
+      <workItem from="1752433618906" duration="618000" />
+      <workItem from="1752998336386" duration="600000" />
+      <workItem from="1753029344157" duration="676000" />
+      <workItem from="1753031186559" duration="22000" />
+      <workItem from="1753073677201" duration="1331000" />
+      <workItem from="1753078515684" duration="9982000" />
+      <workItem from="1753102917992" duration="657000" />
+      <workItem from="1753103624894" duration="1725000" />
+      <workItem from="1753107870737" duration="6837000" />
+      <workItem from="1753328508892" duration="5500000" />
+      <workItem from="1753343239195" duration="4580000" />
+      <workItem from="1753407454776" duration="943000" />
+      <workItem from="1753419123670" duration="1869000" />
+      <workItem from="1753585338513" duration="3836000" />
+      <workItem from="1754558699436" duration="2298000" />
+      <workItem from="1754798728151" duration="3853000" />
+      <workItem from="1754814413147" duration="148000" />
+      <workItem from="1754814622364" duration="3129000" />
+      <workItem from="1755358621645" duration="2000" />
+      <workItem from="1755508369891" duration="467000" />
     </task>
     <servers />
   </component>
@@ -143,7 +183,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="wnz_auth" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -152,23 +204,8 @@
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
   </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/DisasterManagementSystem/Controllers/AuthoController.cs</url>
-          <line>24</line>
-          <properties documentPath="D:\DisasterManagementSystem\Backend\DisasterManagementSystem\DisasterManagementSystem\Controllers\AuthoController.cs" containingFunctionPresentation="Method 'Register'">
-            <startOffsets>
-              <option value="776" />
-            </startOffsets>
-            <endOffsets>
-              <option value="800" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

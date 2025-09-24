@@ -11,8 +11,6 @@ public partial class Donation
 
     public string? Name { get; set; }
 
-    public string Type { get; set; } = null!;
-
     public string? Description { get; set; }
 
     public decimal? Quantity { get; set; }
@@ -23,13 +21,21 @@ public partial class Donation
 
     public string? Currency { get; set; }
 
-    public DateTime? DateReceived { get; set; }
+    public DateTime DateReceived { get; set; }
 
     public string SourceType { get; set; } = null!;
 
     public string Status { get; set; } = null!;
 
+    public string? Phone { get; set; }
+
+    public string? Category { get; set; }
+
+    public string? PaymentMethod { get; set; }
+
     public virtual ICollection<DonationDistribution> DonationDistributions { get; set; } = new List<DonationDistribution>();
 
     public virtual User? DonorUser { get; set; }
+
+    public virtual ICollection<FinancialAllocation> FinancialAllocations { get; set; } = new List<FinancialAllocation>();
 }

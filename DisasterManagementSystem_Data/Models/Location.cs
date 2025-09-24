@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 
@@ -11,9 +10,9 @@ public partial class Location
 
     public string Name { get; set; } = null!;
 
-    public Geometry Geography { get; set; } = null!;
-
     public string? Address { get; set; }
+
+    public Geometry? Geography { get; set; }
 
     public string? Country { get; set; }
 
